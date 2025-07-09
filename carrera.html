@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>Malla Curricular Estética - Ingeniería Industrial</title>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+  body {
+    font-family: 'Nunito Sans', sans-serif;
+    background-color: #fff0f5;
+    margin: 0;
+    padding: 40px;
+    overflow-x: auto;
+  }
+  h1 {
+    color: #c71585;
+    text-align: center;
+    margin-bottom: 40px;
+  }
+  .year-row {
+    display: flex;
+    gap: 20px;
+    margin-bottom: 60px;
+  }
+  .year-column {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+  }
+  .year-column h2 {
+    color: #db3e8d;
+    margin-bottom: 10px;
+    border-bottom: 2px solid #db3e8d;
+    padding-bottom: 5px;
+  }
+  .course {
+    padding: 14px 16px;
+    border-radius: 12px;
+    border: 2px solid #f4b1c8;
+    min-width: 160px;
+    text-align: center;
+    font-size: 0.95rem;
+    font-weight: 600;
+    position: relative;
+    cursor: not-allowed;
+    opacity: 0.4;
+    transition: all 0.3s ease;
+    color: #333;
+  }
+  .course[data-type="calculo"],
+  .course[data-id="400"],
+  .course[data-id="401"],
+  .course[data-id="402"],
+  .course[data-id="406"],
+  .course[data-id="407"],
+  .course[data-id="408"],
+  .course[data-id="494"],
+  .course[data-id="711"],
+  .course[data-id="458"] {
+    background-color: #ec71a1;
+    border-color: #f70883;
+  }
+  .course[data-type="logica"],
+  .course[data-id="404"],
+  .course[data-id="409"],
+  .course[data-id="90002"] {
+    background-color: #9c9cd3;
+    border-color: #0e0ea0;
+  }
+  .course[data-type="quimica"],
+  .course[data-id="411"],
+  .course[data-id="278"],
+  .course[data-id="280"],
+  .course[data-id="468"] {
+    background-color: #80cfbc;
+    border-color: #1a753d;
+  }
+  .course[data-type="gestion"],
+  .course[data-id="412"],
+  .course[data-id="466"],
+  .course[data-id="467"],
+  .course[data-id="472"],
+  .course[data-id="473"],
+  .course[data-id="813"],
+  .course[data-id="814"],
+  .course[data-id="815"],
+  .course[data-id="816"] {
+    background-color: #e65858;
+    border-color: #c22020;
+  }
+  .course[data-type="ingenieria"],
+  .course[data-id="405"],
+  .course[data-id="800"],
+  .course[data-id="410"],
+  .course[data-id="457"],
+  .course[data-id="281"],
+  .course[data-id="803"],
+  .course[data-id="283"],
+  .course[data-id="284"],
+  .course[data-id="279"],
+  .course[data-id="287"],
+  .course[data-id="291"],
+  .course[data-id="469"],
+  .course[data-id="470"],
+  .course[data-id="474"],
+  .course[data-id="475"],
+  .course[data-id="817"],
+  .course[data-id="478"],
+  .course[data-id="479"],
+  .course[data-id="480"],
+  .course[data-id="830"],
+  .course[data-id="297"],
+  .course[data-id="477"],
+  .course[data-id="801"] {
+    background-color: #e962ee;
+    border-color: #c90dcf;
+  }
+  .course.enabled {
+    cursor: pointer;
+    opacity: 1;
+    border-style: solid;
+  }
+  .course.completed {
+    text-decoration: line-through;
+    opacity: 0.7;
+  }
+  </style>
+</head>
+<body>
+  <h1>UNIVERSIDAD DE MORON- Ingeniería Industrial</h1>
+  <div class="year-row">
+    <!-- Año 1 -->
+    <div class="year-column">
+      <h2>1° Año</h2>
+      <div class="course enabled" data-id="400" data-type="calculo">Análisis Matemático I</div>
+      <div class="course enabled" data-id="401" data-type="calculo">Álgebra Lineal</div>
+      <div class="course" data-id="402" data-type="calculo" data-req="400">Física I</div>
+      <div class="course enabled" data-id="404" data-type="logica">Lógica</div>
+      <div class="course enabled" data-id="405">Dibujo</div>
+      <div class="course enabled" data-id="90001">Informática I</div>
+      <div class="course enabled" data-id="90002">Inglés I</div>
+    </div>
+
+    <!-- Año 2 -->
+    <div class="year-column">
+      <h2>2° Año</h2>
+      <div class="course" data-id="406" data-type="calculo" data-req="400">Análisis Matemático II</div>
+      <div class="course" data-id="407" data-type="calculo" data-req="402,406">Física II</div>
+      <div class="course" data-id="408" data-type="calculo" data-req="400,401,405">Geometría Analítica</div>
+      <div class="course" data-id="409" data-type="logica" data-req="404">Historia de la Ciencia</div>
+      <div class="course" data-id="410" data-type="ingenieria" data-req="402">Ecología y Control Ambiental</div>
+      <div class="course" data-id="411" data-type="quimica" data-req="402">Química General</div>
+      <div class="course" data-id="412" data-type="gestion" data-req="400,401">Economía y Financiación</div>
+      <div class="course" data-id="800" data-req="400,401,406,90001">Algoritmos y Cálculo Numérico</div>
+    </div>
+
+    <!-- Año 3 -->
+    <div class="year-column">
+      <h2>3° Año</h2>
+      <div class="course" data-id="278" data-type="quimica" data-req="407,411">Química Industrial</div>
+      <div class="course" data-id="458" data-type="calculo" data-req="401,407">Mecánica Racional</div>
+      <div class="course" data-id="280" data-type="quimica" data-req="407,411">Termodinámica</div>
+      <div class="course" data-id="283" data-type="ingenieria" data-req="410">Higiene y Seguridad Industrial</div>
+      <div class="course" data-id="284" data-type="ingenieria" data-req="278,410">Ingeniería Ambiental</div>
+      <div class="course" data-id="457" data-req="402,405,406">Estática y Resistencia de Materiales</div>
+      <div class="course" data-id="711" data-req="406">Probabilidad y Estadística</div>
+      <div class="course" data-id="466" data-type="gestion" data-req="402,412">Organización Industrial A</div>
+      <div class="course" data-id="467" data-type="gestion" data-req="466">Organización Industrial B</div>
+      <div class="course" data-id="468" data-type="quimica" data-req="407,411,457">Ciencia de los Materiales</div>
+      <div class="course" data-id="494" data-type="calculo" data-req="401,406,408">Análisis Matemático III</div>
+      <div class="course" data-id="281" data-req="412,800,90001">Sistemas Industriales de Información</div>
+    </div>
+
+    <!-- Año 4 -->
+    <div class="year-column">
+      <h2>4° Año</h2>
+      <div class="course" data-id="801" data-req="407,409,458,711">Física Moderna</div>
+      <div class="course" data-id="803" data-req="280,406,458,800">Mecánica de los Fluidos</div>
+      <div class="course" data-id="279" data-req="408,457,458">Mecanismos</div>
+      <div class="course" data-id="287" data-req="279,280">Máquinas Térmicas</div>
+      <div class="course" data-id="291" data-req="281">Redes de Datos</div>
+      <div class="course" data-id="469" data-req="407,494">Electrotecnia y Máquinas</div>
+      <div class="course" data-id="470" data-req="278,280,411">Operaciones Unitarias</div>
+      <div class="course" data-id="472" data-req="412,467">Organización Industrial C</div>
+      <div class="course" data-id="473" data-req="472">Organización Industrial D</div>
+      <div class="course" data-id="474" data-req="278,407,468">Tecnología I</div>
+      <div class="course" data-id="475" data-req="281,711">Investigación Operativa</div>
+    </div>
+
+    <!-- Año 5 -->
+    <div class="year-column">
+      <h2>5° Año</h2>
+      <div class="course" data-id="813" data-req="473,711">Comercialización</div>
+      <div class="course" data-id="814" data-req="473">Legislación y Ejercicio Profesional</div>
+      <div class="course" data-id="830" data-req="283,284,457,468">Arquitectura Industrial</div>
+      <div class="course" data-id="297" data-req="291">Automatización Industrial</div>
+      <div class="course" data-id="816" data-req="284,468,473">Gestión de Calidad</div>
+      <div class="course" data-id="815" data-req="467,473,475">Economía de la Empresa</div>
+      <div class="course" data-id="477" data-req="468,474,801">Tecnología II</div>
+      <div class="course" data-id="478" data-req="287,469,803">Instalaciones Industriales</div>
+      <div class="course" data-id="479" data-req="284,473">Diseño Industrial</div>
+      <div class="course" data-id="480" data-req="473">Envases y Embalajes</div>
+      <div class="course" data-id="817" data-req="287,469,473,475,803">Trabajo Final</div>
+    </div>
+  </div>
+
+  <script>
+    const courses = document.querySelectorAll('.course');
+    function saveProgress() {
+      const saved = {};
+      courses.forEach(course => {
+        saved[course.dataset.id] = course.classList.contains('completed');
+      });
+      localStorage.setItem('materiasAprobadas', JSON.stringify(saved));
+    }
+    function loadProgress() {
+      const saved = JSON.parse(localStorage.getItem('materiasAprobadas') || '{}');
+      courses.forEach(course => {
+        if (saved[course.dataset.id]) {
+          course.classList.add('completed');
+        }
+      });
+    }
+    function updateStates() {
+      const completed = new Set();
+      courses.forEach(course => {
+        if (course.classList.contains('completed')) {
+          completed.add(course.dataset.id);
+        }
+      });
+      courses.forEach(course => {
+        const reqs = course.dataset.req ? course.dataset.req.split(',') : [];
+        const allMet = reqs.every(r => completed.has(r));
+        if (reqs.length === 0 || allMet) {
+          course.classList.add('enabled');
+        } else {
+          course.classList.remove('enabled');
+          course.classList.remove('completed');
+        }
+      });
+      saveProgress();
+    }
+    courses.forEach(course => {
+      course.addEventListener('click', () => {
+        if (!course.classList.contains('enabled')) return;
+        course.classList.toggle('completed');
+        updateStates();
+      });
+    });
+    window.onload = () => {
+      loadProgress();
+      updateStates();
+    };
+  </script>
+</body>
+</html>
