@@ -2,258 +2,352 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
-  <title>Malla Curricular Estética - Ingeniería Industrial</title>
-  <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@400;700&display=swap" rel="stylesheet">
+  <title>Malla Curricular - Ingeniería Industrial</title>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@400;700;900&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
   <style>
   body {
     font-family: 'Nunito Sans', sans-serif;
     background-color: #fff0f5;
     margin: 0;
-    padding: 40px;
-    overflow-x: auto;
+    padding: 20px;
+    padding-top: 20px;
   }
-  h1 {
-    color: #c71585;
-    text-align: center;
-    margin-bottom: 40px;
+
+  header { text-align: left; margin-bottom: 30px; }
+  h1 { color: #c71585; font-weight: 900; margin: 10px 0; text-shadow: 2px 2px 0px #ffd1dc; }
+
+  /* Pestañas */
+  .tabs-container { display: flex; justify-content: center; gap: 15px; margin-top: 20px; flex-wrap: wrap; }
+  .tab-btn {
+    padding: 12px 25px; border: none; border-radius: 25px; font-size: 0.95rem; font-weight: 700;
+    cursor: pointer; transition: all 0.3s ease; background-color: #ffcce0; color: #c71585;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05); display: flex; align-items: center; gap: 8px;
   }
-  .year-row {
-    display: flex;
-    gap: 20px;
-    margin-bottom: 60px;
-  }
-  .year-column {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 12px;
-  }
-  .year-column h2 {
-    color: #db3e8d;
-    margin-bottom: 10px;
-    border-bottom: 2px solid #db3e8d;
-    padding-bottom: 5px;
-  }
-  .course {
-    padding: 14px 16px;
-    border-radius: 12px;
-    border: 2px solid #f4b1c8;
-    min-width: 160px;
-    text-align: center;
-    font-size: 0.95rem;
-    font-weight: 600;
-    position: relative;
-    cursor: not-allowed;
-    opacity: 0.4;
-    transition: all 0.3s ease;
-    color: #333;
-  }
-  .course[data-type="calculo"],
-  .course[data-id="400"],
-  .course[data-id="401"],
-  .course[data-id="402"],
-  .course[data-id="406"],
-  .course[data-id="407"],
-  .course[data-id="408"],
-  .course[data-id="494"],
-  .course[data-id="711"],
-  .course[data-id="458"] {
-    background-color: #ec71a1;
-    border-color: #f70883;
-  }
-  .course[data-type="logica"],
-  .course[data-id="404"],
-  .course[data-id="409"],
-  .course[data-id="90002"] {
-    background-color: #9c9cd3;
-    border-color: #0e0ea0;
-  }
-  .course[data-type="quimica"],
-  .course[data-id="411"],
-  .course[data-id="278"],
-  .course[data-id="280"],
-  .course[data-id="468"] {
-    background-color: #80cfbc;
-    border-color: #1a753d;
-  }
-  .course[data-type="gestion"],
-  .course[data-id="412"],
-  .course[data-id="466"],
-  .course[data-id="467"],
-  .course[data-id="472"],
-  .course[data-id="473"],
-  .course[data-id="813"],
-  .course[data-id="814"],
-  .course[data-id="815"],
-  .course[data-id="816"] {
-    background-color: #e65858;
-    border-color: #c22020;
-  }
-  .course[data-type="ingenieria"],
-  .course[data-id="405"],
-  .course[data-id="800"],
-  .course[data-id="410"],
-  .course[data-id="457"],
-  .course[data-id="281"],
-  .course[data-id="803"],
-  .course[data-id="283"],
-  .course[data-id="284"],
-  .course[data-id="279"],
-  .course[data-id="287"],
-  .course[data-id="291"],
-  .course[data-id="469"],
-  .course[data-id="470"],
-  .course[data-id="474"],
-  .course[data-id="475"],
-  .course[data-id="817"],
-  .course[data-id="478"],
-  .course[data-id="479"],
-  .course[data-id="480"],
-  .course[data-id="830"],
-  .course[data-id="297"],
-  .course[data-id="477"],
-  .course[data-id="801"] {
-    background-color: #e962ee;
-    border-color: #c90dcf;
-  }
-  .course.enabled {
-    cursor: pointer;
-    opacity: 1;
-    border-style: solid;
-  }
-  .course.completed {
-    text-decoration: line-through;
-    opacity: 0.7;
-  }
-  </style>
+  .tab-btn:hover { background-color: #ff99bb; transform: translateY(-2px); }
+  .tab-btn.active { background-color: #c71585; color: white; box-shadow: 0 4px 10px rgba(199, 21, 133, 0.3); transform: scale(1.05); }
+
+  /* Vistas */
+  .view-section { display: none; animation: fadeIn 0.5s ease; }
+  .view-section.active { display: block; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+  /* --- MAPA --- */
+  #view-map { overflow-x: auto; padding: 20px 0; }
+  .year-row { display: flex; gap: 20px; justify-content: center; min-width: max-content; padding-bottom: 20px; }
+  .year-column { display: flex; flex-direction: column; align-items: center; gap: 12px; }
+  .year-column h2 { color: #db3e8d; margin-bottom: 10px; border-bottom: 3px solid #db3e8d; padding-bottom: 5px; font-size: 1.1rem; }
   
+  .course {
+    padding: 14px 16px; border-radius: 15px; border: 2px solid #f4b1c8;
+    min-width: 160px; max-width: 160px; text-align: center; font-size: 0.9rem; font-weight: 700;
+    position: relative; cursor: not-allowed; opacity: 0.5; transition: all 0.3s;
+    color: #555; background-color: #ffe4e1; z-index: 1;
+  }
+
+  /* Colores */
+  .course[data-type="calculo"], .course[data-id="400"], .course[data-id="401"], .course[data-id="402"], .course[data-id="406"], .course[data-id="407"], .course[data-id="408"], .course[data-id="494"], .course[data-id="711"], .course[data-id="458"] { background-color: #ffb7ce; border-color: #f70883; color: #880044; }
+  .course[data-type="logica"], .course[data-id="404"], .course[data-id="409"], .course[data-id="90002"] { background-color: #c3c3e5; border-color: #4848a0; color: #202060; }
+  .course[data-type="quimica"], .course[data-id="411"], .course[data-id="278"], .course[data-id="280"], .course[data-id="468"] { background-color: #a7e2d2; border-color: #1a753d; color: #0f4223; }
+  .course[data-type="gestion"], .course[data-id="412"], .course[data-id="466"], .course[data-id="467"], .course[data-id="472"], .course[data-id="473"], .course[data-id="813"], .course[data-id="814"], .course[data-id="815"], .course[data-id="816"] { background-color: #ff9999; border-color: #c22020; color: #6e1010; }
+  .course[data-type="ingenieria"], .course[data-id="405"], .course[data-id="800"], .course[data-id="410"], .course[data-id="457"], .course[data-id="281"], .course[data-id="803"], .course[data-id="283"], .course[data-id="284"], .course[data-id="279"], .course[data-id="287"], .course[data-id="291"], .course[data-id="469"], .course[data-id="470"], .course[data-id="474"], .course[data-id="475"], .course[data-id="817"], .course[data-id="478"], .course[data-id="479"], .course[data-id="480"], .course[data-id="830"], .course[data-id="297"], .course[data-id="477"], .course[data-id="801"] { background-color: #f3ccf5; border-color: #c90dcf; color: #6a056e; }
+
+  /* Estados */
+  .course.enabled { cursor: pointer; opacity: 1; transform: scale(1); box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+  .course.enabled:hover { transform: translateY(-3px); z-index: 10; }
+  .course.completed { opacity: 0.6; filter: grayscale(40%); text-decoration: none; }
+  .course.completed::after { content: '★'; position: absolute; top: -8px; right: -8px; background: #FFD700; color: white; border-radius: 50%; width: 20px; height: 20px; font-size: 12px; line-height: 20px; text-align: center; box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
+
+  /* ESTILO NUEVO: Highlight de dependencia */
+  .course.is-unlocked {
+    box-shadow: 0 0 15px #ff1493; /* Resplandor rosa fuerte */
+    transform: scale(1.05);
+    z-index: 5;
+    border-color: #ff1493 !important;
+    animation: pulse 1.5s infinite;
+  }
+  @keyframes pulse {
+    0% { box-shadow: 0 0 0 0 rgba(255, 20, 147, 0.7); }
+    70% { box-shadow: 0 0 0 10px rgba(255, 20, 147, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(255, 20, 147, 0); }
+  }
+
+  /* --- NOTAS --- */
+  #view-grades { max-width: 800px; margin: 0 auto; background: white; padding: 40px; border-radius: 20px; box-shadow: 0 10px 30px rgba(199, 21, 133, 0.1); border: 1px solid #ffcce0; }
+  .average-card { background: linear-gradient(135deg, #c71585, #db3e8d); color: white; padding: 30px; border-radius: 15px; text-align: center; margin-bottom: 30px; box-shadow: 0 8px 20px rgba(199, 21, 133, 0.3); }
+  .average-card .big-number { font-size: 3.5rem; font-weight: 900; margin: 10px 0; }
+  .grade-row { display: flex; justify-content: space-between; align-items: center; padding: 15px; border-bottom: 1px dashed #f4b1c8; }
+  .grade-input { width: 80px; padding: 10px; border: 2px solid #db3e8d; border-radius: 10px; text-align: center; font-weight: bold; color: #c71585; font-size: 1rem; outline: none; background: #fff0f5; }
+
+  /* --- STATS --- */
+  #view-stats { max-width: 900px; margin: 0 auto; padding-bottom: 50px; }
+  .stats-header { display: flex; gap: 30px; flex-wrap: wrap; justify-content: center; margin-bottom: 40px; }
+  .progress-circle-container { position: relative; width: 180px; height: 180px; background: white; border-radius: 50%; display: flex; justify-content: center; align-items: center; box-shadow: 0 10px 20px rgba(199,21,133,0.15); }
+  .progress-circle-bg { width: 100%; height: 100%; border-radius: 50%; background: conic-gradient(#db3e8d 0%, #ffe4e1 0%); display: flex; justify-content: center; align-items: center; transition: background 1s ease; }
+  .progress-circle-inner { width: 80%; height: 80%; background: white; border-radius: 50%; display: flex; flex-direction: column; justify-content: center; align-items: center; color: #c71585; }
+  .pc-percentage { font-size: 2rem; font-weight: 900; }
+  .stat-card { background: white; padding: 20px; border-radius: 15px; width: 150px; text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.05); border: 2px solid #f4b1c8; }
+  .stat-val { font-size: 2rem; font-weight: 900; color: #db3e8d; }
+  .planner-section { background: white; padding: 30px; border-radius: 20px; border: 1px solid #ffcce0; }
+  .available-courses-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 15px; }
+  .plan-card { padding: 15px; border: 2px dashed #db3e8d; border-radius: 12px; color: #db3e8d; font-weight: 700; cursor: pointer; transition: all 0.2s; background: #fff0f5; position: relative; user-select: none; }
+  .plan-card:hover { transform: translateY(-3px); background: #ffe4e1; }
+  .plan-card.planned { background: #db3e8d; color: white; border-style: solid; box-shadow: 0 5px 15px rgba(219, 62, 141, 0.4); }
+  .plan-card.planned::after { content: '❤️'; position: absolute; top: -10px; right: -10px; font-size: 1.2rem; }
+  </style>
 </head>
 <body>
-  <h1>UNIVERSIDAD DE MORON- Ingeniería Industrial</h1>
-  <div class="year-row">
-    <!-- Año 1 -->
-    <div class="year-column">
-      <h2>1° Año</h2>
-      <div class="course enabled" data-id="400" data-type="calculo">Análisis Matemático I</div>
-      <div class="course enabled" data-id="401" data-type="calculo">Álgebra Lineal</div>
-      <div class="course" data-id="402" data-type="calculo" data-req="400">Física I</div>
-      <div class="course enabled" data-id="404" data-type="logica">Lógica</div>
-      <div class="course enabled" data-id="405">Dibujo</div>
-      <div class="course enabled" data-id="90001">Informática I</div>
-      <div class="course enabled" data-id="90002">Inglés I</div>
-    </div>
 
-    <!-- Año 2 -->
-    <div class="year-column">
-      <h2>2° Año</h2>
-      <div class="course" data-id="406" data-type="calculo" data-req="400">Análisis Matemático II</div>
-      <div class="course" data-id="407" data-type="calculo" data-req="402,406">Física II</div>
-      <div class="course" data-id="408" data-type="calculo" data-req="400,401,405">Geometría Analítica</div>
-      <div class="course" data-id="409" data-type="logica" data-req="404">Historia de la Ciencia</div>
-      <div class="course" data-id="410" data-type="ingenieria" data-req="402">Ecología y Control Ambiental</div>
-      <div class="course" data-id="411" data-type="quimica" data-req="402">Química General</div>
-      <div class="course" data-id="412" data-type="gestion" data-req="400,401">Economía y Financiación</div>
-      <div class="course" data-id="800" data-req="400,401,406,90001">Algoritmos y Cálculo Numérico</div>
+  <header>
+    <h1>🎀 UNIVERSIDAD DE MORON - Ing. Industrial 🎀</h1>
+    <div class="tabs-container">
+      <button class="tab-btn active" onclick="switchTab('map')">🗺️ Plan de Estudios</button>
+      <button class="tab-btn" onclick="switchTab('grades')">📝 Promedio</button>
+      <button class="tab-btn" onclick="switchTab('stats')">📊 Progreso y Plan</button>
     </div>
+  </header>
 
-    <!-- Año 3 -->
-    <div class="year-column">
-      <h2>3° Año</h2>
-      <div class="course" data-id="278" data-type="quimica" data-req="407,411">Química Industrial</div>
-      <div class="course" data-id="458" data-type="calculo" data-req="401,407">Mecánica Racional</div>
-      <div class="course" data-id="280" data-type="quimica" data-req="407,411">Termodinámica</div>
-      <div class="course" data-id="283" data-type="ingenieria" data-req="410">Higiene y Seguridad Industrial</div>
-      <div class="course" data-id="284" data-type="ingenieria" data-req="278,410">Ingeniería Ambiental</div>
-      <div class="course" data-id="457" data-req="402,405,406">Estática y Resistencia de Materiales</div>
-      <div class="course" data-id="711" data-req="406">Probabilidad y Estadística</div>
-      <div class="course" data-id="466" data-type="gestion" data-req="402,412">Organización Industrial A</div>
-      <div class="course" data-id="467" data-type="gestion" data-req="466">Organización Industrial B</div>
-      <div class="course" data-id="468" data-type="quimica" data-req="407,411,457">Ciencia de los Materiales</div>
-      <div class="course" data-id="494" data-type="calculo" data-req="401,406,408">Análisis Matemático III</div>
-      <div class="course" data-id="281" data-req="412,800,90001">Sistemas Industriales de Información</div>
+  <div id="view-map" class="view-section active">
+    <div class="year-row">
+      <div class="year-column">
+        <h2>1° Año</h2>
+        <div class="course enabled" data-id="400" data-type="calculo">Análisis Matemático I</div>
+        <div class="course enabled" data-id="401" data-type="calculo">Álgebra Lineal</div>
+        <div class="course" data-id="402" data-type="calculo" data-req="400">Física I</div>
+        <div class="course enabled" data-id="404" data-type="logica">Lógica</div>
+        <div class="course enabled" data-id="405">Dibujo</div>
+        <div class="course enabled" data-id="90001">Informática I</div>
+        <div class="course enabled" data-id="90002">Inglés I</div>
+      </div>
+      <div class="year-column">
+        <h2>2° Año</h2>
+        <div class="course" data-id="406" data-type="calculo" data-req="400">Análisis Matemático II</div>
+        <div class="course" data-id="407" data-type="calculo" data-req="402,406">Física II</div>
+        <div class="course" data-id="408" data-type="calculo" data-req="400,401,405">Geometría Analítica</div>
+        <div class="course" data-id="409" data-type="logica" data-req="404">Historia de la Ciencia</div>
+        <div class="course" data-id="410" data-type="ingenieria" data-req="402">Ecología y Control Ambiental</div>
+        <div class="course" data-id="411" data-type="quimica" data-req="402">Química General</div>
+        <div class="course" data-id="412" data-type="gestion" data-req="400,401">Economía y Financiación</div>
+        <div class="course" data-id="800" data-req="400,401,406,90001">Algoritmos y Cálculo Numérico</div>
+      </div>
+      <div class="year-column">
+        <h2>3° Año</h2>
+        <div class="course" data-id="278" data-type="quimica" data-req="407,411">Química Industrial</div>
+        <div class="course" data-id="458" data-type="calculo" data-req="401,407">Mecánica Racional</div>
+        <div class="course" data-id="280" data-type="quimica" data-req="407,411">Termodinámica</div>
+        <div class="course" data-id="283" data-type="ingenieria" data-req="410">Higiene y Seguridad Industrial</div>
+        <div class="course" data-id="284" data-type="ingenieria" data-req="278,410">Ingeniería Ambiental</div>
+        <div class="course" data-id="457" data-req="402,405,406">Estática y Resistencia de Materiales</div>
+        <div class="course" data-id="711" data-req="406">Probabilidad y Estadística</div>
+        <div class="course" data-id="466" data-type="gestion" data-req="402,412">Organización Industrial A</div>
+        <div class="course" data-id="467" data-type="gestion" data-req="466">Organización Industrial B</div>
+        <div class="course" data-id="468" data-type="quimica" data-req="407,411,457">Ciencia de los Materiales</div>
+        <div class="course" data-id="494" data-type="calculo" data-req="401,406,408">Análisis Matemático III</div>
+        <div class="course" data-id="281" data-req="412,800,90001">Sistemas Industriales de Información</div>
+      </div>
+      <div class="year-column">
+        <h2>4° Año</h2>
+        <div class="course" data-id="801" data-req="407,409,458,711">Física Moderna</div>
+        <div class="course" data-id="803" data-req="280,406,458,800">Mecánica de los Fluidos</div>
+        <div class="course" data-id="279" data-req="408,457,458">Mecanismos</div>
+        <div class="course" data-id="287" data-req="279,280">Máquinas Térmicas</div>
+        <div class="course" data-id="291" data-req="281">Redes de Datos</div>
+        <div class="course" data-id="469" data-req="407,494">Electrotecnia y Máquinas</div>
+        <div class="course" data-id="470" data-req="278,280,411">Operaciones Unitarias</div>
+        <div class="course" data-id="472" data-req="412,467">Organización Industrial C</div>
+        <div class="course" data-id="473" data-req="472">Organización Industrial D</div>
+        <div class="course" data-id="474" data-req="278,407,468">Tecnología I</div>
+        <div class="course" data-id="475" data-req="281,711">Investigación Operativa</div>
+      </div>
+      <div class="year-column">
+        <h2>5° Año</h2>
+        <div class="course" data-id="813" data-req="473,711">Comercialización</div>
+        <div class="course" data-id="814" data-req="473">Legislación y Ejercicio Profesional</div>
+        <div class="course" data-id="830" data-req="283,284,457,468">Arquitectura Industrial</div>
+        <div class="course" data-id="297" data-req="291">Automatización Industrial</div>
+        <div class="course" data-id="816" data-req="284,468,473">Gestión de Calidad</div>
+        <div class="course" data-id="815" data-req="467,473,475">Economía de la Empresa</div>
+        <div class="course" data-id="477" data-req="468,474,801">Tecnología II</div>
+        <div class="course" data-id="478" data-req="287,469,803">Instalaciones Industriales</div>
+        <div class="course" data-id="479" data-req="284,473">Diseño Industrial</div>
+        <div class="course" data-id="480" data-req="473">Envases y Embalajes</div>
+        <div class="course" data-id="817" data-req="287,469,473,475,803">Trabajo Final</div>
+      </div>
     </div>
+  </div>
 
-    <!-- Año 4 -->
-    <div class="year-column">
-      <h2>4° Año</h2>
-      <div class="course" data-id="801" data-req="407,409,458,711">Física Moderna</div>
-      <div class="course" data-id="803" data-req="280,406,458,800">Mecánica de los Fluidos</div>
-      <div class="course" data-id="279" data-req="408,457,458">Mecanismos</div>
-      <div class="course" data-id="287" data-req="279,280">Máquinas Térmicas</div>
-      <div class="course" data-id="291" data-req="281">Redes de Datos</div>
-      <div class="course" data-id="469" data-req="407,494">Electrotecnia y Máquinas</div>
-      <div class="course" data-id="470" data-req="278,280,411">Operaciones Unitarias</div>
-      <div class="course" data-id="472" data-req="412,467">Organización Industrial C</div>
-      <div class="course" data-id="473" data-req="472">Organización Industrial D</div>
-      <div class="course" data-id="474" data-req="278,407,468">Tecnología I</div>
-      <div class="course" data-id="475" data-req="281,711">Investigación Operativa</div>
+  <div id="view-grades" class="view-section">
+    <div class="average-card">
+      <h2>PROMEDIO GENERAL</h2>
+      <div class="big-number" id="averageDisplay">0.00</div>
+      <div>Basado en las materias marcadas en el plan</div>
     </div>
+    <p style="text-align:center;color:#666;font-style:italic;">Usa "AC" para materias acreditadas.</p>
+    <div id="gradesContainer" class="grades-table-container"></div>
+  </div>
 
-    <!-- Año 5 -->
-    <div class="year-column">
-      <h2>5° Año</h2>
-      <div class="course" data-id="813" data-req="473,711">Comercialización</div>
-      <div class="course" data-id="814" data-req="473">Legislación y Ejercicio Profesional</div>
-      <div class="course" data-id="830" data-req="283,284,457,468">Arquitectura Industrial</div>
-      <div class="course" data-id="297" data-req="291">Automatización Industrial</div>
-      <div class="course" data-id="816" data-req="284,468,473">Gestión de Calidad</div>
-      <div class="course" data-id="815" data-req="467,473,475">Economía de la Empresa</div>
-      <div class="course" data-id="477" data-req="468,474,801">Tecnología II</div>
-      <div class="course" data-id="478" data-req="287,469,803">Instalaciones Industriales</div>
-      <div class="course" data-id="479" data-req="284,473">Diseño Industrial</div>
-      <div class="course" data-id="480" data-req="473">Envases y Embalajes</div>
-      <div class="course" data-id="817" data-req="287,469,473,475,803">Trabajo Final</div>
+  <div id="view-stats" class="view-section">
+    <div class="stats-header">
+      <div class="progress-circle-container">
+        <div class="progress-circle-bg" id="progressCircle">
+          <div class="progress-circle-inner"><span class="pc-percentage" id="statsPercentage">0%</span></div>
+        </div>
+      </div>
+      <div class="stat-card"><span class="stat-val" id="statsCompleted">0</span><span class="stat-desc">Aprobadas</span></div>
+      <div class="stat-card"><span class="stat-val" id="statsRemaining">0</span><span class="stat-desc">Faltantes</span></div>
+    </div>
+    <div class="planner-section">
+      <h3 style="color:#c71585;margin-top:0;">📅 Planificador: Próximo Cuatrimestre</h3>
+      <div class="available-courses-grid" id="plannerGrid"></div>
     </div>
   </div>
 
   <script>
     const courses = document.querySelectorAll('.course');
+    const gradesContainer = document.getElementById('gradesContainer');
+    const averageDisplay = document.getElementById('averageDisplay');
+    const plannerGrid = document.getElementById('plannerGrid');
+    
+    let gradesData = JSON.parse(localStorage.getItem('materiasNotas') || '{}');
+    let plannedData = JSON.parse(localStorage.getItem('materiasPlanificadas') || '{}');
+
+    // --- PESTAÑAS ---
+    function switchTab(tabName) {
+      document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
+      document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+      if (tabName === 'map') {
+        document.getElementById('view-map').classList.add('active');
+        document.querySelectorAll('.tab-btn')[0].classList.add('active');
+      } else if (tabName === 'grades') {
+        document.getElementById('view-grades').classList.add('active');
+        document.querySelectorAll('.tab-btn')[1].classList.add('active');
+        renderGrades();
+      } else if (tabName === 'stats') {
+        document.getElementById('view-stats').classList.add('active');
+        document.querySelectorAll('.tab-btn')[2].classList.add('active');
+        renderStatsAndPlanner();
+      }
+    }
+
+    // --- GUARDADO ---
     function saveProgress() {
       const saved = {};
-      courses.forEach(course => {
-        saved[course.dataset.id] = course.classList.contains('completed');
-      });
+      courses.forEach(course => saved[course.dataset.id] = course.classList.contains('completed'));
       localStorage.setItem('materiasAprobadas', JSON.stringify(saved));
+      localStorage.setItem('materiasNotas', JSON.stringify(gradesData));
+      localStorage.setItem('materiasPlanificadas', JSON.stringify(plannedData));
     }
+
     function loadProgress() {
       const saved = JSON.parse(localStorage.getItem('materiasAprobadas') || '{}');
-      courses.forEach(course => {
-        if (saved[course.dataset.id]) {
-          course.classList.add('completed');
-        }
-      });
+      courses.forEach(course => { if (saved[course.dataset.id]) course.classList.add('completed'); });
     }
+
+    // --- LOGICA PRINCIPAL ---
     function updateStates() {
       const completed = new Set();
-      courses.forEach(course => {
-        if (course.classList.contains('completed')) {
-          completed.add(course.dataset.id);
-        }
-      });
+      courses.forEach(course => { if (course.classList.contains('completed')) completed.add(course.dataset.id); });
+      
       courses.forEach(course => {
         const reqs = course.dataset.req ? course.dataset.req.split(',') : [];
         const allMet = reqs.every(r => completed.has(r));
         if (reqs.length === 0 || allMet) {
           course.classList.add('enabled');
         } else {
-          course.classList.remove('enabled');
-          course.classList.remove('completed');
+          course.classList.remove('enabled'); course.classList.remove('completed');
         }
       });
       saveProgress();
     }
+
+    // --- NOTAS ---
+    function renderGrades() {
+        gradesContainer.innerHTML = '';
+        const completedCourses = Array.from(courses).filter(c => c.classList.contains('completed'));
+        if (completedCourses.length === 0) { gradesContainer.innerHTML = '<div style="text-align:center;color:#999;">Aún no has aprobado materias.</div>'; calculateAverage(); return; }
+        completedCourses.forEach(course => {
+            const id = course.dataset.id;
+            const row = document.createElement('div'); row.className = 'grade-row';
+            row.innerHTML = `<span class="grade-name">${course.textContent}</span><input type="text" class="grade-input" placeholder="-" value="${gradesData[id] || ''}" oninput="updateGrade('${id}', this.value)">`;
+            gradesContainer.appendChild(row);
+        });
+        calculateAverage();
+    }
+    function updateGrade(id, value) {
+        const num = parseFloat(value);
+        if (!isNaN(num)) { if(num > 10) value = 10; if(num < 0) value = 0; }
+        value === '' ? delete gradesData[id] : gradesData[id] = value;
+        calculateAverage(); saveProgress();
+    }
+    function calculateAverage() {
+        const values = Object.values(gradesData).map(v => parseFloat(v)).filter(v => !isNaN(v));
+        if (values.length === 0) { averageDisplay.textContent = '0.00'; return; }
+        averageDisplay.textContent = (values.reduce((a, b) => a + b, 0) / values.length).toFixed(2);
+    }
+
+    // --- STATS ---
+    function renderStatsAndPlanner() {
+      const total = courses.length;
+      const completed = document.querySelectorAll('.course.completed').length;
+      const percentage = Math.round((completed / total) * 100);
+      document.getElementById('statsPercentage').textContent = `${percentage}%`;
+      document.getElementById('statsCompleted').textContent = completed;
+      document.getElementById('statsRemaining').textContent = total - completed;
+      document.getElementById('progressCircle').style.background = `conic-gradient(#db3e8d ${percentage}%, #ffe4e1 ${percentage}% 100%)`;
+
+      plannerGrid.innerHTML = '';
+      const available = Array.from(courses).filter(c => c.classList.contains('enabled') && !c.classList.contains('completed'));
+      if (available.length === 0) { plannerGrid.innerHTML = '<div style="text-align:center;color:#999;font-style:italic;">No hay materias disponibles.</div>'; return; }
+      available.forEach(course => {
+        const id = course.dataset.id;
+        const card = document.createElement('div'); card.className = `plan-card ${plannedData[id] ? 'planned' : ''}`;
+        card.textContent = course.textContent; card.onclick = () => {
+           plannedData[id] ? delete plannedData[id] : plannedData[id] = true;
+           card.classList.toggle('planned'); saveProgress();
+        };
+        plannerGrid.appendChild(card);
+      });
+    }
+
+    // --- INTERACTIVIDAD MAPA (Nuevo) ---
     courses.forEach(course => {
-      course.addEventListener('click', () => {
+      // 1. Click para aprobar + Confeti
+      course.addEventListener('click', (e) => {
         if (!course.classList.contains('enabled')) return;
+        
+        const isCompleting = !course.classList.contains('completed');
         course.classList.toggle('completed');
+        
+        if (isCompleting) {
+            // Lanza Confeti si estás aprobando
+            confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 }, colors: ['#c71585', '#db3e8d', '#ffd1dc'] });
+        } else {
+            delete gradesData[course.dataset.id];
+            delete plannedData[course.dataset.id];
+        }
         updateStates();
       });
+
+      // 2. Mouse Over (Modo Detective)
+      course.addEventListener('mouseenter', () => {
+        const myId = course.dataset.id;
+        // Busca todas las materias que piden esta materia como requisito
+        courses.forEach(c => {
+            const reqs = c.dataset.req ? c.dataset.req.split(',') : [];
+            if (reqs.includes(myId)) {
+                c.classList.add('is-unlocked');
+            }
+        });
+      });
+
+      // 3. Mouse Leave (Limpiar)
+      course.addEventListener('mouseleave', () => {
+        courses.forEach(c => c.classList.remove('is-unlocked'));
+      });
     });
-    window.onload = () => {
-      loadProgress();
-      updateStates();
-    };
+
+    window.onload = () => { loadProgress(); updateStates(); };
   </script>
-  
 </body>
 </html>
