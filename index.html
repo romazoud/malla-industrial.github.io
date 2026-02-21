@@ -15,7 +15,7 @@
     padding-top: 20px;
   }
 
-  header { text-align: left; margin-bottom: 30px; }
+  header { text-align: center; margin-bottom: 30px; }
   h1 { color: #c71585; font-weight: 900; margin: 10px 0; text-shadow: 2px 2px 0px #ffd1dc; }
 
   /* Pestañas */
@@ -60,18 +60,8 @@
   .course.completed::after { content: '★'; position: absolute; top: -8px; right: -8px; background: #FFD700; color: white; border-radius: 50%; width: 20px; height: 20px; font-size: 12px; line-height: 20px; text-align: center; box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
 
   /* ESTILO NUEVO: Highlight de dependencia */
-  .course.is-unlocked {
-    box-shadow: 0 0 15px #ff1493; /* Resplandor rosa fuerte */
-    transform: scale(1.05);
-    z-index: 5;
-    border-color: #ff1493 !important;
-    animation: pulse 1.5s infinite;
-  }
-  @keyframes pulse {
-    0% { box-shadow: 0 0 0 0 rgba(255, 20, 147, 0.7); }
-    70% { box-shadow: 0 0 0 10px rgba(255, 20, 147, 0); }
-    100% { box-shadow: 0 0 0 0 rgba(255, 20, 147, 0); }
-  }
+  .course.is-unlocked { box-shadow: 0 0 15px #ff1493; transform: scale(1.05); z-index: 5; border-color: #ff1493 !important; animation: pulse 1.5s infinite; }
+  @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(255, 20, 147, 0.7); } 70% { box-shadow: 0 0 0 10px rgba(255, 20, 147, 0); } 100% { box-shadow: 0 0 0 0 rgba(255, 20, 147, 0); } }
 
   /* --- NOTAS --- */
   #view-grades { max-width: 800px; margin: 0 auto; background: white; padding: 40px; border-radius: 20px; box-shadow: 0 10px 30px rgba(199, 21, 133, 0.1); border: 1px solid #ffcce0; }
@@ -95,16 +85,30 @@
   .plan-card:hover { transform: translateY(-3px); background: #ffe4e1; }
   .plan-card.planned { background: #db3e8d; color: white; border-style: solid; box-shadow: 0 5px 15px rgba(219, 62, 141, 0.4); }
   .plan-card.planned::after { content: '❤️'; position: absolute; top: -10px; right: -10px; font-size: 1.2rem; }
+
+  /* --- HORARIO (NUEVO) --- */
+  #view-schedule { max-width: 1000px; margin: 0 auto; padding-bottom: 50px; }
+  .schedule-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; }
+  .day-card { background: white; border: 2px dashed #db3e8d; border-radius: 15px; padding: 20px; box-shadow: 0 5px 15px rgba(199,21,133,0.05); transition: transform 0.2s; }
+  .day-card:hover { transform: translateY(-3px); }
+  .day-card h3 { color: #c71585; margin-top: 0; text-align: center; border-bottom: 2px solid #f4b1c8; padding-bottom: 10px; font-weight: 900; }
+  .day-textarea { 
+    width: 100%; height: 150px; border: none; resize: none; 
+    font-family: 'Nunito Sans', sans-serif; font-size: 0.95rem; font-weight: 700;
+    color: #555; outline: none; background: transparent; line-height: 1.5;
+  }
+  .day-textarea::placeholder { color: #f4b1c8; font-weight: 400; }
   </style>
 </head>
 <body>
 
   <header>
-    <h1>🎀 UNIVERSIDAD DE MORON - Ing. Industrial 🎀</h1>
+    <h1> UNIVERSIDAD DE MORON - Ing. Industrial </h1>
     <div class="tabs-container">
       <button class="tab-btn active" onclick="switchTab('map')">🗺️ Plan de Estudios</button>
       <button class="tab-btn" onclick="switchTab('grades')">📝 Promedio</button>
       <button class="tab-btn" onclick="switchTab('stats')">📊 Progreso y Plan</button>
+      <button class="tab-btn" onclick="switchTab('schedule')">📅 Horario</button>
     </div>
   </header>
 
@@ -199,7 +203,40 @@
     </div>
     <div class="planner-section">
       <h3 style="color:#c71585;margin-top:0;">📅 Planificador: Próximo Cuatrimestre</h3>
+      <p style="color:#666; margin-bottom:20px;">Estas materias ya tienen las correlativas listas. Haz clic para seleccionarlas.</p>
       <div class="available-courses-grid" id="plannerGrid"></div>
+    </div>
+  </div>
+
+  <div id="view-schedule" class="view-section">
+    <h2 style="color:#c71585; text-align:center; margin-bottom:5px;">🕒 Mi Horario Semanal</h2>
+    <p style="text-align:center; color:#666; margin-bottom:30px; font-style:italic;">Escribe tus materias, horarios y aulas. ¡Se guarda solo!</p>
+    
+    <div class="schedule-grid">
+      <div class="day-card">
+        <h3>Lunes</h3>
+        <textarea class="day-textarea" data-day="lunes" placeholder="Ej:&#10;08:00 - Análisis I (Aula 4)&#10;10:00 - Lógica"></textarea>
+      </div>
+      <div class="day-card">
+        <h3>Martes</h3>
+        <textarea class="day-textarea" data-day="martes" placeholder="Escribe aquí..."></textarea>
+      </div>
+      <div class="day-card">
+        <h3>Miércoles</h3>
+        <textarea class="day-textarea" data-day="miercoles" placeholder="Escribe aquí..."></textarea>
+      </div>
+      <div class="day-card">
+        <h3>Jueves</h3>
+        <textarea class="day-textarea" data-day="jueves" placeholder="Escribe aquí..."></textarea>
+      </div>
+      <div class="day-card">
+        <h3>Viernes</h3>
+        <textarea class="day-textarea" data-day="viernes" placeholder="Escribe aquí..."></textarea>
+      </div>
+      <div class="day-card">
+        <h3>Sábado</h3>
+        <textarea class="day-textarea" data-day="sabado" placeholder="Escribe aquí..."></textarea>
+      </div>
     </div>
   </div>
 
@@ -216,17 +253,16 @@
     function switchTab(tabName) {
       document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
       document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+      
+      const tabs = document.querySelectorAll('.tab-btn');
       if (tabName === 'map') {
-        document.getElementById('view-map').classList.add('active');
-        document.querySelectorAll('.tab-btn')[0].classList.add('active');
+        document.getElementById('view-map').classList.add('active'); tabs[0].classList.add('active');
       } else if (tabName === 'grades') {
-        document.getElementById('view-grades').classList.add('active');
-        document.querySelectorAll('.tab-btn')[1].classList.add('active');
-        renderGrades();
+        document.getElementById('view-grades').classList.add('active'); tabs[1].classList.add('active'); renderGrades();
       } else if (tabName === 'stats') {
-        document.getElementById('view-stats').classList.add('active');
-        document.querySelectorAll('.tab-btn')[2].classList.add('active');
-        renderStatsAndPlanner();
+        document.getElementById('view-stats').classList.add('active'); tabs[2].classList.add('active'); renderStatsAndPlanner();
+      } else if (tabName === 'schedule') {
+        document.getElementById('view-schedule').classList.add('active'); tabs[3].classList.add('active');
       }
     }
 
@@ -298,7 +334,7 @@
 
       plannerGrid.innerHTML = '';
       const available = Array.from(courses).filter(c => c.classList.contains('enabled') && !c.classList.contains('completed'));
-      if (available.length === 0) { plannerGrid.innerHTML = '<div style="text-align:center;color:#999;font-style:italic;">No hay materias disponibles.</div>'; return; }
+      if (available.length === 0) { plannerGrid.innerHTML = '<div style="text-align:center;color:#999;font-style:italic;">No hay materias disponibles por ahora.</div>'; return; }
       available.forEach(course => {
         const id = course.dataset.id;
         const card = document.createElement('div'); card.className = `plan-card ${plannedData[id] ? 'planned' : ''}`;
@@ -310,9 +346,25 @@
       });
     }
 
-    // --- INTERACTIVIDAD MAPA (Nuevo) ---
+    // --- HORARIO LÓGICA ---
+    const scheduleTextareas = document.querySelectorAll('.day-textarea');
+    let scheduleData = JSON.parse(localStorage.getItem('materiasHorario') || '{}');
+
+    function loadSchedule() {
+      scheduleTextareas.forEach(ta => {
+        const day = ta.dataset.day;
+        if (scheduleData[day]) { ta.value = scheduleData[day]; }
+        
+        // Guardado automático al escribir
+        ta.addEventListener('input', (e) => {
+          scheduleData[day] = e.target.value;
+          localStorage.setItem('materiasHorario', JSON.stringify(scheduleData));
+        });
+      });
+    }
+
+    // --- INTERACTIVIDAD MAPA ---
     courses.forEach(course => {
-      // 1. Click para aprobar + Confeti
       course.addEventListener('click', (e) => {
         if (!course.classList.contains('enabled')) return;
         
@@ -320,7 +372,6 @@
         course.classList.toggle('completed');
         
         if (isCompleting) {
-            // Lanza Confeti si estás aprobando
             confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 }, colors: ['#c71585', '#db3e8d', '#ffd1dc'] });
         } else {
             delete gradesData[course.dataset.id];
@@ -329,25 +380,24 @@
         updateStates();
       });
 
-      // 2. Mouse Over (Modo Detective)
       course.addEventListener('mouseenter', () => {
         const myId = course.dataset.id;
-        // Busca todas las materias que piden esta materia como requisito
         courses.forEach(c => {
             const reqs = c.dataset.req ? c.dataset.req.split(',') : [];
-            if (reqs.includes(myId)) {
-                c.classList.add('is-unlocked');
-            }
+            if (reqs.includes(myId)) c.classList.add('is-unlocked');
         });
       });
 
-      // 3. Mouse Leave (Limpiar)
       course.addEventListener('mouseleave', () => {
         courses.forEach(c => c.classList.remove('is-unlocked'));
       });
     });
 
-    window.onload = () => { loadProgress(); updateStates(); };
+    window.onload = () => { 
+      loadProgress(); 
+      updateStates(); 
+      loadSchedule(); // Cargar los horarios guardados
+    };
   </script>
 </body>
 </html>
