@@ -15,37 +15,96 @@
     background-color: #28301c; /* Verde oliva oscuro */
     color: #ffc3cc; /* Rosa pastel */
     margin: 0;
-    padding: 20px;
-    padding-top: 20px;
+    padding: 0; /* Quitamos el padding para que la barra ocupe el 100% */
   }
 
   h1, h2, h3 {
-    font-family: 'Lora', serif; /* Fuente elegante para títulos */
+    font-family: 'Lora', serif;
     color: #ffc3cc;
     margin: 10px 0;
     font-weight: 700;
   }
 
-  header { text-align: center; margin-bottom: 30px; }
-  h1 { font-weight: 900; letter-spacing: 1px; }
-
-  /* --- PESTAÑAS --- */
-  .tabs-container { display: flex; justify-content: center; gap: 10px; margin-top: 20px; flex-wrap: wrap; }
-  .tab-btn {
-    padding: 10px 20px; border: 1px solid #ffc3cc; border-radius: 25px; font-size: 0.9rem; font-weight: 600;
-    cursor: pointer; transition: all 0.3s ease; background-color: transparent; color: #ffc3cc;
-    font-family: 'Poppins', sans-serif; display: flex; align-items: center; gap: 6px;
+  /* --- NAVBAR (NUEVO DISEÑO) --- */
+  header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #1d2314; /* Un tono más oscuro que el fondo para que contraste */
+    padding: 15px 40px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.4);
+    margin-bottom: 40px;
+    flex-wrap: wrap; /* Para que no se rompa en celulares */
+    gap: 20px;
   }
-  .tab-btn:hover { background-color: rgba(255, 195, 204, 0.1); transform: translateY(-2px); }
-  .tab-btn.active { background-color: #ffc3cc; color: #28301c; font-weight: 700; transform: scale(1.05); }
+
+  .logo-container {
+    text-align: left;
+  }
+  
+  .logo-container h1 {
+    font-size: 1.8rem;
+    margin: 0;
+    font-weight: 900;
+    letter-spacing: 0.5px;
+  }
+  
+  .logo-container h2 {
+    font-size: 0.95rem;
+    margin: 0;
+    opacity: 0.8;
+    font-family: 'Poppins', sans-serif;
+    font-weight: 400;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+
+  /* --- PESTAÑAS TIPO NAVBAR --- */
+  .tabs-container { 
+    display: flex; 
+    align-items: center; 
+    gap: 10px; 
+    flex-wrap: wrap; 
+  }
+  
+  .tab-btn {
+    padding: 8px 16px; 
+    border: none; 
+    border-radius: 20px; 
+    font-size: 0.95rem; 
+    font-weight: 600;
+    cursor: pointer; 
+    transition: all 0.3s ease; 
+    background-color: transparent; 
+    color: #ffc3cc;
+    font-family: 'Poppins', sans-serif; 
+    opacity: 0.7;
+  }
+  
+  .tab-btn:hover { 
+    opacity: 1; 
+    background-color: rgba(255, 195, 204, 0.1); 
+  }
+  
+  .tab-btn.active { 
+    opacity: 1; 
+    background-color: #ffc3cc; 
+    color: #28301c; 
+    font-weight: 700; 
+  }
+
+  /* --- CONTENEDOR PRINCIPAL DE LAS VISTAS --- */
+  .main-content {
+    padding: 0 40px; /* Le devolvemos el espacio a los costados al contenido */
+  }
 
   /* Vistas */
-  .view-section { display: none; animation: fadeIn 0.5s ease; }
+  .view-section { display: none; animation: fadeIn 0.4s ease; }
   .view-section.active { display: block; }
   @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
   /* --- MAPA --- */
-  #view-map { overflow-x: auto; padding: 20px 0; }
+  #view-map { overflow-x: auto; padding-bottom: 40px; }
   .year-row { display: flex; gap: 20px; justify-content: center; min-width: max-content; padding-bottom: 20px; }
   .year-column { display: flex; flex-direction: column; align-items: center; gap: 12px; }
   .year-column h2 { border-bottom: 2px solid #ffc3cc; padding-bottom: 5px; font-size: 1.2rem; margin-bottom: 15px; }
@@ -57,14 +116,12 @@
     color: #ffc3cc; background-color: rgba(0, 0, 0, 0.2); z-index: 1;
   }
 
-  /* Colores sutiles para el modo oscuro */
   .course[data-type="calculo"], .course[data-id="400"], .course[data-id="401"], .course[data-id="402"], .course[data-id="406"], .course[data-id="407"], .course[data-id="408"], .course[data-id="494"], .course[data-id="711"], .course[data-id="458"] { border-left: 4px solid #ffb7ce; }
   .course[data-type="logica"], .course[data-id="404"], .course[data-id="409"], .course[data-id="90002"] { border-left: 4px solid #c3c3e5; }
   .course[data-type="quimica"], .course[data-id="411"], .course[data-id="278"], .course[data-id="280"], .course[data-id="468"] { border-left: 4px solid #a7e2d2; }
   .course[data-type="gestion"], .course[data-id="412"], .course[data-id="466"], .course[data-id="467"], .course[data-id="472"], .course[data-id="473"], .course[data-id="813"], .course[data-id="814"], .course[data-id="815"], .course[data-id="816"] { border-left: 4px solid #ff9999; }
   .course[data-type="ingenieria"], .course[data-id="405"], .course[data-id="800"], .course[data-id="410"], .course[data-id="457"], .course[data-id="281"], .course[data-id="803"], .course[data-id="283"], .course[data-id="284"], .course[data-id="279"], .course[data-id="287"], .course[data-id="291"], .course[data-id="469"], .course[data-id="470"], .course[data-id="474"], .course[data-id="475"], .course[data-id="817"], .course[data-id="478"], .course[data-id="479"], .course[data-id="480"], .course[data-id="830"], .course[data-id="297"], .course[data-id="477"], .course[data-id="801"] { border-left: 4px solid #f3ccf5; }
 
-  /* Estados de las materias */
   .course.enabled { cursor: pointer; opacity: 1; border-color: #ffc3cc; background-color: rgba(255, 195, 204, 0.05); }
   .course.enabled:hover { transform: translateY(-3px); z-index: 10; background-color: rgba(255, 195, 204, 0.15); }
   .course.completed { opacity: 0.5; filter: grayscale(20%); text-decoration: none; border-color: rgba(255,195,204,0.2); }
@@ -141,8 +198,10 @@
 <body>
 
   <header>
-    <h1>Universidad de Morón</h1>
-    <h2 style="font-size: 1.2rem; opacity: 0.8; font-family: 'Poppins', sans-serif; font-weight: 400;">Ingeniería Industrial</h2>
+    <div class="logo-container">
+      <h1>Universidad de Morón</h1>
+      <h2>Ingeniería Industrial</h2>
+    </div>
     <div class="tabs-container">
       <button class="tab-btn active" onclick="switchTab('map')">🗺️ Plan de Estudios</button>
       <button class="tab-btn" onclick="switchTab('grades')">📝 Promedio</button>
@@ -152,154 +211,156 @@
     </div>
   </header>
 
-  <div id="view-map" class="view-section active">
-    <div class="year-row">
-      <div class="year-column">
-        <h2>Primer Año</h2>
-        <div class="course enabled" data-id="400" data-type="calculo">Análisis Matemático I</div>
-        <div class="course enabled" data-id="401" data-type="calculo">Álgebra Lineal</div>
-        <div class="course" data-id="402" data-type="calculo" data-req="400">Física I</div>
-        <div class="course enabled" data-id="404" data-type="logica">Lógica</div>
-        <div class="course enabled" data-id="405">Dibujo</div>
-        <div class="course enabled" data-id="90001">Informática I</div>
-        <div class="course enabled" data-id="90002">Inglés I</div>
-      </div>
-      <div class="year-column">
-        <h2>Segundo Año</h2>
-        <div class="course" data-id="406" data-type="calculo" data-req="400">Análisis Matemático II</div>
-        <div class="course" data-id="407" data-type="calculo" data-req="402,406">Física II</div>
-        <div class="course" data-id="408" data-type="calculo" data-req="400,401,405">Geometría Analítica</div>
-        <div class="course" data-id="409" data-type="logica" data-req="404">Historia de la Ciencia</div>
-        <div class="course" data-id="410" data-type="ingenieria" data-req="402">Ecología y Control Ambiental</div>
-        <div class="course" data-id="411" data-type="quimica" data-req="402">Química General</div>
-        <div class="course" data-id="412" data-type="gestion" data-req="400,401">Economía y Financiación</div>
-        <div class="course" data-id="800" data-req="400,401,406,90001">Algoritmos y Cálculo Numérico</div>
-      </div>
-      <div class="year-column">
-        <h2>Tercer Año</h2>
-        <div class="course" data-id="278" data-type="quimica" data-req="407,411">Química Industrial</div>
-        <div class="course" data-id="458" data-type="calculo" data-req="401,407">Mecánica Racional</div>
-        <div class="course" data-id="280" data-type="quimica" data-req="407,411">Termodinámica</div>
-        <div class="course" data-id="283" data-type="ingenieria" data-req="410">Higiene y Seguridad Industrial</div>
-        <div class="course" data-id="284" data-type="ingenieria" data-req="278,410">Ingeniería Ambiental</div>
-        <div class="course" data-id="457" data-req="402,405,406">Estática y Resistencia de Materiales</div>
-        <div class="course" data-id="711" data-req="406">Probabilidad y Estadística</div>
-        <div class="course" data-id="466" data-type="gestion" data-req="402,412">Organización Industrial A</div>
-        <div class="course" data-id="467" data-type="gestion" data-req="466">Organización Industrial B</div>
-        <div class="course" data-id="468" data-type="quimica" data-req="407,411,457">Ciencia de los Materiales</div>
-        <div class="course" data-id="494" data-type="calculo" data-req="401,406,408">Análisis Matemático III</div>
-        <div class="course" data-id="281" data-req="412,800,90001">Sistemas Industriales de Información</div>
-      </div>
-      <div class="year-column">
-        <h2>Cuarto Año</h2>
-        <div class="course" data-id="801" data-req="407,409,458,711">Física Moderna</div>
-        <div class="course" data-id="803" data-req="280,406,458,800">Mecánica de los Fluidos</div>
-        <div class="course" data-id="279" data-req="408,457,458">Mecanismos</div>
-        <div class="course" data-id="287" data-req="279,280">Máquinas Térmicas</div>
-        <div class="course" data-id="291" data-req="281">Redes de Datos</div>
-        <div class="course" data-id="469" data-req="407,494">Electrotecnia y Máquinas</div>
-        <div class="course" data-id="470" data-req="278,280,411">Operaciones Unitarias</div>
-        <div class="course" data-id="472" data-req="412,467">Organización Industrial C</div>
-        <div class="course" data-id="473" data-req="472">Organización Industrial D</div>
-        <div class="course" data-id="474" data-req="278,407,468">Tecnología I</div>
-        <div class="course" data-id="475" data-req="281,711">Investigación Operativa</div>
-      </div>
-      <div class="year-column">
-        <h2>Quinto Año</h2>
-        <div class="course" data-id="813" data-req="473,711">Comercialización</div>
-        <div class="course" data-id="814" data-req="473">Legislación y Ejercicio Profesional</div>
-        <div class="course" data-id="830" data-req="283,284,457,468">Arquitectura Industrial</div>
-        <div class="course" data-id="297" data-req="291">Automatización Industrial</div>
-        <div class="course" data-id="816" data-req="284,468,473">Gestión de Calidad</div>
-        <div class="course" data-id="815" data-req="467,473,475">Economía de la Empresa</div>
-        <div class="course" data-id="477" data-req="468,474,801">Tecnología II</div>
-        <div class="course" data-id="478" data-req="287,469,803">Instalaciones Industriales</div>
-        <div class="course" data-id="479" data-req="284,473">Diseño Industrial</div>
-        <div class="course" data-id="480" data-req="473">Envases y Embalajes</div>
-        <div class="course" data-id="817" data-req="287,469,473,475,803">Trabajo Final</div>
-      </div>
-    </div>
-  </div>
-
-  <div id="view-grades" class="view-section panel-box">
-    <div class="average-card">
-      <h2 style="margin-top:0;">Promedio General</h2>
-      <div class="big-number" id="averageDisplay">0.00</div>
-    </div>
-    <p style="text-align:center; opacity:0.7; font-size: 0.9rem; margin-bottom:20px;">* Escribe "AC" para las materias dadas por equivalencia.</p>
-    <div id="gradesContainer" class="grades-table-container"></div>
-  </div>
-
-  <div id="view-stats" class="view-section">
-    <div class="stats-header">
-      <div class="progress-circle-container">
-        <div class="progress-circle-bg" id="progressCircle">
-          <div class="progress-circle-inner">
-            <span class="pc-percentage" id="statsPercentage">0%</span>
-            <span class="pc-label">Avance</span>
+  <main class="main-content">
+      <div id="view-map" class="view-section active">
+        <div class="year-row">
+          <div class="year-column">
+            <h2>Primer Año</h2>
+            <div class="course enabled" data-id="400" data-type="calculo">Análisis Matemático I</div>
+            <div class="course enabled" data-id="401" data-type="calculo">Álgebra Lineal</div>
+            <div class="course" data-id="402" data-type="calculo" data-req="400">Física I</div>
+            <div class="course enabled" data-id="404" data-type="logica">Lógica</div>
+            <div class="course enabled" data-id="405">Dibujo</div>
+            <div class="course enabled" data-id="90001">Informática I</div>
+            <div class="course enabled" data-id="90002">Inglés I</div>
+          </div>
+          <div class="year-column">
+            <h2>Segundo Año</h2>
+            <div class="course" data-id="406" data-type="calculo" data-req="400">Análisis Matemático II</div>
+            <div class="course" data-id="407" data-type="calculo" data-req="402,406">Física II</div>
+            <div class="course" data-id="408" data-type="calculo" data-req="400,401,405">Geometría Analítica</div>
+            <div class="course" data-id="409" data-type="logica" data-req="404">Historia de la Ciencia</div>
+            <div class="course" data-id="410" data-type="ingenieria" data-req="402">Ecología y Control Ambiental</div>
+            <div class="course" data-id="411" data-type="quimica" data-req="402">Química General</div>
+            <div class="course" data-id="412" data-type="gestion" data-req="400,401">Economía y Financiación</div>
+            <div class="course" data-id="800" data-req="400,401,406,90001">Algoritmos y Cálculo Numérico</div>
+          </div>
+          <div class="year-column">
+            <h2>Tercer Año</h2>
+            <div class="course" data-id="278" data-type="quimica" data-req="407,411">Química Industrial</div>
+            <div class="course" data-id="458" data-type="calculo" data-req="401,407">Mecánica Racional</div>
+            <div class="course" data-id="280" data-type="quimica" data-req="407,411">Termodinámica</div>
+            <div class="course" data-id="283" data-type="ingenieria" data-req="410">Higiene y Seguridad Industrial</div>
+            <div class="course" data-id="284" data-type="ingenieria" data-req="278,410">Ingeniería Ambiental</div>
+            <div class="course" data-id="457" data-req="402,405,406">Estática y Resistencia de Materiales</div>
+            <div class="course" data-id="711" data-req="406">Probabilidad y Estadística</div>
+            <div class="course" data-id="466" data-type="gestion" data-req="402,412">Organización Industrial A</div>
+            <div class="course" data-id="467" data-type="gestion" data-req="466">Organización Industrial B</div>
+            <div class="course" data-id="468" data-type="quimica" data-req="407,411,457">Ciencia de los Materiales</div>
+            <div class="course" data-id="494" data-type="calculo" data-req="401,406,408">Análisis Matemático III</div>
+            <div class="course" data-id="281" data-req="412,800,90001">Sistemas Industriales de Información</div>
+          </div>
+          <div class="year-column">
+            <h2>Cuarto Año</h2>
+            <div class="course" data-id="801" data-req="407,409,458,711">Física Moderna</div>
+            <div class="course" data-id="803" data-req="280,406,458,800">Mecánica de los Fluidos</div>
+            <div class="course" data-id="279" data-req="408,457,458">Mecanismos</div>
+            <div class="course" data-id="287" data-req="279,280">Máquinas Térmicas</div>
+            <div class="course" data-id="291" data-req="281">Redes de Datos</div>
+            <div class="course" data-id="469" data-req="407,494">Electrotecnia y Máquinas</div>
+            <div class="course" data-id="470" data-req="278,280,411">Operaciones Unitarias</div>
+            <div class="course" data-id="472" data-req="412,467">Organización Industrial C</div>
+            <div class="course" data-id="473" data-req="472">Organización Industrial D</div>
+            <div class="course" data-id="474" data-req="278,407,468">Tecnología I</div>
+            <div class="course" data-id="475" data-req="281,711">Investigación Operativa</div>
+          </div>
+          <div class="year-column">
+            <h2>Quinto Año</h2>
+            <div class="course" data-id="813" data-req="473,711">Comercialización</div>
+            <div class="course" data-id="814" data-req="473">Legislación y Ejercicio Profesional</div>
+            <div class="course" data-id="830" data-req="283,284,457,468">Arquitectura Industrial</div>
+            <div class="course" data-id="297" data-req="291">Automatización Industrial</div>
+            <div class="course" data-id="816" data-req="284,468,473">Gestión de Calidad</div>
+            <div class="course" data-id="815" data-req="467,473,475">Economía de la Empresa</div>
+            <div class="course" data-id="477" data-req="468,474,801">Tecnología II</div>
+            <div class="course" data-id="478" data-req="287,469,803">Instalaciones Industriales</div>
+            <div class="course" data-id="479" data-req="284,473">Diseño Industrial</div>
+            <div class="course" data-id="480" data-req="473">Envases y Embalajes</div>
+            <div class="course" data-id="817" data-req="287,469,473,475,803">Trabajo Final</div>
           </div>
         </div>
       </div>
-      <div class="stat-card"><span class="stat-val" id="statsCompleted">0</span><span class="stat-desc">Aprobadas</span></div>
-      <div class="stat-card"><span class="stat-val" id="statsRemaining">0</span><span class="stat-desc">Pendientes</span></div>
-    </div>
-    
-    <div class="panel-box planner-section">
-      <h3>📅 Planificador de Cursada</h3>
-      <p style="opacity:0.8; margin-bottom:20px; font-size:0.9rem;">Haz clic en las materias que deseas cursar este cuatrimestre (solo aparecen las habilitadas).</p>
-      <div class="available-courses-grid" id="plannerGrid"></div>
-    </div>
-  </div>
 
-  <div id="view-schedule" class="view-section">
-    
-    <div class="schedule-grid">
-      <div class="day-card">
-        <h3>Lunes</h3>
-        <textarea class="day-textarea" data-day="lunes" placeholder="Ej:&#10;08:00 - Análisis I (Aula 4)&#10;10:00 - Lógica"></textarea>
+      <div id="view-grades" class="view-section panel-box">
+        <div class="average-card">
+          <h2 style="margin-top:0;">Promedio General</h2>
+          <div class="big-number" id="averageDisplay">0.00</div>
+        </div>
+        <p style="text-align:center; opacity:0.7; font-size: 0.9rem; margin-bottom:20px;">* Escribe "AC" para las materias dadas por equivalencia.</p>
+        <div id="gradesContainer" class="grades-table-container"></div>
       </div>
-      <div class="day-card">
-        <h3>Martes</h3>
-        <textarea class="day-textarea" data-day="martes" placeholder="Escribe aquí..."></textarea>
-      </div>
-      <div class="day-card">
-        <h3>Miércoles</h3>
-        <textarea class="day-textarea" data-day="miercoles" placeholder="Escribe aquí..."></textarea>
-      </div>
-      <div class="day-card">
-        <h3>Jueves</h3>
-        <textarea class="day-textarea" data-day="jueves" placeholder="Escribe aquí..."></textarea>
-      </div>
-      <div class="day-card">
-        <h3>Viernes</h3>
-        <textarea class="day-textarea" data-day="viernes" placeholder="Escribe aquí..."></textarea>
-      </div>
-      <div class="day-card">
-        <h3>Sábado</h3>
-        <textarea class="day-textarea" data-day="sabado" placeholder="Escribe aquí..."></textarea>
-      </div>
-    </div>
 
-    <div class="panel-box exams-container">
-      <h3 style="margin-top:0;">📝 Exámenes y Entregas</h3>
-      <div class="add-exam-box">
-        <input type="text" id="examName" class="input-exam" placeholder="Detalle (Ej: 1° Parcial Física)">
-        <input type="date" id="examDate" class="input-exam" style="flex: 0.5;">
-        <button class="btn-add" onclick="addExam()">Agendar</button>
+      <div id="view-stats" class="view-section">
+        <div class="stats-header">
+          <div class="progress-circle-container">
+            <div class="progress-circle-bg" id="progressCircle">
+              <div class="progress-circle-inner">
+                <span class="pc-percentage" id="statsPercentage">0%</span>
+                <span class="pc-label">Avance</span>
+              </div>
+            </div>
+          </div>
+          <div class="stat-card"><span class="stat-val" id="statsCompleted">0</span><span class="stat-desc">Aprobadas</span></div>
+          <div class="stat-card"><span class="stat-val" id="statsRemaining">0</span><span class="stat-desc">Pendientes</span></div>
+        </div>
+        
+        <div class="panel-box planner-section">
+          <h3>📅 Planificador de Cursada</h3>
+          <p style="opacity:0.8; margin-bottom:20px; font-size:0.9rem;">Haz clic en las materias que deseas cursar este cuatrimestre (solo aparecen las habilitadas).</p>
+          <div class="available-courses-grid" id="plannerGrid"></div>
+        </div>
       </div>
-      <div id="examList" class="exam-list"></div>
-    </div>
-  </div>
 
-  <div id="view-rewards" class="view-section panel-box">
-    <h3 style="text-align:center; margin-top:0;">✨ Mis Objetivos y Premios</h3>
-    <div class="add-reward-box">
-      <input type="text" id="goalInput" class="input-reward" placeholder="Objetivo (ej: Final de Química)">
-      <input type="text" id="prizeInput" class="input-reward" placeholder="Premio (ej: Día de Spa)">
-      <button class="btn-add" onclick="addReward()">Añadir</button>
-    </div>
-    <div id="rewardList" class="reward-list"></div>
-  </div>
+      <div id="view-schedule" class="view-section">
+        
+        <div class="schedule-grid">
+          <div class="day-card">
+            <h3>Lunes</h3>
+            <textarea class="day-textarea" data-day="lunes" placeholder="Ej:&#10;08:00 - Análisis I (Aula 4)&#10;10:00 - Lógica"></textarea>
+          </div>
+          <div class="day-card">
+            <h3>Martes</h3>
+            <textarea class="day-textarea" data-day="martes" placeholder="Escribe aquí..."></textarea>
+          </div>
+          <div class="day-card">
+            <h3>Miércoles</h3>
+            <textarea class="day-textarea" data-day="miercoles" placeholder="Escribe aquí..."></textarea>
+          </div>
+          <div class="day-card">
+            <h3>Jueves</h3>
+            <textarea class="day-textarea" data-day="jueves" placeholder="Escribe aquí..."></textarea>
+          </div>
+          <div class="day-card">
+            <h3>Viernes</h3>
+            <textarea class="day-textarea" data-day="viernes" placeholder="Escribe aquí..."></textarea>
+          </div>
+          <div class="day-card">
+            <h3>Sábado</h3>
+            <textarea class="day-textarea" data-day="sabado" placeholder="Escribe aquí..."></textarea>
+          </div>
+        </div>
+
+        <div class="panel-box exams-container">
+          <h3 style="margin-top:0;">📝 Exámenes y Entregas</h3>
+          <div class="add-exam-box">
+            <input type="text" id="examName" class="input-exam" placeholder="Detalle (Ej: 1° Parcial Física)">
+            <input type="date" id="examDate" class="input-exam" style="flex: 0.5;">
+            <button class="btn-add" onclick="addExam()">Agendar</button>
+          </div>
+          <div id="examList" class="exam-list"></div>
+        </div>
+      </div>
+
+      <div id="view-rewards" class="view-section panel-box">
+        <h3 style="text-align:center; margin-top:0;">✨ Mis Objetivos y Premios</h3>
+        <div class="add-reward-box">
+          <input type="text" id="goalInput" class="input-reward" placeholder="Objetivo (ej: Final de Química)">
+          <input type="text" id="prizeInput" class="input-reward" placeholder="Premio (ej: Día de Spa)">
+          <button class="btn-add" onclick="addReward()">Añadir</button>
+        </div>
+        <div id="rewardList" class="reward-list"></div>
+      </div>
+  </main>
 
   <script>
     const courses = document.querySelectorAll('.course');
@@ -394,7 +455,6 @@
       document.getElementById('statsCompleted').textContent = completed;
       document.getElementById('statsRemaining').textContent = total - completed;
       
-      // Color actualizado para el anillo de progreso
       document.getElementById('progressCircle').style.background = `conic-gradient(#ffc3cc ${percentage}%, #323c23 ${percentage}% 100%)`;
       
       plannerGrid.innerHTML = '';
@@ -509,7 +569,6 @@
     }
     function toggleReward(index) {
       rewardsData[index].done = !rewardsData[index].done;
-      // Colores de confeti adaptados al tema
       if(rewardsData[index].done) confetti({ particleCount: 150, spread: 80, origin: { y: 0.6 }, colors: ['#ffc3cc', '#ffffff', '#e0a6b1'] });
       saveProgress(); renderRewards();
     }
@@ -542,7 +601,3 @@
   </script>
 </body>
 </html>
-</body>
-</html>
-
-
