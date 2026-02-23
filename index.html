@@ -19,11 +19,11 @@
   h1 { color: #c71585; font-weight: 900; margin: 10px 0; text-shadow: 2px 2px 0px #ffd1dc; }
 
   /* Pestañas */
-  .tabs-container { display: flex; justify-content: center; gap: 15px; margin-top: 20px; flex-wrap: wrap; }
+  .tabs-container { display: flex; justify-content: center; gap: 10px; margin-top: 20px; flex-wrap: wrap; }
   .tab-btn {
-    padding: 12px 25px; border: none; border-radius: 25px; font-size: 0.95rem; font-weight: 700;
+    padding: 10px 20px; border: none; border-radius: 25px; font-size: 0.9rem; font-weight: 700;
     cursor: pointer; transition: all 0.3s ease; background-color: #ffcce0; color: #c71585;
-    box-shadow: 0 4px 6px rgba(0,0,0,0.05); display: flex; align-items: center; gap: 8px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05); display: flex; align-items: center; gap: 6px;
   }
   .tab-btn:hover { background-color: #ff99bb; transform: translateY(-2px); }
   .tab-btn.active { background-color: #c71585; color: white; box-shadow: 0 4px 10px rgba(199, 21, 133, 0.3); transform: scale(1.05); }
@@ -58,8 +58,6 @@
   .course.enabled:hover { transform: translateY(-3px); z-index: 10; }
   .course.completed { opacity: 0.6; filter: grayscale(40%); text-decoration: none; }
   .course.completed::after { content: '★'; position: absolute; top: -8px; right: -8px; background: #FFD700; color: white; border-radius: 50%; width: 20px; height: 20px; font-size: 12px; line-height: 20px; text-align: center; box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
-
-  /* ESTILO NUEVO: Highlight de dependencia */
   .course.is-unlocked { box-shadow: 0 0 15px #ff1493; transform: scale(1.05); z-index: 5; border-color: #ff1493 !important; animation: pulse 1.5s infinite; }
   @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(255, 20, 147, 0.7); } 70% { box-shadow: 0 0 0 10px rgba(255, 20, 147, 0); } 100% { box-shadow: 0 0 0 0 rgba(255, 20, 147, 0); } }
 
@@ -86,29 +84,56 @@
   .plan-card.planned { background: #db3e8d; color: white; border-style: solid; box-shadow: 0 5px 15px rgba(219, 62, 141, 0.4); }
   .plan-card.planned::after { content: '❤️'; position: absolute; top: -10px; right: -10px; font-size: 1.2rem; }
 
-  /* --- HORARIO (NUEVO) --- */
+  /* --- REWARDS --- */
+  #view-rewards { max-width: 600px; margin: 0 auto; background: white; padding: 30px; border-radius: 20px; border: 1px solid #ffcce0; box-shadow: 0 10px 30px rgba(199,21,133,0.1); }
+  .add-reward-box { display: flex; gap: 10px; margin-bottom: 30px; flex-wrap: wrap; }
+  .input-reward { flex: 1; padding: 12px; border: 2px solid #f4b1c8; border-radius: 10px; outline: none; color: #c71585; font-weight: bold; }
+  .input-reward::placeholder { color: #eeaabb; }
+  .btn-add { background: #c71585; color: white; border: none; padding: 12px 20px; border-radius: 10px; font-weight: bold; cursor: pointer; transition: 0.3s; }
+  .btn-add:hover { background: #a0126b; }
+  .reward-list { display: flex; flex-direction: column; gap: 15px; }
+  .reward-item { display: flex; align-items: center; justify-content: space-between; padding: 15px; border: 2px dashed #db3e8d; border-radius: 15px; background: #fff0f5; transition: 0.3s; }
+  .reward-item.done { border-style: solid; background: #e8ffe8; border-color: #55aa55; opacity: 0.8; }
+  .reward-text-group { display: flex; flex-direction: column; }
+  .r-goal { font-weight: 800; font-size: 1.1rem; color: #c71585; }
+  .r-prize { font-size: 0.9rem; color: #db3e8d; }
+  .reward-item.done .r-goal, .reward-item.done .r-prize { text-decoration: line-through; color: #55aa55; }
+  .check-btn { width: 30px; height: 30px; border: 2px solid #c71585; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; color: transparent; font-size: 1.2rem; background: white; transition: 0.2s; }
+  .reward-item.done .check-btn { background: #55aa55; border-color: #55aa55; color: white; }
+  .delete-btn { margin-left: 10px; color: #ff6b6b; cursor: pointer; font-size: 1.2rem; background: none; border: none; }
+
+  /* --- HORARIO Y EXÁMENES --- */
   #view-schedule { max-width: 1000px; margin: 0 auto; padding-bottom: 50px; }
-  .schedule-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; }
+  .schedule-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-bottom: 40px; }
   .day-card { background: white; border: 2px dashed #db3e8d; border-radius: 15px; padding: 20px; box-shadow: 0 5px 15px rgba(199,21,133,0.05); transition: transform 0.2s; }
   .day-card:hover { transform: translateY(-3px); }
   .day-card h3 { color: #c71585; margin-top: 0; text-align: center; border-bottom: 2px solid #f4b1c8; padding-bottom: 10px; font-weight: 900; }
-  .day-textarea { 
-    width: 100%; height: 150px; border: none; resize: none; 
-    font-family: 'Nunito Sans', sans-serif; font-size: 0.95rem; font-weight: 700;
-    color: #555; outline: none; background: transparent; line-height: 1.5;
-  }
+  .day-textarea { width: 100%; height: 150px; border: none; resize: none; font-family: 'Nunito Sans', sans-serif; font-size: 0.95rem; font-weight: 700; color: #555; outline: none; background: transparent; line-height: 1.5; }
   .day-textarea::placeholder { color: #f4b1c8; font-weight: 400; }
+
+  /* Parciales */
+  .exams-container { background: white; border: 1px solid #ffcce0; border-radius: 20px; padding: 30px; box-shadow: 0 10px 30px rgba(199,21,133,0.1); }
+  .add-exam-box { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
+  .input-exam { flex: 1; min-width: 200px; padding: 12px; border: 2px solid #f4b1c8; border-radius: 10px; outline: none; color: #c71585; font-weight: bold; font-family: 'Nunito Sans'; }
+  .exam-list { display: flex; flex-direction: column; gap: 10px; }
+  .exam-item { display: flex; justify-content: space-between; align-items: center; padding: 15px 20px; background: linear-gradient(135deg, #fff0f5, #ffe4e1); border-left: 5px solid #db3e8d; border-radius: 10px; font-weight: bold; color: #c71585; }
+  .exam-info { display: flex; flex-direction: column; }
+  .exam-subject { font-size: 1.1rem; color: #a0126b; }
+  .exam-date-text { font-size: 0.85rem; color: #db3e8d; margin-top: 3px; }
+  .exam-badge { background: #db3e8d; color: white; padding: 5px 12px; border-radius: 20px; font-size: 0.8rem; margin-right: 15px; }
+  .exam-actions { display: flex; align-items: center; }
   </style>
 </head>
 <body>
 
   <header>
-    <h1> UNIVERSIDAD DE MORON - Ing. Industrial </h1>
+    <h1>🎀 UNIVERSIDAD DE MORON - Ing. Industrial 🎀</h1>
     <div class="tabs-container">
       <button class="tab-btn active" onclick="switchTab('map')">🗺️ Plan de Estudios</button>
       <button class="tab-btn" onclick="switchTab('grades')">📝 Promedio</button>
-      <button class="tab-btn" onclick="switchTab('stats')">📊 Progreso y Plan</button>
-      <button class="tab-btn" onclick="switchTab('schedule')">📅 Horario</button>
+      <button class="tab-btn" onclick="switchTab('stats')">📊 Progreso</button>
+      <button class="tab-btn" onclick="switchTab('schedule')">📅 Horario y Exámenes</button>
+      <button class="tab-btn" onclick="switchTab('rewards')">🎁 Premios</button>
     </div>
   </header>
 
@@ -209,6 +234,7 @@
   </div>
 
   <div id="view-schedule" class="view-section">
+    
     <h2 style="color:#c71585; text-align:center; margin-bottom:5px;">🕒 Mi Horario Semanal</h2>
     <p style="text-align:center; color:#666; margin-bottom:30px; font-style:italic;">Escribe tus materias, horarios y aulas. ¡Se guarda solo!</p>
     
@@ -238,6 +264,30 @@
         <textarea class="day-textarea" data-day="sabado" placeholder="Escribe aquí..."></textarea>
       </div>
     </div>
+
+    <div class="exams-container">
+      <h2 style="color:#c71585; margin-top:0; border-bottom: 2px solid #f4b1c8; padding-bottom:10px;">📝 Próximos Parciales y Entregas</h2>
+      
+      <div class="add-exam-box">
+        <input type="text" id="examName" class="input-exam" placeholder="Materia / Descripción (Ej: 1° Parcial Física)">
+        <input type="date" id="examDate" class="input-exam" style="flex: 0.5;">
+        <button class="btn-add" onclick="addExam()">Agendar</button>
+      </div>
+
+      <div id="examList" class="exam-list">
+        </div>
+    </div>
+
+  </div>
+
+  <div id="view-rewards" class="view-section">
+    <h2 style="color:#c71585; text-align:center;">🎁 Mis Premios y Metas</h2>
+    <div class="add-reward-box">
+      <input type="text" id="goalInput" class="input-reward" placeholder="Objetivo (ej: Aprobar Física)">
+      <input type="text" id="prizeInput" class="input-reward" placeholder="Premio (ej: Comprar botas)">
+      <button class="btn-add" onclick="addReward()">Agregar</button>
+    </div>
+    <div id="rewardList" class="reward-list"></div>
   </div>
 
   <script>
@@ -245,16 +295,20 @@
     const gradesContainer = document.getElementById('gradesContainer');
     const averageDisplay = document.getElementById('averageDisplay');
     const plannerGrid = document.getElementById('plannerGrid');
+    const rewardList = document.getElementById('rewardList');
+    const examList = document.getElementById('examList');
     
     let gradesData = JSON.parse(localStorage.getItem('materiasNotas') || '{}');
     let plannedData = JSON.parse(localStorage.getItem('materiasPlanificadas') || '{}');
+    let rewardsData = JSON.parse(localStorage.getItem('materiasPremios') || '[]');
+    let scheduleData = JSON.parse(localStorage.getItem('materiasHorario') || '{}');
+    let examsData = JSON.parse(localStorage.getItem('materiasExamenes') || '[]');
 
-    // --- PESTAÑAS ---
     function switchTab(tabName) {
       document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
       document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
-      
       const tabs = document.querySelectorAll('.tab-btn');
+      
       if (tabName === 'map') {
         document.getElementById('view-map').classList.add('active'); tabs[0].classList.add('active');
       } else if (tabName === 'grades') {
@@ -262,17 +316,20 @@
       } else if (tabName === 'stats') {
         document.getElementById('view-stats').classList.add('active'); tabs[2].classList.add('active'); renderStatsAndPlanner();
       } else if (tabName === 'schedule') {
-        document.getElementById('view-schedule').classList.add('active'); tabs[3].classList.add('active');
+        document.getElementById('view-schedule').classList.add('active'); tabs[3].classList.add('active'); renderExams();
+      } else if (tabName === 'rewards') {
+        document.getElementById('view-rewards').classList.add('active'); tabs[4].classList.add('active'); renderRewards();
       }
     }
 
-    // --- GUARDADO ---
     function saveProgress() {
       const saved = {};
       courses.forEach(course => saved[course.dataset.id] = course.classList.contains('completed'));
       localStorage.setItem('materiasAprobadas', JSON.stringify(saved));
       localStorage.setItem('materiasNotas', JSON.stringify(gradesData));
       localStorage.setItem('materiasPlanificadas', JSON.stringify(plannedData));
+      localStorage.setItem('materiasPremios', JSON.stringify(rewardsData));
+      localStorage.setItem('materiasExamenes', JSON.stringify(examsData));
     }
 
     function loadProgress() {
@@ -280,24 +337,19 @@
       courses.forEach(course => { if (saved[course.dataset.id]) course.classList.add('completed'); });
     }
 
-    // --- LOGICA PRINCIPAL ---
     function updateStates() {
       const completed = new Set();
       courses.forEach(course => { if (course.classList.contains('completed')) completed.add(course.dataset.id); });
-      
       courses.forEach(course => {
         const reqs = course.dataset.req ? course.dataset.req.split(',') : [];
         const allMet = reqs.every(r => completed.has(r));
-        if (reqs.length === 0 || allMet) {
-          course.classList.add('enabled');
-        } else {
-          course.classList.remove('enabled'); course.classList.remove('completed');
-        }
+        if (reqs.length === 0 || allMet) { course.classList.add('enabled'); } 
+        else { course.classList.remove('enabled'); course.classList.remove('completed'); }
       });
       saveProgress();
     }
 
-    // --- NOTAS ---
+    /* --- NOTAS --- */
     function renderGrades() {
         gradesContainer.innerHTML = '';
         const completedCourses = Array.from(courses).filter(c => c.classList.contains('completed'));
@@ -322,7 +374,7 @@
         averageDisplay.textContent = (values.reduce((a, b) => a + b, 0) / values.length).toFixed(2);
     }
 
-    // --- STATS ---
+    /* --- STATS Y PLANIFICADOR --- */
     function renderStatsAndPlanner() {
       const total = courses.length;
       const completed = document.querySelectorAll('.course.completed').length;
@@ -331,7 +383,7 @@
       document.getElementById('statsCompleted').textContent = completed;
       document.getElementById('statsRemaining').textContent = total - completed;
       document.getElementById('progressCircle').style.background = `conic-gradient(#db3e8d ${percentage}%, #ffe4e1 ${percentage}% 100%)`;
-
+      
       plannerGrid.innerHTML = '';
       const available = Array.from(courses).filter(c => c.classList.contains('enabled') && !c.classList.contains('completed'));
       if (available.length === 0) { plannerGrid.innerHTML = '<div style="text-align:center;color:#999;font-style:italic;">No hay materias disponibles por ahora.</div>'; return; }
@@ -346,16 +398,11 @@
       });
     }
 
-    // --- HORARIO LÓGICA ---
-    const scheduleTextareas = document.querySelectorAll('.day-textarea');
-    let scheduleData = JSON.parse(localStorage.getItem('materiasHorario') || '{}');
-
+    /* --- HORARIO --- */
     function loadSchedule() {
-      scheduleTextareas.forEach(ta => {
+      document.querySelectorAll('.day-textarea').forEach(ta => {
         const day = ta.dataset.day;
         if (scheduleData[day]) { ta.value = scheduleData[day]; }
-        
-        // Guardado automático al escribir
         ta.addEventListener('input', (e) => {
           scheduleData[day] = e.target.value;
           localStorage.setItem('materiasHorario', JSON.stringify(scheduleData));
@@ -363,40 +410,131 @@
       });
     }
 
-    // --- INTERACTIVIDAD MAPA ---
-    courses.forEach(course => {
-      course.addEventListener('click', (e) => {
-        if (!course.classList.contains('enabled')) return;
+    /* --- PARCIALES (NUEVO) --- */
+    function renderExams() {
+      examList.innerHTML = '';
+      if(examsData.length === 0) { 
+        examList.innerHTML = '<div style="text-align:center;color:#999;font-style:italic;padding:10px;">¡No hay parciales agendados! Disfruta la paz. ☕</div>'; 
+        return; 
+      }
+      
+      // Ordenar por fecha (los más próximos arriba)
+      examsData.sort((a, b) => new Date(a.date) - new Date(b.date));
+
+      examsData.forEach((exam, index) => {
+        const div = document.createElement('div');
+        div.className = 'exam-item';
         
+        // Formatear la fecha a dd/mm/aaaa
+        const [year, month, day] = exam.date.split('-');
+        const formattedDate = `${day}/${month}/${year}`;
+
+        // Calcular días faltantes
+        const examDate = new Date(exam.date);
+        const today = new Date();
+        today.setHours(0,0,0,0);
+        
+        // Agregar timezone offset para evitar bugs con la fecha
+        examDate.setMinutes(examDate.getMinutes() + examDate.getTimezoneOffset());
+        
+        const diffTime = examDate - today;
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        
+        let badgeText = "";
+        if (diffDays === 0) badgeText = "¡ES HOY! 😱";
+        else if (diffDays === 1) badgeText = "Mañana";
+        else if (diffDays < 0) badgeText = "Pasado";
+        else badgeText = `En ${diffDays} días`;
+
+        div.innerHTML = `
+          <div class="exam-info">
+            <span class="exam-subject">${exam.name}</span>
+            <span class="exam-date-text">📅 ${formattedDate}</span>
+          </div>
+          <div class="exam-actions">
+            ${diffDays >= 0 ? `<span class="exam-badge">${badgeText}</span>` : `<span class="exam-badge" style="background:#aaa;">Terminado</span>`}
+            <button class="delete-btn" onclick="deleteExam(${index})" title="Eliminar">✕</button>
+          </div>
+        `;
+        examList.appendChild(div);
+      });
+    }
+
+    function addExam() {
+      const name = document.getElementById('examName').value;
+      const date = document.getElementById('examDate').value;
+      if(!name || !date) return;
+      examsData.push({ name, date });
+      document.getElementById('examName').value = ''; 
+      document.getElementById('examDate').value = '';
+      saveProgress(); 
+      renderExams();
+    }
+
+    function deleteExam(index) {
+      examsData.splice(index, 1); 
+      saveProgress(); 
+      renderExams();
+    }
+
+    /* --- RECOMPENSAS --- */
+    function renderRewards() {
+      rewardList.innerHTML = '';
+      if(rewardsData.length === 0) { rewardList.innerHTML = '<div style="text-align:center;color:#999;font-style:italic;">¡Agrega tu primer objetivo y premio! 🎁</div>'; return; }
+      rewardsData.forEach((item, index) => {
+        const div = document.createElement('div');
+        div.className = `reward-item ${item.done ? 'done' : ''}`;
+        div.innerHTML = `
+          <div class="reward-text-group">
+            <span class="r-goal">${item.goal}</span>
+            <span class="r-prize">Premio: ${item.prize}</span>
+          </div>
+          <div style="display:flex; align-items:center;">
+             <button class="check-btn" onclick="toggleReward(${index})">✔</button>
+             <button class="delete-btn" onclick="deleteReward(${index})">✕</button>
+          </div>
+        `;
+        rewardList.appendChild(div);
+      });
+    }
+    function addReward() {
+      const goal = document.getElementById('goalInput').value;
+      const prize = document.getElementById('prizeInput').value;
+      if(!goal || !prize) return;
+      rewardsData.push({ goal, prize, done: false });
+      document.getElementById('goalInput').value = ''; document.getElementById('prizeInput').value = '';
+      saveProgress(); renderRewards();
+    }
+    function toggleReward(index) {
+      rewardsData[index].done = !rewardsData[index].done;
+      if(rewardsData[index].done) confetti({ particleCount: 150, spread: 80, origin: { y: 0.6 } });
+      saveProgress(); renderRewards();
+    }
+    function deleteReward(index) {
+      rewardsData.splice(index, 1); saveProgress(); renderRewards();
+    }
+
+    // --- INIT EVENTOS ---
+    courses.forEach(course => {
+      course.addEventListener('click', () => {
+        if (!course.classList.contains('enabled')) return;
         const isCompleting = !course.classList.contains('completed');
         course.classList.toggle('completed');
-        
-        if (isCompleting) {
-            confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 }, colors: ['#c71585', '#db3e8d', '#ffd1dc'] });
-        } else {
-            delete gradesData[course.dataset.id];
-            delete plannedData[course.dataset.id];
-        }
+        if (isCompleting) confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 }, colors: ['#c71585', '#db3e8d', '#ffd1dc'] });
+        else { delete gradesData[course.dataset.id]; delete plannedData[course.dataset.id]; }
         updateStates();
       });
-
       course.addEventListener('mouseenter', () => {
         const myId = course.dataset.id;
-        courses.forEach(c => {
-            const reqs = c.dataset.req ? c.dataset.req.split(',') : [];
-            if (reqs.includes(myId)) c.classList.add('is-unlocked');
-        });
+        courses.forEach(c => { if ((c.dataset.req || '').split(',').includes(myId)) c.classList.add('is-unlocked'); });
       });
-
-      course.addEventListener('mouseleave', () => {
-        courses.forEach(c => c.classList.remove('is-unlocked'));
-      });
+      course.addEventListener('mouseleave', () => courses.forEach(c => c.classList.remove('is-unlocked')));
     });
 
     window.onload = () => { 
       loadProgress(); 
       updateStates(); 
-      loadSchedule(); // Cargar los horarios guardados
+      loadSchedule();
     };
   </script>
 </body>
