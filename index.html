@@ -15,7 +15,7 @@
     background-color: #28301c; /* Verde oliva oscuro */
     color: #ffc3cc; /* Rosa pastel */
     margin: 0;
-    padding: 0; /* Quitamos el padding para que la barra ocupe el 100% */
+    padding: 0; 
   }
 
   h1, h2, h3 {
@@ -30,11 +30,11 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    background-color: #1d2314; /* Un tono más oscuro que el fondo para que contraste */
+    background-color: #1d2314; 
     padding: 15px 40px;
     box-shadow: 0 4px 15px rgba(0,0,0,0.4);
     margin-bottom: 40px;
-    flex-wrap: wrap; /* Para que no se rompa en celulares */
+    flex-wrap: wrap; 
     gap: 20px;
   }
 
@@ -95,7 +95,7 @@
 
   /* --- CONTENEDOR PRINCIPAL DE LAS VISTAS --- */
   .main-content {
-    padding: 0 40px; /* Le devolvemos el espacio a los costados al contenido */
+    padding: 0 40px; 
   }
 
   /* Vistas */
@@ -162,11 +162,15 @@
   /* --- HORARIO Y EXÁMENES --- */
   #view-schedule { max-width: 1000px; margin: 0 auto; padding-bottom: 50px; }
   .schedule-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-bottom: 40px; }
-  .day-card { background: #323c23; border: 1px solid rgba(255,195,204,0.2); border-radius: 15px; padding: 20px; transition: transform 0.2s; }
-  .day-card h3 { border-bottom: 1px solid rgba(255,195,204,0.3); padding-bottom: 10px; text-align: center; }
-  .day-textarea { width: 100%; height: 150px; border: none; resize: none; font-family: 'Poppins', sans-serif; font-size: 0.9rem; font-weight: 400; color: #ffc3cc; outline: none; background: transparent; line-height: 1.6; }
-  .day-textarea::placeholder { color: rgba(255,195,204,0.4); }
+  
+  /* TARJETAS DE HORARIO BLANCAS */
+  .day-card { background: #ffffff; border: 1px solid #ffc3cc; border-radius: 15px; padding: 20px; transition: transform 0.2s; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
+  .day-card:hover { transform: translateY(-3px); }
+  .day-card h3 { color: #28301c; border-bottom: 1px solid rgba(40,48,28,0.2); padding-bottom: 10px; text-align: center; margin-top: 0; }
+  .day-textarea { width: 100%; height: 150px; border: none; resize: none; font-family: 'Poppins', sans-serif; font-size: 0.9rem; font-weight: 600; color: #28301c; outline: none; background: transparent; line-height: 1.6; }
+  .day-textarea::placeholder { color: rgba(40,48,28,0.4); font-weight: 400; }
 
+  /* Parciales */
   .add-exam-box { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
   .input-exam { flex: 1; min-width: 200px; padding: 12px; border: 1px solid #ffc3cc; border-radius: 10px; outline: none; background: #28301c; color: #ffc3cc; font-family: 'Poppins', sans-serif; }
   .btn-add { background: #ffc3cc; color: #28301c; border: none; padding: 12px 25px; border-radius: 10px; font-weight: 700; font-family: 'Poppins', sans-serif; cursor: pointer; transition: 0.3s; }
