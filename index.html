@@ -110,25 +110,36 @@
   .year-column h2 { border-bottom: 2px solid #ffc3cc; padding-bottom: 5px; font-size: 1.2rem; margin-bottom: 15px; }
   
   .course {
-    padding: 14px 16px; border-radius: 12px; border: 1px solid rgba(255, 195, 204, 0.3);
-    min-width: 160px; max-width: 160px; text-align: center; font-size: 0.85rem; font-weight: 600;
-    position: relative; cursor: not-allowed; opacity: 0.4; transition: all 0.3s;
-    color: #ffc3cc; background-color: rgba(0, 0, 0, 0.2); z-index: 1;
+    padding: 14px 16px; 
+    border-radius: 12px; 
+    border: 1px solid rgba(255, 195, 204, 0.3);
+    min-width: 160px; 
+    max-width: 160px; 
+    text-align: center; 
+    font-size: 0.85rem; 
+    font-weight: 600;
+    position: relative; 
+    cursor: not-allowed; 
+    opacity: 0.5; /* Un poco más opaco para que se note que están bloqueadas */
+    transition: all 0.3s;
+    /* --- CAMBIOS AQUÍ --- */
+    color: #28301c; /* Texto verde oscuro para alto contraste */
+    background-color: #ffffff; /* Fondo blanco */
+    z-index: 1;
   }
 
-  .course[data-type="calculo"], .course[data-id="400"], .course[data-id="401"], .course[data-id="402"], .course[data-id="406"], .course[data-id="407"], .course[data-id="408"], .course[data-id="494"], .course[data-id="711"], .course[data-id="458"] { border-left: 4px solid #ffb7ce; }
-  .course[data-type="logica"], .course[data-id="404"], .course[data-id="409"], .course[data-id="90002"] { border-left: 4px solid #c3c3e5; }
-  .course[data-type="quimica"], .course[data-id="411"], .course[data-id="278"], .course[data-id="280"], .course[data-id="468"] { border-left: 4px solid #a7e2d2; }
-  .course[data-type="gestion"], .course[data-id="412"], .course[data-id="466"], .course[data-id="467"], .course[data-id="472"], .course[data-id="473"], .course[data-id="813"], .course[data-id="814"], .course[data-id="815"], .course[data-id="816"] { border-left: 4px solid #ff9999; }
-  .course[data-type="ingenieria"], .course[data-id="405"], .course[data-id="800"], .course[data-id="410"], .course[data-id="457"], .course[data-id="281"], .course[data-id="803"], .course[data-id="283"], .course[data-id="284"], .course[data-id="279"], .course[data-id="287"], .course[data-id="291"], .course[data-id="469"], .course[data-id="470"], .course[data-id="474"], .course[data-id="475"], .course[data-id="817"], .course[data-id="478"], .course[data-id="479"], .course[data-id="480"], .course[data-id="830"], .course[data-id="297"], .course[data-id="477"], .course[data-id="801"] { border-left: 4px solid #f3ccf5; }
+  /* Ajuste de colores laterales para que se sigan viendo bien sobre fondo blanco */
+  .course[data-type="calculo"], .course[data-id="400"], .course[data-id="401"], .course[data-id="402"], .course[data-id="406"], .course[data-id="407"], .course[data-id="408"], .course[data-id="494"], .course[data-id="711"], .course[data-id="458"] { border-left: 6px solid #ff85a8; }
+  .course[data-type="logica"], .course[data-id="404"], .course[data-id="409"], .course[data-id="90002"] { border-left: 6px solid #8585d1; }
+  .course[data-type="quimica"], .course[data-id="411"], .course[data-id="278"], .course[data-id="280"], .course[data-id="468"] { border-left: 6px solid #5dbda5; }
+  .course[data-type="gestion"], .course[data-id="412"], .course[data-id="466"], .course[data-id="467"], .course[data-id="472"], .course[data-id="473"], .course[data-id="813"], .course[data-id="814"], .course[data-id="815"], .course[data-id="816"] { border-left: 6px solid #ff6666; }
+  .course[data-type="ingenieria"], .course[data-id="405"], .course[data-id="800"], .course[data-id="410"], .course[data-id="457"], .course[data-id="281"], .course[data-id="803"], .course[data-id="283"], .course[data-id="284"], .course[data-id="279"], .course[data-id="287"], .course[data-id="291"], .course[data-id="469"], .course[data-id="470"], .course[data-id="474"], .course[data-id="475"], .course[data-id="817"], .course[data-id="478"], .course[data-id="479"], .course[data-id="480"], .course[data-id="830"], .course[data-id="297"], .course[data-id="477"], .course[data-id="801"] { border-left: 6px solid #d991dd; }
 
-  .course.enabled { cursor: pointer; opacity: 1; border-color: #ffc3cc; background-color: rgba(255, 195, 204, 0.05); }
-  .course.enabled:hover { transform: translateY(-3px); z-index: 10; background-color: rgba(255, 195, 204, 0.15); }
-  .course.completed { opacity: 0.5; filter: grayscale(20%); text-decoration: none; border-color: rgba(255,195,204,0.2); }
-  .course.completed::after { content: '★'; position: absolute; top: -8px; right: -8px; background: #ffc3cc; color: #28301c; border-radius: 50%; width: 20px; height: 20px; font-size: 12px; line-height: 20px; text-align: center; }
-  .course.is-unlocked { box-shadow: 0 0 15px rgba(255, 195, 204, 0.5); transform: scale(1.05); z-index: 5; border-color: #ffc3cc !important; animation: pulse 1.5s infinite; }
-  @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(255, 195, 204, 0.4); } 70% { box-shadow: 0 0 0 10px rgba(255, 195, 204, 0); } 100% { box-shadow: 0 0 0 0 rgba(255, 195, 204, 0); } }
-
+  .course.enabled { cursor: pointer; opacity: 1; border-color: #ffc3cc; background-color: #ffffff; }
+  .course.enabled:hover { transform: translateY(-3px); z-index: 10; background-color: #fff9fa; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+  .course.completed { opacity: 0.6; filter: grayscale(50%); text-decoration: none; border-color: #a8b398; background-color: #e8eade; }
+  .course.completed::after { content: '★'; position: absolute; top: -8px; right: -8px; background: #28301c; color: #ffc3cc; border-radius: 50%; width: 20px; height: 20px; font-size: 12px; line-height: 20px; text-align: center; }
+  .course.is-unlocked { box-shadow: 0 0 15px rgba(255, 195, 204, 0.8); transform: scale(1.05); z-index: 5; border-color: #ffc3cc !important; animation: pulse 1.5s infinite; }
   /* --- CONTENEDORES SECUNDARIOS --- */
   .panel-box { background: #323c23; padding: 30px; border-radius: 20px; border: 1px solid rgba(255,195,204,0.2); box-shadow: 0 10px 30px rgba(0,0,0,0.2); margin-bottom: 30px; }
 
@@ -630,4 +641,5 @@
   </script>
 </body>
 </html>
+
 
