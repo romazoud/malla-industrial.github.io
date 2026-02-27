@@ -104,24 +104,36 @@
   @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
   /* --- MAPA --- */
-  #view-map { overflow-x: auto; padding-bottom: 40px; }
+ #view-map { overflow-x: auto; padding-bottom: 40px; }
   .year-row { display: flex; gap: 20px; justify-content: center; min-width: max-content; padding-bottom: 20px; }
   .year-column { display: flex; flex-direction: column; align-items: center; gap: 12px; }
   .year-column h2 { border-bottom: 2px solid #ffc3cc; padding-bottom: 5px; font-size: 1.2rem; margin-bottom: 15px; }
   
   .course {
-    padding: 14px 16px; 
-    border-radius: 12px; 
-    border: 1px solid rgba(255, 195, 204, 0.3);
-    min-width: 160px; 
-    max-width: 160px; 
-    text-align: center; 
-    font-size: 0.85rem; 
-    font-weight: 600;
-    position: relative; 
-    cursor: not-allowed; 
-    opacity: 0.5; /* Un poco más opaco para que se note que están bloqueadas */
-    transition: all 0.3s;
+    padding: 14px 16px; border-radius: 12px; border: 1px solid rgba(255, 195, 204, 0.3);
+    min-width: 160px; max-width: 160px; text-align: center; font-size: 0.85rem; font-weight: 600;
+    position: relative; cursor: not-allowed; opacity: 0.5; transition: all 0.3s;
+    color: #28301c; background-color: #ffffff; z-index: 1;
+  }
+
+  .course[data-type="biologica"] { border-left: 6px solid #ff85a8; }
+  .course[data-type="comunitaria"] { border-left: 6px solid #5dbda5; }
+  .course[data-type="kinefisiatria"] { border-left: 6px solid #8585d1; }
+  .course[data-type="valoracion"] { border-left: 6px solid #d991dd; }
+  .course[data-type="humanistica"] { border-left: 6px solid #ff6666; }
+
+  .course.enabled { cursor: pointer; opacity: 1; border-color: #ffc3cc; background-color: #ffffff; }
+  .course.enabled:hover { transform: translateY(-3px); z-index: 10; background-color: #fff9fa; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+  
+  .course.completed { 
+    opacity: 1; filter: none; border-color: #ffc3cc; background-color: #ffc3cc; color: #28301c; text-decoration: none; 
+  }
+  .course.completed::after { 
+    content: '★'; position: absolute; top: -8px; right: -8px; background: #28301c; color: #ffc3cc; 
+    border-radius: 50%; width: 20px; height: 20px; font-size: 12px; line-height: 20px; text-align: center; box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+  }
+  .course.is-unlocked { box-shadow: 0 0 15px rgba(255, 195, 204, 0.8); transform: scale(1.05); z-index: 5; border-color: #ffc3cc !important; animation: pulse 1.5s infinite; }
+  @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(255, 195, 204, 0.4); } 70% { box-shadow: 0 0 0 10px rgba(255, 195, 204, 0); } 100% { box-shadow: 0 0 0 0 rgba(255, 195, 204, 0); } }
     
     /* --- CAMBIOS AQUÍ --- */
     color: #28301c; /* Texto verde oscuro para alto contraste */
@@ -699,6 +711,7 @@
   </script>
 </body>
 </html>
+
 
 
 
