@@ -12,8 +12,8 @@
   /* --- COLORES BASE Y TIPOGRAFÍA --- */
   body {
     font-family: 'Poppins', sans-serif;
-    background-color: #c43670; /* Verde oliva oscuro */
-    color: #faffc7; /* Rosa pastel */
+    background-color: #c43670; /* Rosa oscuro/Magenta */
+    color: #faffc7; /* Amarillo pastel */
     margin: 0;
     padding: 0; 
   }
@@ -214,46 +214,56 @@
   .plan-card.planned::after { content: '♡'; position: absolute; top: -12px; right: -8px; font-size: 1.5rem; color: #45151b; }
 
   /* --- HORARIO Y EXÁMENES --- */
-  #view-schedule { max-width: 1000px; margin: 0 auto; padding-bottom: 50px; }
-  .schedule-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-bottom: 40px; }
+  #view-schedule { max-width: 1100px; margin: 0 auto; padding-bottom: 50px; }
+  .table-container { 
+    background: #ffffff; padding: 20px; border-radius: 20px; 
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2); overflow-x: auto;
+  }
+  .schedule-table { width: 100%; border-collapse: collapse; color: #45151b; min-width: 700px; }
+  .schedule-table th, .schedule-table td { border: 1px solid #ffc3cc; padding: 0; text-align: center; height: 50px; }
+  .schedule-table th { background: #ffc3cc; font-family: 'Lora', serif; padding: 10px; font-weight: 700; color:#45151b; }
+  .hour-col { background: #fff9fa; font-weight: 700; width: 100px; }
   
-  /* TARJETAS BLANCAS CORREGIDAS */
-  .day-card { 
-    background: #ffffff; 
-    border: 2px solid #ffc3cc; 
-    border-radius: 15px; 
-    padding: 20px; 
-    transition: transform 0.2s; 
-    box-shadow: 0 5px 15px rgba(0,0,0,0.1); 
+  .schedule-input {
+    width: 100%; height: 100%; border: none; outline: none; background: transparent;
+    padding: 5px; font-family: 'Poppins', sans-serif; text-align: center; color: #45151b;
+    resize: none; font-size: 0.85rem; box-sizing: border-box; font-weight: 600;
   }
-  .day-card:hover { transform: translateY(-3px); }
-  .day-card h3 { 
-    color: #45151b; 
-    border-bottom: 2px solid #ffc3cc; 
-    padding-bottom: 10px; 
-    text-align: center; 
-    margin-top: 0;
+  .schedule-input:focus { background: #fff9fa; }
+  
+  /* ESTILO PARA HORARIOS OCUPADOS (ROSA DE FONDO CON AMARILLO PASTEL) */
+  .occupied-cell {
+    background-color: #c43670 !important; 
+    color: #faffc7 !important;
+    font-weight: 700;
   }
-  .day-textarea { 
-    width: 100%; 
-    height: 150px; 
-    border: none; 
-    resize: none; 
-    font-family: 'Poppins', sans-serif; 
-    font-size: 0.9rem; 
-    font-weight: 600; 
-    color: #45151b; 
-    outline: none; 
-    background: transparent; 
-    line-height: 1.6; 
+
+  /* --- MODAL PARA AGENDAR HORARIO --- */
+  .schedule-modal-overlay {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(69, 21, 27, 0.9); z-index: 2000;
+    display: none; justify-content: center; align-items: center;
+    animation: fadeIn 0.3s ease;
   }
-  .day-textarea::placeholder { color: rgba(40,48,28,0.5); font-weight: 400; }
+  .schedule-modal-content {
+    background: #ffffff; color: #45151b; padding: 30px; border-radius: 20px;
+    max-width: 90%; width: 400px; text-align: center;
+    border: 4px solid #ffc3cc; box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+  }
+  .schedule-modal-content select {
+    width: 100%; padding: 12px; margin-bottom: 15px; border-radius: 8px;
+    border: 2px solid #ffc3cc; font-family: 'Poppins', sans-serif;
+    background: #fff9fa; color: #45151b; font-weight: 600; outline: none;
+  }
+  .schedule-modal-content label { display: block; text-align: left; font-size: 0.85rem; font-weight: bold; margin-bottom: 5px; }
 
   /* Parciales */
   .add-exam-box { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
   .input-exam { flex: 1; min-width: 200px; padding: 12px; border: 1px solid #ffc3cc; border-radius: 10px; outline: none; background: #fff9fa; color: #28301c; font-family: 'Poppins', sans-serif; }
   .btn-add { background: #ffc3cc; color: #45151b; border: none; padding: 12px 25px; border-radius: 10px; font-weight: 700; font-family: 'Poppins', sans-serif; cursor: pointer; transition: 0.3s; }
   .btn-add:hover { opacity: 0.8; }
+  .btn-close { background: transparent; border: 2px solid #45151b; color: #45151b; width: 100%; margin-top: 10px; }
+  .btn-close:hover { background: #45151b; color: #ffffff; }
   
   .exam-list { display: flex; flex-direction: column; gap: 10px; }
   .exam-item { display: flex; justify-content: space-between; align-items: center; padding: 15px 20px; background: #fff9fa; border-left: 4px solid #ffc3cc; border-radius: 10px; }
@@ -279,6 +289,40 @@
   </style>
 </head>
 <body>
+
+  <div id="scheduleModal" class="schedule-modal-overlay">
+    <div class="schedule-modal-content">
+      <h2 style="color: #45151b; margin-top:0;">📝 Agendar Materia</h2>
+      <p style="font-size: 0.9rem; margin-bottom: 20px; color:#45151b;">Solo aparecen las materias que tenés habilitadas para cursar.</p>
+      
+      <label>Materia a cursar:</label>
+      <select id="schSubject"></select>
+      
+      <label>Día de la semana:</label>
+      <select id="schDay">
+        <option value="lunes">Lunes</option>
+        <option value="martes">Martes</option>
+        <option value="miercoles">Miércoles</option>
+        <option value="jueves">Jueves</option>
+        <option value="viernes">Viernes</option>
+        <option value="sabado">Sábado</option>
+      </select>
+      
+      <div style="display:flex; gap:10px;">
+        <div style="flex:1;">
+          <label>Hora Inicio:</label>
+          <select id="schStart"></select>
+        </div>
+        <div style="flex:1;">
+          <label>Hora Fin:</label>
+          <select id="schEnd"></select>
+        </div>
+      </div>
+      
+      <button class="btn-add" style="width: 100%; padding: 15px; font-size: 1.1rem; margin-top: 10px;" onclick="saveToSchedule()">✔️ Asignar en Horario</button>
+      <button class="btn-add btn-close" onclick="closeScheduleModal()">Cancelar</button>
+    </div>
+  </div>
 
   <header>
     <div class="logo-container">
@@ -396,34 +440,30 @@
 
       <div id="view-schedule" class="view-section">
         
-        <div class="schedule-grid">
-          <div class="day-card">
-            <h3>Lunes</h3>
-            <textarea class="day-textarea" data-day="lunes" placeholder="Ej:&#10;08:00 - Análisis I (Aula 4)&#10;10:00 - Lógica"></textarea>
-          </div>
-          <div class="day-card">
-            <h3>Martes</h3>
-            <textarea class="day-textarea" data-day="martes" placeholder="Escribe aquí..."></textarea>
-          </div>
-          <div class="day-card">
-            <h3>Miércoles</h3>
-            <textarea class="day-textarea" data-day="miercoles" placeholder="Escribe aquí..."></textarea>
-          </div>
-          <div class="day-card">
-            <h3>Jueves</h3>
-            <textarea class="day-textarea" data-day="jueves" placeholder="Escribe aquí..."></textarea>
-          </div>
-          <div class="day-card">
-            <h3>Viernes</h3>
-            <textarea class="day-textarea" data-day="viernes" placeholder="Escribe aquí..."></textarea>
-          </div>
-          <div class="day-card">
-            <h3>Sábado</h3>
-            <textarea class="day-textarea" data-day="sabado" placeholder="Escribe aquí..."></textarea>
-          </div>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+          <h3 style="margin: 0; color: #ffc3cc; font-family: 'Lora', serif; font-size: 1.5rem;">Mi Semana</h3>
+          <button class="btn-add" onclick="openScheduleModal()">➕ Asignar Materia Rápido</button>
         </div>
 
-        <div class="panel-box exams-container">
+        <div class="table-container">
+          <table class="schedule-table">
+            <thead>
+              <tr>
+                <th class="hour-col">Hora</th>
+                <th>Lunes</th>
+                <th>Martes</th>
+                <th>Miércoles</th>
+                <th>Jueves</th>
+                <th>Viernes</th>
+                <th>Sábado</th>
+              </tr>
+            </thead>
+            <tbody id="scheduleBody">
+            </tbody>
+          </table>
+        </div>
+
+        <div class="panel-box exams-container" style="margin-top:30px;">
           <h3 style="margin-top:0;">📝 Exámenes y Entregas</h3>
           <div class="add-exam-box">
             <input type="text" id="examName" class="input-exam" placeholder="Detalle (Ej: 1° Parcial Física)">
@@ -456,8 +496,86 @@
     let gradesData = JSON.parse(localStorage.getItem('materiasNotas') || '{}');
     let plannedData = JSON.parse(localStorage.getItem('materiasPlanificadas') || '{}');
     let rewardsData = JSON.parse(localStorage.getItem('materiasPremios') || '[]');
-    let scheduleData = JSON.parse(localStorage.getItem('materiasHorario') || '{}');
     let examsData = JSON.parse(localStorage.getItem('materiasExamenes') || '[]');
+    
+    /* VARIABLES NUEVAS PARA EL HORARIO */
+    let tableData = JSON.parse(localStorage.getItem('materiasTabla') || '{}');
+    const horas = ["08:00", "09:00", "10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00", "17:00", "18:00", "19:00", "20:00", "21:00", "22:00", "23:00"];
+    const dias = ["lunes", "martes", "miercoles", "jueves", "viernes", "sabado"];
+    const scheduleBody = document.getElementById('scheduleBody');
+
+    // --- LÓGICA DE LA TABLA DE HORARIOS ---
+    function buildSchedule() {
+      scheduleBody.innerHTML = '';
+      horas.forEach(h => {
+        const row = document.createElement('tr');
+        row.innerHTML = `<td class="hour-col">${h}</td>`;
+        dias.forEach(d => {
+          const cellId = `${d}-${h}`;
+          const content = tableData[cellId] || "";
+          const occupiedClass = content.trim() !== "" ? "occupied-cell" : "";
+          row.innerHTML += `<td><textarea class="schedule-input ${occupiedClass}" data-id="${cellId}" oninput="saveTableCell(this)">${content}</textarea></td>`;
+        });
+        scheduleBody.appendChild(row);
+      });
+    }
+
+    function saveTableCell(el) {
+      tableData[el.dataset.id] = el.value;
+      localStorage.setItem('materiasTabla', JSON.stringify(tableData));
+      if (el.value.trim() !== '') el.classList.add('occupied-cell');
+      else el.classList.remove('occupied-cell');
+    }
+
+    // --- LÓGICA DEL POP-UP ---
+    function initScheduleModal() {
+      const startSel = document.getElementById('schStart');
+      const endSel = document.getElementById('schEnd');
+      startSel.innerHTML = ''; endSel.innerHTML = '';
+      
+      horas.forEach((h, index) => {
+        startSel.innerHTML += `<option value="${index}">${h}</option>`;
+        let endHour = parseInt(h.split(':')[0]) + 1;
+        endSel.innerHTML += `<option value="${index + 1}">${endHour}:00</option>`;
+      });
+    }
+
+    function openScheduleModal() {
+      const selectSubject = document.getElementById('schSubject');
+      selectSubject.innerHTML = '';
+      const enabledCourses = document.querySelectorAll('.course.enabled:not(.completed)');
+      
+      if(enabledCourses.length === 0) {
+        selectSubject.innerHTML = '<option value="">No hay materias disponibles</option>';
+      } else {
+        enabledCourses.forEach(c => {
+          selectSubject.innerHTML += `<option value="${c.textContent}">${c.textContent}</option>`;
+        });
+      }
+      document.getElementById('scheduleModal').style.display = 'flex';
+    }
+
+    function closeScheduleModal() { 
+      document.getElementById('scheduleModal').style.display = 'none'; 
+    }
+
+    function saveToSchedule() {
+      const subject = document.getElementById('schSubject').value;
+      const day = document.getElementById('schDay').value;
+      const startIdx = parseInt(document.getElementById('schStart').value);
+      const endIdx = parseInt(document.getElementById('schEnd').value);
+
+      if(!subject) { alert("Primero debes seleccionar una materia."); return; }
+      if(startIdx >= endIdx) { alert("La hora de fin debe ser posterior a la hora de inicio."); return; }
+
+      for(let i = startIdx; i < endIdx; i++) {
+        let cellId = `${day}-${horas[i]}`;
+        tableData[cellId] = subject;
+      }
+      localStorage.setItem('materiasTabla', JSON.stringify(tableData));
+      buildSchedule();
+      closeScheduleModal();
+    }
 
     function switchTab(tabName) {
       document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
@@ -471,7 +589,7 @@
       } else if (tabName === 'stats') {
         document.getElementById('view-stats').classList.add('active'); tabs[2].classList.add('active'); renderStatsAndPlanner();
       } else if (tabName === 'schedule') {
-        document.getElementById('view-schedule').classList.add('active'); tabs[3].classList.add('active'); renderExams();
+        document.getElementById('view-schedule').classList.add('active'); tabs[3].classList.add('active'); renderExams(); openScheduleModal();
       } else if (tabName === 'rewards') {
         document.getElementById('view-rewards').classList.add('active'); tabs[4].classList.add('active'); renderRewards();
       }
@@ -551,18 +669,6 @@
            card.classList.toggle('planned'); saveProgress();
         };
         plannerGrid.appendChild(card);
-      });
-    }
-
-    /* --- HORARIO --- */
-    function loadSchedule() {
-      document.querySelectorAll('.day-textarea').forEach(ta => {
-        const day = ta.dataset.day;
-        if (scheduleData[day]) { ta.value = scheduleData[day]; }
-        ta.addEventListener('input', (e) => {
-          scheduleData[day] = e.target.value;
-          localStorage.setItem('materiasHorario', JSON.stringify(scheduleData));
-        });
       });
     }
 
@@ -679,12 +785,12 @@
     window.onload = () => { 
       loadProgress(); 
       updateStates(); 
-      loadSchedule();
+      buildSchedule();
+      initScheduleModal();
     };
   </script>
 </body>
 </html>
-
 
 
 
