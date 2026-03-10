@@ -12,8 +12,8 @@
   /* --- COLORES BASE Y TIPOGRAFÍA --- */
   body {
     font-family: 'Poppins', sans-serif;
-    background-color: #c43670; /* Rosa oscuro/Magenta */
-    color: #faffc7; /* Amarillo pastel */
+    background-color: #c43670; 
+    color: #faffc7; 
     margin: 0;
     padding: 0; 
   }
@@ -25,80 +25,26 @@
     font-weight: 700;
   }
 
-  /* --- NAVBAR (DISEÑO) --- */
+  /* --- NAVBAR --- */
   header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    background-color: #45151b; 
-    padding: 15px 40px;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.4);
-    margin-bottom: 40px;
-    flex-wrap: wrap; 
-    gap: 20px;
+    display: flex; justify-content: space-between; align-items: center;
+    background-color: #45151b; padding: 15px 40px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.4); margin-bottom: 40px;
+    flex-wrap: wrap; gap: 20px;
   }
+  .logo-container h1 { font-size: 1.8rem; margin: 0; font-weight: 900; letter-spacing: 0.5px; }
+  .logo-container h2 { font-size: 0.95rem; margin: 0; opacity: 0.8; font-weight: 400; text-transform: uppercase; }
 
-  .logo-container {
-    text-align: left;
-  }
-  
-  .logo-container h1 {
-    font-size: 1.8rem;
-    margin: 0;
-    font-weight: 900;
-    letter-spacing: 0.5px;
-  }
-  
-  .logo-container h2 {
-    font-size: 0.95rem;
-    margin: 0;
-    opacity: 0.8;
-    font-family: 'Poppins', sans-serif;
-    font-weight: 400;
-    letter-spacing: 1px;
-    text-transform: uppercase;
-  }
-
-  /* --- PESTAÑAS TIPO NAVBAR --- */
-  .tabs-container { 
-    display: flex; 
-    align-items: center; 
-    gap: 10px; 
-    flex-wrap: wrap; 
-  }
-  
+  .tabs-container { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
   .tab-btn {
-    padding: 8px 16px; 
-    border: none; 
-    border-radius: 20px; 
-    font-size: 0.95rem; 
-    font-weight: 600;
-    cursor: pointer; 
-    transition: all 0.3s ease; 
-    background-color: transparent; 
-    color: #ffc3cc;
-    font-family: 'Poppins', sans-serif; 
-    opacity: 0.7;
+    padding: 8px 16px; border: none; border-radius: 20px; font-size: 0.95rem; font-weight: 600;
+    cursor: pointer; transition: all 0.3s ease; background-color: transparent; color: #ffc3cc; opacity: 0.7;
   }
-  
-  .tab-btn:hover { 
-    opacity: 1; 
-    background-color: rgba(255, 195, 204, 0.1); 
-  }
-  
-  .tab-btn.active { 
-    opacity: 1; 
-    background-color: #ffc3cc; 
-    color: #45151b; 
-    font-weight: 700; 
-  }
+  .tab-btn:hover { opacity: 1; background-color: rgba(255, 195, 204, 0.1); }
+  .tab-btn.active { opacity: 1; background-color: #ffc3cc; color: #45151b; font-weight: 700; }
 
-  /* --- CONTENEDOR PRINCIPAL DE LAS VISTAS --- */
-  .main-content {
-    padding: 0 40px; 
-  }
-
-  /* Vistas */
+  /* --- CONTENEDOR PRINCIPAL --- */
+  .main-content { padding: 0 40px; }
   .view-section { display: none; animation: fadeIn 0.4s ease; }
   .view-section.active { display: block; }
   @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
@@ -116,7 +62,6 @@
     color: #28301c; background-color: #ffffff; z-index: 1;
   }
 
-  /* Ajuste de colores laterales */
   .course[data-type="calculo"], .course[data-id="400"], .course[data-id="401"], .course[data-id="402"], .course[data-id="406"], .course[data-id="407"], .course[data-id="408"], .course[data-id="494"], .course[data-id="711"], .course[data-id="458"] { border-left: 6px solid #ff85a8; }
   .course[data-type="logica"], .course[data-id="404"], .course[data-id="409"], .course[data-id="90002"] { border-left: 6px solid #8585d1; }
   .course[data-type="quimica"], .course[data-id="411"], .course[data-id="278"], .course[data-id="280"], .course[data-id="468"] { border-left: 6px solid #5dbda5; }
@@ -126,86 +71,34 @@
   .course.enabled { cursor: pointer; opacity: 1; border-color: #ffc3cc; background-color: #ffffff; }
   .course.enabled:hover { transform: translateY(-3px); z-index: 10; background-color: #fff9fa; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
   
-  /* ESTILOS DE MATERIA APROBADA (ROSA) */
-  .course.completed { 
-    opacity: 1; 
-    filter: none; 
-    border-color: #ffc3cc; 
-    background-color: #ffc3cc; 
-    color: #45151b; 
-    text-decoration: line-through; 
-  }
-  .course.completed::after { 
-    content: '★'; 
-    position: absolute; 
-    top: -8px; 
-    right: -8px; 
-    background: #45151b; 
-    color: #ffc3cc; 
-    border-radius: 50%; 
-    width: 20px; 
-    height: 20px; 
-    font-size: 12px; 
-    line-height: 20px; 
-    text-align: center; 
-    box-shadow: 0 2px 5px rgba(0,0,0,0.2); 
-  }
-
+  .course.completed { opacity: 1; filter: none; border-color: #ffc3cc; background-color: #ffc3cc; color: #45151b; text-decoration: line-through; }
+  .course.completed::after { content: '★'; position: absolute; top: -8px; right: -8px; background: #45151b; color: #ffc3cc; border-radius: 50%; width: 20px; height: 20px; font-size: 12px; line-height: 20px; text-align: center; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
   .course.is-unlocked { box-shadow: 0 0 15px rgba(255, 195, 204, 0.8); transform: scale(1.05); z-index: 5; border-color: #ffc3cc !important; animation: pulse 1.5s infinite; }
   @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(255, 195, 204, 0.4); } 70% { box-shadow: 0 0 0 10px rgba(255, 195, 204, 0); } 100% { box-shadow: 0 0 0 0 rgba(255, 195, 204, 0); } }
 
   /* --- CONTENEDORES SECUNDARIOS --- */
-  .panel-box { 
-    background: #ffffff; 
-    color: #45151b;     
-    padding: 30px; 
-    border-radius: 20px; 
-    border: 2px solid #ffc3cc; 
-    box-shadow: 0 10px 30px rgba(0,0,0,0.1); 
-    margin-bottom: 30px; 
-  }
+  .panel-box { background: #ffffff; color: #45151b; padding: 30px; border-radius: 20px; border: 2px solid #ffc3cc; box-shadow: 0 10px 30px rgba(0,0,0,0.1); margin-bottom: 30px; }
 
   /* --- NOTAS --- */
   #view-grades { max-width: 800px; margin: 0 auto; }
   .average-card { background: #ffc3cc; color: #45151b; padding: 30px; border-radius: 15px; text-align: center; margin-bottom: 30px; }
-  .average-card h2 { color: #45151b; }
+  .average-card h2 { color: #45151b; margin-top:0; }
   .average-card .big-number { font-size: 3.5rem; font-family: 'Poppins', sans-serif; font-weight: 900; margin: 10px 0; }
   .grade-row { display: flex; justify-content: space-between; align-items: center; padding: 15px; border-bottom: 1px dashed rgba(255,195,204,0.3); }
   .grade-input { width: 80px; padding: 10px; border: 1px solid #ffc3cc; border-radius: 8px; text-align: center; font-family: 'Poppins', sans-serif; font-weight: bold; color: #28301c; font-size: 1rem; outline: none; background: #fff9fa; }
-  .grade-input:focus { box-shadow: 0 0 8px rgba(255,195,204,0.5); }
 
   /* --- STATS Y PLANIFICADOR --- */
   #view-stats { max-width: 900px; margin: 0 auto; padding-bottom: 50px; }
   .stats-header { display: flex; gap: 30px; flex-wrap: wrap; justify-content: center; margin-bottom: 40px; }
   .progress-circle-container { position: relative; width: 180px; height: 180px; background: #ffffff; border-radius: 50%; display: flex; justify-content: center; align-items: center; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
-  .progress-circle-bg { width: 100%; height: 100%; border-radius: 50%; background: conic-gradient(#ffc3cc 0%, #ffffff 0%); display: flex; justify-content: center; align-items: center; transition: background 1s ease; }
+  .progress-circle-bg { width: 100%; height: 100%; border-radius: 50%; display: flex; justify-content: center; align-items: center; transition: background 1s ease; }
   .progress-circle-inner { width: 80%; height: 80%; background: #ffffff; border-radius: 50%; display: flex; flex-direction: column; justify-content: center; align-items: center; color: #28301c; }
   .pc-percentage { font-size: 2rem; font-weight: 700; }
   .pc-label { font-size: 0.8rem; letter-spacing: 1px; opacity: 0.8; }
   
-  .stat-card { 
-    background: #ffc3cc; 
-    color: #45151b; 
-    padding: 20px; 
-    border-radius: 15px; 
-    width: 150px; 
-    text-align: center; 
-    border: 2px solid #ffc3cc; 
-    display: flex; 
-    flex-direction: column; 
-    justify-content: center; 
-    box-shadow: 0 5px 15px rgba(0,0,0,0.1); 
-  }
-  .stat-val { 
-    font-size: 2.5rem; 
-    font-weight: 700; 
-    color: #45151b; 
-  }
-  .stat-desc { 
-    font-size: 0.9rem; 
-    opacity: 0.9; 
-    color: #45151b; 
-  }
+  .stat-card { background: #ffc3cc; color: #45151b; padding: 20px; border-radius: 15px; width: 150px; text-align: center; border: 2px solid #ffc3cc; display: flex; flex-direction: column; justify-content: center; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
+  .stat-val { font-size: 2.5rem; font-weight: 700; color: #45151b; }
+  .stat-desc { font-size: 0.9rem; opacity: 0.9; color: #45151b; }
   
   .available-courses-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 15px; }
   .plan-card { padding: 15px; border: 1px dashed #45151b; border-radius: 12px; color: #45151b; font-weight: 600; font-size: 0.9rem; cursor: pointer; transition: all 0.2s; background: transparent; position: relative; user-select: none; }
@@ -213,69 +106,53 @@
   .plan-card.planned { background: #ffc3cc; color: #45151b; border-style: solid; border-color: #ffc3cc; }
   .plan-card.planned::after { content: '♡'; position: absolute; top: -12px; right: -8px; font-size: 1.5rem; color: #45151b; }
 
-  /* --- HORARIO Y EXÁMENES --- */
+  /* --- HORARIO --- */
   #view-schedule { max-width: 1100px; margin: 0 auto; padding-bottom: 50px; }
-  .table-container { 
-    background: #ffffff; padding: 20px; border-radius: 20px; 
-    box-shadow: 0 10px 30px rgba(0,0,0,0.2); overflow-x: auto;
-  }
+  .table-container { background: #ffffff; padding: 20px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); overflow-x: auto; }
   .schedule-table { width: 100%; border-collapse: collapse; color: #45151b; min-width: 700px; }
   .schedule-table th, .schedule-table td { border: 1px solid #ffc3cc; padding: 0; text-align: center; height: 50px; }
   .schedule-table th { background: #ffc3cc; font-family: 'Lora', serif; padding: 10px; font-weight: 700; color:#45151b; }
   .hour-col { background: #fff9fa; font-weight: 700; width: 100px; }
-  
-  .schedule-input {
-    width: 100%; height: 100%; border: none; outline: none; background: transparent;
-    padding: 5px; font-family: 'Poppins', sans-serif; text-align: center; color: #45151b;
-    resize: none; font-size: 0.85rem; box-sizing: border-box; font-weight: 600;
-  }
+  .schedule-input { width: 100%; height: 100%; border: none; outline: none; background: transparent; padding: 5px; font-family: 'Poppins', sans-serif; text-align: center; color: #45151b; resize: none; font-size: 0.85rem; box-sizing: border-box; font-weight: 600; }
   .schedule-input:focus { background: #fff9fa; }
-  
-  /* ESTILO PARA HORARIOS OCUPADOS (ROSA DE FONDO CON AMARILLO PASTEL) */
-  .occupied-cell {
-    background-color: #c43670 !important; 
-    color: #faffc7 !important;
-    font-weight: 700;
-  }
+  .occupied-cell { background-color: #c43670 !important; color: #faffc7 !important; font-weight: 700; }
 
-  /* --- MODAL PARA AGENDAR HORARIO --- */
-  .schedule-modal-overlay {
-    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-    background: rgba(69, 21, 27, 0.9); z-index: 2000;
-    display: none; justify-content: center; align-items: center;
-    animation: fadeIn 0.3s ease;
-  }
-  .schedule-modal-content {
-    background: #ffffff; color: #45151b; padding: 30px; border-radius: 20px;
-    max-width: 90%; width: 400px; text-align: center;
-    border: 4px solid #ffc3cc; box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-  }
-  .schedule-modal-content select {
-    width: 100%; padding: 12px; margin-bottom: 15px; border-radius: 8px;
-    border: 2px solid #ffc3cc; font-family: 'Poppins', sans-serif;
-    background: #fff9fa; color: #45151b; font-weight: 600; outline: none;
-  }
+  .schedule-modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(69, 21, 27, 0.9); z-index: 2000; display: none; justify-content: center; align-items: center; animation: fadeIn 0.3s ease; }
+  .schedule-modal-content { background: #ffffff; color: #45151b; padding: 30px; border-radius: 20px; max-width: 90%; width: 400px; text-align: center; border: 4px solid #ffc3cc; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+  .schedule-modal-content select, .schedule-modal-content input { width: 100%; padding: 12px; margin-bottom: 15px; border-radius: 8px; border: 2px solid #ffc3cc; font-family: 'Poppins', sans-serif; background: #fff9fa; color: #45151b; font-weight: 600; outline: none; box-sizing: border-box; }
   .schedule-modal-content label { display: block; text-align: left; font-size: 0.85rem; font-weight: bold; margin-bottom: 5px; }
 
-  /* Parciales */
+  /* BOTONES Y GENERALES */
   .add-exam-box { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
   .input-exam { flex: 1; min-width: 200px; padding: 12px; border: 1px solid #ffc3cc; border-radius: 10px; outline: none; background: #fff9fa; color: #28301c; font-family: 'Poppins', sans-serif; }
   .btn-add { background: #ffc3cc; color: #45151b; border: none; padding: 12px 25px; border-radius: 10px; font-weight: 700; font-family: 'Poppins', sans-serif; cursor: pointer; transition: 0.3s; }
   .btn-add:hover { opacity: 0.8; }
   .btn-close { background: transparent; border: 2px solid #45151b; color: #45151b; width: 100%; margin-top: 10px; }
   .btn-close:hover { background: #45151b; color: #ffffff; }
-  
+
   .exam-list { display: flex; flex-direction: column; gap: 10px; }
   .exam-item { display: flex; justify-content: space-between; align-items: center; padding: 15px 20px; background: #fff9fa; border-left: 4px solid #ffc3cc; border-radius: 10px; }
   .exam-subject { font-size: 1rem; font-weight: 600; }
-  .exam-date-text { font-size: 0.85rem; opacity: 0.7; margin-top: 3px; }
   .exam-badge { background: #ffc3cc; color: #45151b; padding: 4px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: 700; margin-right: 15px; }
+
+  /* --- CALENDARIO --- */
+  #view-calendar { max-width: 1100px; margin: 0 auto 50px; }
+  .cal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+  .cal-header select { padding: 10px 20px; font-size: 1.1rem; border-radius: 10px; border: 2px solid #45151b; background: #ffc3cc; color: #45151b; font-weight: 700; font-family: 'Poppins', sans-serif; outline: none; cursor: pointer; }
+  .calendar-container { background: #ffffff; border-radius: 20px; padding: 20px; border: 2px solid #ffc3cc; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
+  .cal-weekdays { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; margin-bottom: 10px; text-align: center; font-weight: 700; color: #45151b; }
+  .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; }
+  .cal-day { min-height: 100px; border: 1px solid #ffc3cc; border-radius: 10px; padding: 5px; background: #fff9fa; cursor: pointer; transition: 0.2s; display: flex; flex-direction: column; }
+  .cal-day:hover { background: #ffc3cc; border-color: #45151b; }
+  .cal-day.empty { background: transparent; border: none; cursor: default; }
+  .cal-date-num { font-weight: 700; color: #45151b; margin-bottom: 5px; text-align: right; font-size: 0.9rem; }
+  .cal-event-pill { font-size: 0.75rem; padding: 4px 6px; border-radius: 5px; margin-bottom: 4px; color: #ffffff; font-weight: 600; text-align: left; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+  .cal-event-pill:hover { opacity: 0.8; }
 
   /* --- REWARDS --- */
   #view-rewards { max-width: 600px; margin: 0 auto; }
   .add-reward-box { display: flex; gap: 10px; margin-bottom: 30px; flex-wrap: wrap; }
   .input-reward { flex: 1; padding: 12px; border: 1px solid #ffc3cc; border-radius: 10px; outline: none; background: #fff9fa; color: #28301c; font-family: 'Poppins', sans-serif; }
-  .input-reward::placeholder { color: rgba(40,48,28,0.5); }
   .reward-list { display: flex; flex-direction: column; gap: 15px; }
   .reward-item { display: flex; align-items: center; justify-content: space-between; padding: 15px; border: 1px dashed #ffc3cc; border-radius: 12px; background: #fff9fa; transition: 0.3s; }
   .reward-item.done { border-style: solid; background: rgba(255,195,204,0.3); opacity: 0.6; }
@@ -293,34 +170,46 @@
   <div id="scheduleModal" class="schedule-modal-overlay">
     <div class="schedule-modal-content">
       <h2 style="color: #45151b; margin-top:0;">📝 Agendar Materia</h2>
-      <p style="font-size: 0.9rem; margin-bottom: 20px; color:#45151b;">Solo aparecen las materias que tenés habilitadas para cursar.</p>
-      
-      <label>Materia a cursar:</label>
-      <select id="schSubject"></select>
-      
+      <p style="font-size: 0.9rem; margin-bottom: 20px; color:#45151b;">Solo aparecen las materias habilitadas.</p>
+      <label>Materia a cursar:</label><select id="schSubject"></select>
       <label>Día de la semana:</label>
       <select id="schDay">
-        <option value="lunes">Lunes</option>
-        <option value="martes">Martes</option>
-        <option value="miercoles">Miércoles</option>
-        <option value="jueves">Jueves</option>
-        <option value="viernes">Viernes</option>
-        <option value="sabado">Sábado</option>
+        <option value="lunes">Lunes</option><option value="martes">Martes</option>
+        <option value="miercoles">Miércoles</option><option value="jueves">Jueves</option>
+        <option value="viernes">Viernes</option><option value="sabado">Sábado</option>
       </select>
-      
       <div style="display:flex; gap:10px;">
-        <div style="flex:1;">
-          <label>Hora Inicio:</label>
-          <select id="schStart"></select>
-        </div>
-        <div style="flex:1;">
-          <label>Hora Fin:</label>
-          <select id="schEnd"></select>
-        </div>
+        <div style="flex:1;"><label>Hora Inicio:</label><select id="schStart"></select></div>
+        <div style="flex:1;"><label>Hora Fin:</label><select id="schEnd"></select></div>
       </div>
-      
       <button class="btn-add" style="width: 100%; padding: 15px; font-size: 1.1rem; margin-top: 10px;" onclick="saveToSchedule()">✔️ Asignar en Horario</button>
       <button class="btn-add btn-close" onclick="closeScheduleModal()">Cancelar</button>
+    </div>
+  </div>
+
+  <div id="calModal" class="schedule-modal-overlay">
+    <div class="schedule-modal-content">
+      <h2 style="color: #45151b; margin-top:0;">📅 Agregar Actividad</h2>
+      <p id="calModalDateDisplay" style="font-size: 0.9rem; margin-bottom: 20px; font-weight:bold;"></p>
+      <input type="hidden" id="calDateKey">
+      
+      <label>¿Qué tenés que hacer?</label>
+      <input type="text" id="calTitle" placeholder="Ej: Estudiar Física, TP Integrador..." autocomplete="off">
+      
+      <label>Horario (Opcional):</label>
+      <input type="text" id="calTime" placeholder="Ej: 14:00 o 'Todo el día'" autocomplete="off">
+
+      <label>Color de la etiqueta:</label>
+      <select id="calColor">
+        <option value="#c43670">Rosa Fuerte / Magenta</option>
+        <option value="#45151b">Bordó / Vino</option>
+        <option value="#7a9650">Verde Oliva</option>
+        <option value="#001a6d">Azul Oscuro</option>
+        <option value="#e68a00">Naranja Pastel</option>
+      </select>
+
+      <button class="btn-add" style="width: 100%; padding: 15px; font-size: 1.1rem; margin-top: 10px;" onclick="saveCalEvent()">✔️ Guardar Actividad</button>
+      <button class="btn-add btn-close" onclick="closeCalModal()">Cancelar</button>
     </div>
   </div>
 
@@ -331,6 +220,7 @@
     </div>
     <div class="tabs-container">
       <button class="tab-btn active" onclick="switchTab('map')">🗺️ Plan de Estudios</button>
+      <button class="tab-btn" onclick="switchTab('calendar')">🗓️ Calendario</button>
       <button class="tab-btn" onclick="switchTab('grades')">📝 Promedio</button>
       <button class="tab-btn" onclick="switchTab('stats')">📊 Progreso</button>
       <button class="tab-btn" onclick="switchTab('schedule')">📅 Horario</button>
@@ -408,6 +298,26 @@
         </div>
       </div>
 
+      <div id="view-calendar" class="view-section">
+        <div class="cal-header">
+          <h3 style="margin: 0; color: #faffc7; font-size: 1.5rem;">Mis Fechas Importantes</h3>
+          <select id="monthSelect" onchange="renderCalendar()">
+            <option value="2">Marzo 2026</option>
+            <option value="3">Abril 2026</option>
+            <option value="4">Mayo 2026</option>
+            <option value="5">Junio 2026</option>
+            <option value="6">Julio 2026</option>
+          </select>
+        </div>
+        <div class="calendar-container">
+          <div class="cal-weekdays">
+            <div>Dom</div><div>Lun</div><div>Mar</div><div>Mié</div><div>Jue</div><div>Vie</div><div>Sáb</div>
+          </div>
+          <div id="calendarGrid" class="cal-grid"></div>
+        </div>
+        <p style="text-align:center; opacity:0.8; font-size:0.9rem; margin-top:15px;">* Hacé clic en cualquier día para agregar tareas, exámenes o eventos. Hacé clic en una etiqueta para borrarla.</p>
+      </div>
+
       <div id="view-grades" class="view-section panel-box">
         <div class="average-card">
           <h2 style="margin-top:0;">Promedio General</h2>
@@ -433,13 +343,12 @@
         
         <div class="panel-box planner-section">
           <h3>📅 Planificador de Cursada</h3>
-          <p style="opacity:0.8; margin-bottom:20px; font-size:0.9rem;">Haz clic en las materias que deseas cursar este cuatrimestre (solo aparecen las habilitadas).</p>
+          <p style="opacity:0.8; margin-bottom:20px; font-size:0.9rem;">Haz clic en las materias que deseas cursar este cuatrimestre.</p>
           <div class="available-courses-grid" id="plannerGrid"></div>
         </div>
       </div>
 
       <div id="view-schedule" class="view-section">
-        
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
           <h3 style="margin: 0; color: #ffc3cc; font-family: 'Lora', serif; font-size: 1.5rem;">Mi Semana</h3>
           <button class="btn-add" onclick="openScheduleModal()">➕ Asignar Materia Rápido</button>
@@ -449,17 +358,10 @@
           <table class="schedule-table">
             <thead>
               <tr>
-                <th class="hour-col">Hora</th>
-                <th>Lunes</th>
-                <th>Martes</th>
-                <th>Miércoles</th>
-                <th>Jueves</th>
-                <th>Viernes</th>
-                <th>Sábado</th>
+                <th class="hour-col">Hora</th><th>Lunes</th><th>Martes</th><th>Miércoles</th><th>Jueves</th><th>Viernes</th><th>Sábado</th>
               </tr>
             </thead>
-            <tbody id="scheduleBody">
-            </tbody>
+            <tbody id="scheduleBody"></tbody>
           </table>
         </div>
 
@@ -492,19 +394,102 @@
     const plannerGrid = document.getElementById('plannerGrid');
     const rewardList = document.getElementById('rewardList');
     const examList = document.getElementById('examList');
+    const scheduleBody = document.getElementById('scheduleBody');
+    const calendarGrid = document.getElementById('calendarGrid');
     
     let gradesData = JSON.parse(localStorage.getItem('materiasNotas') || '{}');
     let plannedData = JSON.parse(localStorage.getItem('materiasPlanificadas') || '{}');
     let rewardsData = JSON.parse(localStorage.getItem('materiasPremios') || '[]');
     let examsData = JSON.parse(localStorage.getItem('materiasExamenes') || '[]');
-    
-    /* VARIABLES NUEVAS PARA EL HORARIO */
     let tableData = JSON.parse(localStorage.getItem('materiasTabla') || '{}');
+
+    // --- LÓGICA DE CALENDARIO CON SORPRESA PRE-CARGADA ---
+    let calendarData = JSON.parse(localStorage.getItem('indCalendar'));
+    if (!calendarData) {
+      calendarData = {
+        "2026-6-10": [{ title: "Viaje a Bariloche ✈️", time: "Todo el día", color: "#001a6d" }],
+        "2026-6-11": [{ title: "Bariloche ❄️", time: "Todo el día", color: "#001a6d" }],
+        "2026-6-12": [{ title: "Bariloche ❄️", time: "Todo el día", color: "#001a6d" }],
+        "2026-6-13": [{ title: "Bariloche ❄️", time: "Todo el día", color: "#001a6d" }],
+        "2026-6-14": [{ title: "Bariloche ❄️", time: "Todo el día", color: "#001a6d" }],
+        "2026-6-15": [{ title: "Regreso 🏠", time: "Todo el día", color: "#001a6d" }]
+      };
+      localStorage.setItem('indCalendar', JSON.stringify(calendarData));
+    }
+
+    function renderCalendar() {
+      const month = parseInt(document.getElementById('monthSelect').value);
+      const year = 2026;
+      calendarGrid.innerHTML = '';
+      
+      const firstDay = new Date(year, month, 1).getDay(); // 0 (Dom) a 6 (Sab)
+      const daysInMonth = new Date(year, month + 1, 0).getDate();
+      
+      for(let i = 0; i < firstDay; i++) {
+        calendarGrid.innerHTML += `<div class="cal-day empty"></div>`;
+      }
+      
+      for(let d = 1; d <= daysInMonth; d++) {
+        const dateKey = `${year}-${month}-${d}`;
+        let eventsHtml = '';
+        if(calendarData[dateKey]) {
+          calendarData[dateKey].forEach((ev, idx) => {
+             eventsHtml += `<div class="cal-event-pill" style="background-color:${ev.color};" onclick="deleteCalEvent('${dateKey}', ${idx}, event)" title="${ev.time} - ${ev.title}">${ev.time} - ${ev.title}</div>`;
+          });
+        }
+        
+        calendarGrid.innerHTML += `
+          <div class="cal-day" onclick="openCalModal('${dateKey}', ${d})">
+            <div class="cal-date-num">${d}</div>
+            <div class="cal-events-container">${eventsHtml}</div>
+          </div>
+        `;
+      }
+    }
+
+    function openCalModal(dateKey, dayNum) {
+      document.getElementById('calDateKey').value = dateKey;
+      const monthNames = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
+      const monthIdx = parseInt(document.getElementById('monthSelect').value);
+      document.getElementById('calModalDateDisplay').textContent = `${dayNum} de ${monthNames[monthIdx]} de 2026`;
+      
+      document.getElementById('calTitle').value = '';
+      document.getElementById('calTime').value = '';
+      document.getElementById('calModal').style.display = 'flex';
+    }
+
+    function closeCalModal() { document.getElementById('calModal').style.display = 'none'; }
+
+    function saveCalEvent() {
+      const dateKey = document.getElementById('calDateKey').value;
+      const title = document.getElementById('calTitle').value;
+      const time = document.getElementById('calTime').value || "Todo el día";
+      const color = document.getElementById('calColor').value;
+
+      if(!title) { alert("¡Poné qué vas a hacer!"); return; }
+
+      if(!calendarData[dateKey]) calendarData[dateKey] = [];
+      calendarData[dateKey].push({ title, time, color });
+      
+      localStorage.setItem('indCalendar', JSON.stringify(calendarData));
+      renderCalendar();
+      closeCalModal();
+    }
+
+    function deleteCalEvent(dateKey, idx, event) {
+      event.stopPropagation(); // Evita que se abra el modal al borrar
+      if(confirm("¿Querés borrar esta actividad?")) {
+        calendarData[dateKey].splice(idx, 1);
+        if(calendarData[dateKey].length === 0) delete calendarData[dateKey];
+        localStorage.setItem('indCalendar', JSON.stringify(calendarData));
+        renderCalendar();
+      }
+    }
+
+    // --- HORARIOS ---
     const horas = ["08:00", "09:00", "10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00", "17:00", "18:00", "19:00", "20:00", "21:00", "22:00", "23:00"];
     const dias = ["lunes", "martes", "miercoles", "jueves", "viernes", "sabado"];
-    const scheduleBody = document.getElementById('scheduleBody');
 
-    // --- LÓGICA DE LA TABLA DE HORARIOS ---
     function buildSchedule() {
       scheduleBody.innerHTML = '';
       horas.forEach(h => {
@@ -527,12 +512,10 @@
       else el.classList.remove('occupied-cell');
     }
 
-    // --- LÓGICA DEL POP-UP ---
     function initScheduleModal() {
       const startSel = document.getElementById('schStart');
       const endSel = document.getElementById('schEnd');
       startSel.innerHTML = ''; endSel.innerHTML = '';
-      
       horas.forEach((h, index) => {
         startSel.innerHTML += `<option value="${index}">${h}</option>`;
         let endHour = parseInt(h.split(':')[0]) + 1;
@@ -544,55 +527,37 @@
       const selectSubject = document.getElementById('schSubject');
       selectSubject.innerHTML = '';
       const enabledCourses = document.querySelectorAll('.course.enabled:not(.completed)');
-      
-      if(enabledCourses.length === 0) {
-        selectSubject.innerHTML = '<option value="">No hay materias disponibles</option>';
-      } else {
-        enabledCourses.forEach(c => {
-          selectSubject.innerHTML += `<option value="${c.textContent}">${c.textContent}</option>`;
-        });
-      }
+      if(enabledCourses.length === 0) selectSubject.innerHTML = '<option value="">No hay materias disponibles</option>';
+      else enabledCourses.forEach(c => { selectSubject.innerHTML += `<option value="${c.textContent}">${c.textContent}</option>`; });
       document.getElementById('scheduleModal').style.display = 'flex';
     }
 
-    function closeScheduleModal() { 
-      document.getElementById('scheduleModal').style.display = 'none'; 
-    }
+    function closeScheduleModal() { document.getElementById('scheduleModal').style.display = 'none'; }
 
     function saveToSchedule() {
       const subject = document.getElementById('schSubject').value;
       const day = document.getElementById('schDay').value;
       const startIdx = parseInt(document.getElementById('schStart').value);
       const endIdx = parseInt(document.getElementById('schEnd').value);
-
-      if(!subject) { alert("Primero debes seleccionar una materia."); return; }
-      if(startIdx >= endIdx) { alert("La hora de fin debe ser posterior a la hora de inicio."); return; }
-
-      for(let i = startIdx; i < endIdx; i++) {
-        let cellId = `${day}-${horas[i]}`;
-        tableData[cellId] = subject;
-      }
+      if(!subject) { alert("Seleccioná una materia."); return; }
+      if(startIdx >= endIdx) { alert("Revisá la hora de fin."); return; }
+      for(let i = startIdx; i < endIdx; i++) tableData[`${day}-${horas[i]}`] = subject;
       localStorage.setItem('materiasTabla', JSON.stringify(tableData));
-      buildSchedule();
-      closeScheduleModal();
+      buildSchedule(); closeScheduleModal();
     }
 
+    // --- GENERAL ---
     function switchTab(tabName) {
       document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
       document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
       const tabs = document.querySelectorAll('.tab-btn');
       
-      if (tabName === 'map') {
-        document.getElementById('view-map').classList.add('active'); tabs[0].classList.add('active');
-      } else if (tabName === 'grades') {
-        document.getElementById('view-grades').classList.add('active'); tabs[1].classList.add('active'); renderGrades();
-      } else if (tabName === 'stats') {
-        document.getElementById('view-stats').classList.add('active'); tabs[2].classList.add('active'); renderStatsAndPlanner();
-      } else if (tabName === 'schedule') {
-        document.getElementById('view-schedule').classList.add('active'); tabs[3].classList.add('active'); renderExams(); openScheduleModal();
-      } else if (tabName === 'rewards') {
-        document.getElementById('view-rewards').classList.add('active'); tabs[4].classList.add('active'); renderRewards();
-      }
+      if (tabName === 'map') { document.getElementById('view-map').classList.add('active'); tabs[0].classList.add('active'); } 
+      else if (tabName === 'calendar') { document.getElementById('view-calendar').classList.add('active'); tabs[1].classList.add('active'); renderCalendar(); }
+      else if (tabName === 'grades') { document.getElementById('view-grades').classList.add('active'); tabs[2].classList.add('active'); renderGrades(); } 
+      else if (tabName === 'stats') { document.getElementById('view-stats').classList.add('active'); tabs[3].classList.add('active'); renderStatsAndPlanner(); } 
+      else if (tabName === 'schedule') { document.getElementById('view-schedule').classList.add('active'); tabs[4].classList.add('active'); renderExams(); openScheduleModal(); } 
+      else if (tabName === 'rewards') { document.getElementById('view-rewards').classList.add('active'); tabs[5].classList.add('active'); renderRewards(); }
     }
 
     function saveProgress() {
@@ -622,7 +587,6 @@
       saveProgress();
     }
 
-    /* --- NOTAS --- */
     function renderGrades() {
         gradesContainer.innerHTML = '';
         const completedCourses = Array.from(courses).filter(c => c.classList.contains('completed'));
@@ -647,7 +611,6 @@
         averageDisplay.textContent = (values.reduce((a, b) => a + b, 0) / values.length).toFixed(2);
     }
 
-    /* --- STATS Y PLANIFICADOR --- */
     function renderStatsAndPlanner() {
       const total = courses.length;
       const completed = document.querySelectorAll('.course.completed').length;
@@ -655,7 +618,6 @@
       document.getElementById('statsPercentage').textContent = `${percentage}%`;
       document.getElementById('statsCompleted').textContent = completed;
       document.getElementById('statsRemaining').textContent = total - completed;
-      
       document.getElementById('progressCircle').style.background = `conic-gradient(#ffc3cc ${percentage}%, #ffffff ${percentage}% 100%)`;
       
       plannerGrid.innerHTML = '';
@@ -672,41 +634,20 @@
       });
     }
 
-    /* --- PARCIALES --- */
     function renderExams() {
       examList.innerHTML = '';
-      if(examsData.length === 0) { 
-        examList.innerHTML = '<div style="text-align:center; opacity:0.6; padding:10px;">Sin fechas agendadas. ☕</div>'; 
-        return; 
-      }
+      if(examsData.length === 0) { examList.innerHTML = '<div style="text-align:center; opacity:0.6; padding:10px;">Sin fechas agendadas. ☕</div>'; return; }
       examsData.sort((a, b) => new Date(a.date) - new Date(b.date));
-
       examsData.forEach((exam, index) => {
-        const div = document.createElement('div');
-        div.className = 'exam-item';
-        
+        const div = document.createElement('div'); div.className = 'exam-item';
         const [year, month, day] = exam.date.split('-');
         const formattedDate = `${day}/${month}/${year}`;
-
-        const examDate = new Date(exam.date);
-        const today = new Date();
-        today.setHours(0,0,0,0);
-        examDate.setMinutes(examDate.getMinutes() + examDate.getTimezoneOffset());
-        
-        const diffTime = examDate - today;
-        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-        
-        let badgeText = "";
-        if (diffDays === 0) badgeText = "HOY";
-        else if (diffDays === 1) badgeText = "Mañana";
-        else if (diffDays < 0) badgeText = "Pasado";
-        else badgeText = `En ${diffDays} d.`;
-
+        const examDate = new Date(exam.date); const today = new Date();
+        today.setHours(0,0,0,0); examDate.setMinutes(examDate.getMinutes() + examDate.getTimezoneOffset());
+        const diffDays = Math.ceil((examDate - today) / (1000 * 60 * 60 * 24));
+        let badgeText = diffDays === 0 ? "HOY" : diffDays === 1 ? "Mañana" : diffDays < 0 ? "Pasado" : `En ${diffDays} d.`;
         div.innerHTML = `
-          <div class="exam-info">
-            <span class="exam-subject">${exam.name}</span><br>
-            <span class="exam-date-text" style="font-size:0.85rem; opacity:0.7;">📅 ${formattedDate}</span>
-          </div>
+          <div class="exam-info"><span class="exam-subject">${exam.name}</span><br><span class="exam-date-text" style="font-size:0.85rem; opacity:0.7;">📅 ${formattedDate}</span></div>
           <div class="exam-actions">
             ${diffDays >= 0 ? `<span class="exam-badge">${badgeText}</span>` : `<span class="exam-badge" style="background:rgba(40,48,28,0.1); color:#28301c;">Listo</span>`}
             <button class="delete-btn" onclick="deleteExam(${index})">✕</button>
@@ -717,43 +658,29 @@
     }
 
     function addExam() {
-      const name = document.getElementById('examName').value;
-      const date = document.getElementById('examDate').value;
+      const name = document.getElementById('examName').value; const date = document.getElementById('examDate').value;
       if(!name || !date) return;
-      examsData.push({ name, date });
-      document.getElementById('examName').value = ''; document.getElementById('examDate').value = '';
+      examsData.push({ name, date }); document.getElementById('examName').value = ''; document.getElementById('examDate').value = '';
       saveProgress(); renderExams();
     }
-    function deleteExam(index) {
-      examsData.splice(index, 1); saveProgress(); renderExams();
-    }
+    function deleteExam(index) { examsData.splice(index, 1); saveProgress(); renderExams(); }
 
-    /* --- RECOMPENSAS --- */
     function renderRewards() {
       rewardList.innerHTML = '';
       if(rewardsData.length === 0) { rewardList.innerHTML = '<div style="text-align:center; opacity:0.6;">Sin objetivos aún. 🎁</div>'; return; }
       rewardsData.forEach((item, index) => {
-        const div = document.createElement('div');
-        div.className = `reward-item ${item.done ? 'done' : ''}`;
+        const div = document.createElement('div'); div.className = `reward-item ${item.done ? 'done' : ''}`;
         div.innerHTML = `
-          <div class="reward-text-group">
-            <span class="r-goal">${item.goal}</span><br>
-            <span class="r-prize">Premio: ${item.prize}</span>
-          </div>
-          <div style="display:flex; align-items:center;">
-             <button class="check-btn" onclick="toggleReward(${index})">✔</button>
-             <button class="delete-btn" onclick="deleteReward(${index})">✕</button>
-          </div>
+          <div class="reward-text-group"><span class="r-goal">${item.goal}</span><br><span class="r-prize">Premio: ${item.prize}</span></div>
+          <div style="display:flex; align-items:center;"><button class="check-btn" onclick="toggleReward(${index})">✔</button><button class="delete-btn" onclick="deleteReward(${index})">✕</button></div>
         `;
         rewardList.appendChild(div);
       });
     }
     function addReward() {
-      const goal = document.getElementById('goalInput').value;
-      const prize = document.getElementById('prizeInput').value;
+      const goal = document.getElementById('goalInput').value; const prize = document.getElementById('prizeInput').value;
       if(!goal || !prize) return;
-      rewardsData.push({ goal, prize, done: false });
-      document.getElementById('goalInput').value = ''; document.getElementById('prizeInput').value = '';
+      rewardsData.push({ goal, prize, done: false }); document.getElementById('goalInput').value = ''; document.getElementById('prizeInput').value = '';
       saveProgress(); renderRewards();
     }
     function toggleReward(index) {
@@ -761,11 +688,8 @@
       if(rewardsData[index].done) confetti({ particleCount: 150, spread: 80, origin: { y: 0.6 }, colors: ['#ffc3cc', '#ffffff', '#28301c'] });
       saveProgress(); renderRewards();
     }
-    function deleteReward(index) {
-      rewardsData.splice(index, 1); saveProgress(); renderRewards();
-    }
+    function deleteReward(index) { rewardsData.splice(index, 1); saveProgress(); renderRewards(); }
 
-    // --- INIT EVENTOS ---
     courses.forEach(course => {
       course.addEventListener('click', () => {
         if (!course.classList.contains('enabled')) return;
@@ -783,16 +707,9 @@
     });
 
     window.onload = () => { 
-      loadProgress(); 
-      updateStates(); 
-      buildSchedule();
-      initScheduleModal();
+      loadProgress(); updateStates(); buildSchedule(); initScheduleModal(); renderCalendar();
     };
   </script>
 </body>
 </html>
-
-
-
-
 
