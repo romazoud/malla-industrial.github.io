@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
-  <title>Malla Curricular - Ingeniería Industrial</title>
+  <title>Mi Malla Pro - Plan de Estudios</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,700;1,400&family=Poppins:wght@400;600;700;900&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
@@ -25,6 +25,7 @@
     const auth = getAuth(app);
     const db = getFirestore(app);
 
+    // EXPONEMOS FUNCIONES GLOBALES DE FIREBASE
     window.iniciarSesion = async () => {
       const email = document.getElementById('loginEmail').value;
       const pass = document.getElementById('loginPass').value;
@@ -32,20 +33,18 @@
       try {
         await signInWithEmailAndPassword(auth, email, pass);
       } catch (e) {
-        alert("Email o contraseña incorrectos. Si no tenés cuenta, tocá 'Crear cuenta nueva'.");
+        alert("Email o contraseña incorrectos. Verificá tus datos.");
       }
     };
 
-    window.registrarse = async () => {
-      const email = document.getElementById('loginEmail').value;
-      const pass = document.getElementById('loginPass').value;
-      if (!email || !pass) { alert("Completá email y contraseña."); return; }
-      if (pass.length < 6) { alert("La contraseña debe tener al menos 6 caracteres."); return; }
+    window.crearCuentaFinal = async (email, pass) => {
       try {
         await createUserWithEmailAndPassword(auth, email, pass);
+        return true; // Éxito
       } catch (e) {
-        if (e.code === 'auth/email-already-in-use') alert("Ese email ya está registrado. Iniciá sesión.");
-        else alert("Error: " + e.message);
+        if (e.code === 'auth/email-already-in-use') alert("Ese email ya está registrado. Por favor, iniciá sesión.");
+        else alert("Error al crear cuenta: " + e.message);
+        return false;
       }
     };
 
@@ -58,6 +57,7 @@
     onAuthStateChanged(auth, async (user) => {
       if (user) {
         document.getElementById('loginOverlay').style.display = 'none';
+        document.getElementById('onboardingScreen').style.display = 'none';
         document.getElementById('btnOpenLogin').style.display = 'none';
         document.getElementById('btnLogout').style.display = 'inline-block';
         await loadFromCloud(user.uid);
@@ -110,7 +110,6 @@
       --accent-dark: #45151b;
       --accent-light: #ffc3cc;
       --accent-bg: #c43670;
-      --text-on-accent: #ffffff;
     }
 
     * { box-sizing: border-box; }
@@ -118,339 +117,204 @@
     h1, h2, h3 { font-family: 'Lora', serif; color: var(--accent-light); margin: 10px 0; font-weight: 700; }
 
     /* =====================
-       PANTALLA DE ONBOARDING
+       LOGIN OVERLAY
+    ===================== */
+    #loginOverlay {
+      position: fixed; inset: 0; background: rgba(196, 54, 112, 0.95); z-index: 9999;
+      display: none; justify-content: center; align-items: center;
+    }
+    .login-box {
+      background: #fff; padding: 40px; border-radius: 20px;
+      box-shadow: 0 15px 40px rgba(0,0,0,0.3); width: 90%; max-width: 360px;
+      text-align: center; border: 4px solid var(--accent-light);
+    }
+    .login-box h2 { color: var(--accent-dark); margin-top: 0; font-size: 1.8rem; }
+    .login-box p { color: var(--accent-dark); opacity: 0.8; font-size: 0.9rem; margin-bottom: 20px; }
+    .login-input {
+      width: 100%; padding: 12px; margin-bottom: 15px; border-radius: 8px;
+      border: 2px solid var(--accent-light); font-family: 'Poppins', sans-serif;
+      background: #fff9fa; color: var(--accent-dark); font-weight: 600; outline: none;
+    }
+    .btn-login { width: 100%; background: var(--accent-dark); color: #fff; border: none; padding: 14px; border-radius: 10px; font-weight: 700; cursor: pointer; transition: 0.3s; font-family: 'Poppins', sans-serif; font-size: 1.05rem;}
+    .btn-login:hover { opacity: 0.9; transform: translateY(-2px);}
+    
+    .register-link-box { margin-top: 20px; border-top: 1px solid rgba(0,0,0,0.1); padding-top: 20px; }
+    .register-link-box p { font-size: 0.85rem; margin: 0; color: #666;}
+    .btn-goto-register { background: var(--accent-light); color: var(--accent-dark); border: none; padding: 10px; border-radius: 8px; font-weight: 700; width: 100%; margin-top: 10px; cursor: pointer; transition: 0.3s; font-family: 'Poppins';}
+    .btn-goto-register:hover { background: #ffb3c0;}
+
+    /* =====================
+       PANTALLA ONBOARDING
     ===================== */
     #onboardingScreen {
-      min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 2rem 1rem;
-      background: var(--accent-bg);
-      position: relative;
-      overflow: hidden;
+      min-height: 100vh; display: none; align-items: center; justify-content: center;
+      padding: 2rem 1rem; background: var(--accent-bg); position: relative; z-index: 10000;
     }
-    #onboardingScreen::before {
-      content: '';
-      position: absolute;
-      width: 600px; height: 600px;
-      border-radius: 50%;
-      background: rgba(255,255,255,0.04);
-      top: -200px; right: -200px;
-      pointer-events: none;
-    }
-    #onboardingScreen::after {
-      content: '';
-      position: absolute;
-      width: 400px; height: 400px;
-      border-radius: 50%;
-      background: rgba(255,255,255,0.03);
-      bottom: -100px; left: -100px;
-      pointer-events: none;
-    }
-
     .ob-card {
-      background: #ffffff;
-      border-radius: 24px;
-      padding: 2.5rem 2rem;
-      width: 100%;
-      max-width: 520px;
-      position: relative;
-      z-index: 1;
-      box-shadow: 0 30px 80px rgba(0,0,0,0.25);
-      animation: slideUp 0.5s ease;
+      background: #ffffff; border-radius: 24px; padding: 2.5rem 2rem;
+      width: 100%; max-width: 520px; position: relative; z-index: 1;
+      box-shadow: 0 30px 80px rgba(0,0,0,0.25); animation: slideUp 0.5s ease;
     }
     @keyframes slideUp { from { opacity:0; transform:translateY(20px); } to { opacity:1; transform:translateY(0); } }
 
-    .ob-progress {
-      height: 4px;
-      background: #f0f0f0;
-      border-radius: 2px;
-      margin-bottom: 2rem;
-      overflow: hidden;
-    }
-    .ob-progress-fill {
-      height: 100%;
-      border-radius: 2px;
-      background: var(--accent);
-      transition: width 0.4s ease;
-    }
-
-    .ob-step { display: none; }
-    .ob-step.active { display: block; animation: fadeUp 0.3s ease; }
+    .ob-progress { height: 4px; background: #f0f0f0; border-radius: 2px; margin-bottom: 2rem; overflow: hidden; }
+    .ob-progress-fill { height: 100%; border-radius: 2px; background: var(--accent); transition: width 0.4s ease; }
+    .ob-step { display: none; } .ob-step.active { display: block; animation: fadeUp 0.3s ease; }
     @keyframes fadeUp { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
 
     .ob-step-label { font-size: 11px; color: var(--accent); font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 0.4rem; }
     .ob-step-title { font-size: 22px; font-weight: 700; color: #1a1a1a; margin-bottom: 0.3rem; font-family: 'Lora', serif; }
     .ob-step-sub { font-size: 13px; color: #666; margin-bottom: 1.5rem; line-height: 1.6; }
-
-    .ob-label { display: block; font-size: 12px; font-weight: 600; color: #444; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px; }
+    .ob-label { display: block; font-size: 12px; font-weight: 600; color: #444; margin-bottom: 6px; text-transform: uppercase; }
     .ob-field { margin-bottom: 1.1rem; }
-    .ob-input {
-      width: 100%; padding: 11px 14px; border-radius: 10px;
-      border: 1.5px solid #e5e5e5; font-family: 'Poppins', sans-serif;
-      font-size: 14px; color: #1a1a1a; background: #fafafa; outline: none;
-      transition: border-color 0.2s;
-    }
+    .ob-input { width: 100%; padding: 11px 14px; border-radius: 10px; border: 1.5px solid #e5e5e5; font-family: 'Poppins', sans-serif; font-size: 14px; color: #1a1a1a; background: #fafafa; outline: none; }
     .ob-input:focus { border-color: var(--accent); background: #fff; }
 
-    /* Temas visuales */
+    /* Temas */
     .theme-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 1.5rem; }
-    .theme-card {
-      border: 2px solid #e5e5e5; border-radius: 12px; padding: 12px 8px;
-      cursor: pointer; transition: all 0.2s; text-align: center; background: #fff;
-    }
-    .theme-card:hover { transform: translateY(-2px); border-color: #ccc; }
+    .theme-card { border: 2px solid #e5e5e5; border-radius: 12px; padding: 12px 8px; cursor: pointer; transition: all 0.2s; text-align: center; background: #fff; }
     .theme-card.selected { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-light); }
     .theme-swatch { height: 40px; border-radius: 8px; margin-bottom: 8px; }
     .theme-name { font-size: 12px; font-weight: 700; color: #1a1a1a; }
     .theme-desc { font-size: 10px; color: #888; margin-top: 2px; }
 
-    /* Upload zone */
-    .ob-upload {
-      border: 2px dashed #ddd; border-radius: 14px; padding: 2rem 1rem;
-      text-align: center; cursor: pointer; transition: all 0.2s;
-      background: #fafafa; position: relative; margin-bottom: 1rem;
-    }
-    .ob-upload:hover, .ob-upload.drag-over { border-color: var(--accent); background: #fff5f8; }
+    /* Upload */
+    .ob-upload { border: 2px dashed #ddd; border-radius: 14px; padding: 2rem 1rem; text-align: center; cursor: pointer; background: #fafafa; position: relative; margin-bottom: 1rem; }
+    .ob-upload:hover { border-color: var(--accent); background: #fff5f8; }
     .ob-upload input[type=file] { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%; }
     .ob-upload-icon { font-size: 32px; margin-bottom: 0.5rem; }
     .ob-upload-title { font-size: 14px; font-weight: 600; color: #333; margin-bottom: 4px; }
     .ob-upload-sub { font-size: 12px; color: #888; }
-
-    .ob-file-preview {
-      display: none; align-items: center; gap: 10px;
-      background: #f0fff4; border: 1.5px solid #86efac;
-      border-radius: 10px; padding: 10px 14px; margin-bottom: 1rem;
-    }
+    .ob-file-preview { display: none; align-items: center; gap: 10px; background: #f0fff4; border: 1.5px solid #86efac; border-radius: 10px; padding: 10px 14px; margin-bottom: 1rem; }
     .ob-file-preview.show { display: flex; }
     .ob-file-name { font-size: 13px; font-weight: 600; color: #166534; flex: 1; }
     .ob-file-remove { cursor: pointer; color: #999; font-size: 16px; }
 
-    /* Estado de análisis IA */
-    .ob-ai-analyzing {
-      display: none; text-align: center; padding: 1.5rem;
-      background: linear-gradient(135deg, #fdf2f8, #fff5f5);
-      border-radius: 14px; margin-bottom: 1rem; border: 1.5px solid #fce7f3;
-    }
+    /* Estados de IA */
+    .ob-ai-analyzing { display: none; text-align: center; padding: 1.5rem; background: linear-gradient(135deg, #fdf2f8, #fff5f5); border-radius: 14px; margin-bottom: 1rem; border: 1.5px solid #fce7f3; }
     .ob-ai-analyzing.show { display: block; }
-    .ob-spinner {
-      width: 40px; height: 40px; border: 3px solid #fce7f3;
-      border-top-color: var(--accent); border-radius: 50%;
-      animation: spin 0.8s linear infinite; margin: 0 auto 1rem;
-    }
+    .ob-spinner { width: 40px; height: 40px; border: 3px solid #fce7f3; border-top-color: var(--accent); border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 1rem; }
     @keyframes spin { to { transform: rotate(360deg); } }
-    .ob-ai-text { font-size: 13px; color: #666; }
-
-    /* Error IA */
-    .ob-ai-error {
-      display: none; background: #fff1f2; border: 1.5px solid #fda4af;
-      border-radius: 10px; padding: 12px 16px; font-size: 13px; color: #9f1239;
-      margin-bottom: 1rem;
-    }
+    .ob-ai-error { display: none; background: #fff1f2; border: 1.5px solid #fda4af; border-radius: 10px; padding: 12px 16px; font-size: 13px; color: #9f1239; margin-bottom: 1rem; }
     .ob-ai-error.show { display: block; }
-
-    /* Resultado IA */
-    .ob-ai-result {
-      display: none; background: #f0fdf4; border: 1.5px solid #86efac;
-      border-radius: 10px; padding: 12px 16px; font-size: 13px; color: #166534;
-      margin-bottom: 1rem;
-    }
+    .ob-ai-result { display: none; background: #f0fdf4; border: 1.5px solid #86efac; border-radius: 10px; padding: 12px 16px; font-size: 13px; color: #166534; margin-bottom: 1rem; }
     .ob-ai-result.show { display: flex; gap: 10px; align-items: flex-start; }
 
-    /* Botones nav */
+    /* Botones Nav */
     .ob-nav { display: flex; gap: 10px; margin-top: 1.5rem; }
-    .ob-btn-back {
-      padding: 11px 20px; border-radius: 10px; border: 1.5px solid #e5e5e5;
-      background: transparent; color: #666; cursor: pointer; font-size: 14px;
-      font-family: 'Poppins', sans-serif; font-weight: 600; transition: all 0.2s;
-    }
-    .ob-btn-back:hover { background: #f5f5f5; }
-    .ob-btn-next {
-      flex: 1; padding: 12px 24px; border-radius: 10px; border: none;
-      background: var(--accent); color: #fff; cursor: pointer; font-size: 14px;
-      font-family: 'Poppins', sans-serif; font-weight: 700; transition: all 0.2s;
-    }
-    .ob-btn-next:hover { opacity: 0.88; transform: translateY(-1px); }
-    .ob-btn-next:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
-
-    /* Resumen final */
-    .ob-summary-row {
-      display: flex; justify-content: space-between; align-items: center;
-      padding: 10px 0; border-bottom: 1px solid #f0f0f0; font-size: 13px;
-    }
-    .ob-summary-row:last-child { border-bottom: none; }
-    .ob-summary-key { color: #888; }
-    .ob-summary-val { font-weight: 700; color: #1a1a1a; text-align: right; max-width: 60%; }
+    .ob-btn-back { padding: 11px 20px; border-radius: 10px; border: 1.5px solid #e5e5e5; background: transparent; color: #666; cursor: pointer; font-size: 14px; font-weight: 600; }
+    .ob-btn-next { flex: 1; padding: 12px 24px; border-radius: 10px; border: none; background: var(--accent); color: #fff; cursor: pointer; font-size: 14px; font-weight: 700; transition: 0.2s; }
+    .ob-btn-next:disabled { opacity: 0.4; cursor: not-allowed; }
 
     /* =====================
-       LOGIN OVERLAY
-    ===================== */
-    #loginOverlay {
-      position: fixed; inset: 0;
-      background: rgba(196, 54, 112, 0.95); z-index: 9999;
-      display: none; justify-content: center; align-items: center;
-    }
-    .login-box {
-      background: #fff; padding: 40px; border-radius: 20px;
-      box-shadow: 0 15px 40px rgba(0,0,0,0.3); width: 90%; max-width: 350px;
-      text-align: center; border: 4px solid var(--accent-light); position: relative;
-    }
-    .login-box h2 { color: var(--accent-dark); margin-top: 0; font-size: 1.8rem; }
-    .login-box p { color: var(--accent-dark); opacity: 0.8; font-size: 0.9rem; margin-bottom: 25px; }
-    .login-input {
-      width: 100%; padding: 12px; margin-bottom: 15px; border-radius: 8px;
-      border: 2px solid var(--accent-light); font-family: 'Poppins', sans-serif;
-      background: #fff9fa; color: var(--accent-dark); font-weight: 600; outline: none; box-sizing: border-box;
-    }
-    .btn-login { width: 100%; background: var(--accent-dark); color: #fff; border: none; padding: 12px; border-radius: 8px; font-weight: 700; cursor: pointer; transition: 0.3s; margin-bottom: 10px; font-family: 'Poppins', sans-serif; }
-    .btn-login:hover { opacity: 0.9; }
-    .btn-register { background: var(--accent-light); color: var(--accent-dark); border: 2px solid var(--accent-light); margin-bottom: 0; }
-    .btn-close-login { position: absolute; top: 10px; right: 15px; background: transparent; border: none; font-size: 1.5rem; color: var(--accent-dark); cursor: pointer; font-weight: bold; }
-
-    /* =====================
-       APP PRINCIPAL
+       APP PRINCIPAL & GRILLA DE ELECTIVAS
     ===================== */
     #appContent { display: none; }
-
-    header {
-      display: flex; justify-content: space-between; align-items: center;
-      background-color: var(--accent-dark); padding: 15px 40px;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.4); margin-bottom: 40px;
-      flex-wrap: wrap; gap: 20px;
-    }
+    header { display: flex; justify-content: space-between; align-items: center; background-color: var(--accent-dark); padding: 15px 40px; box-shadow: 0 4px 15px rgba(0,0,0,0.4); margin-bottom: 40px; flex-wrap: wrap; gap: 20px; }
     .logo-container h1 { font-size: 1.8rem; margin: 0; font-weight: 900; }
     .logo-container h2 { font-size: 0.95rem; margin: 0; opacity: 0.8; font-weight: 400; text-transform: uppercase; }
     .tabs-container { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
-    .tab-btn { padding: 8px 16px; border: none; border-radius: 20px; font-size: 0.95rem; font-weight: 600; cursor: pointer; transition: all 0.3s; background: transparent; color: var(--accent-light); opacity: 0.7; font-family: 'Poppins', sans-serif; }
-    .tab-btn:hover { opacity: 1; background: rgba(255,195,204,0.1); }
-    .tab-btn.active { opacity: 1; background: var(--accent-light); color: var(--accent-dark); font-weight: 700; }
+    .tab-btn { padding: 8px 16px; border: none; border-radius: 20px; font-size: 0.95rem; font-weight: 600; cursor: pointer; background: transparent; color: var(--accent-light); opacity: 0.7; font-family: 'Poppins', sans-serif; }
+    .tab-btn.active { opacity: 1; background: var(--accent-light); color: var(--accent-dark); }
     .btn-auth { border: 2px solid var(--accent-light); opacity: 1; }
-    .btn-logout { background: rgba(255,255,255,0.1); display: none; }
-
+    
     .main-content { padding: 0 40px; box-sizing: border-box; }
-    .view-section { display: none; animation: fadeIn 0.4s ease; width: 100%; box-sizing: border-box; }
+    .view-section { display: none; animation: fadeIn 0.4s ease; width: 100%; }
     .view-section.active { display: block; }
-    @keyframes fadeIn { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
-    .panel-box { background: #fff; color: var(--accent-dark); padding: 30px; border-radius: 20px; border: 2px solid var(--accent-light); box-shadow: 0 10px 30px rgba(0,0,0,0.1); margin-bottom: 30px; box-sizing: border-box; }
+    .panel-box { background: #fff; color: var(--accent-dark); padding: 30px; border-radius: 20px; border: 2px solid var(--accent-light); box-shadow: 0 10px 30px rgba(0,0,0,0.1); margin-bottom: 30px; }
 
-    /* MAPA */
     #view-map { overflow-x: auto; padding-bottom: 40px; }
-    .year-row { display: flex; gap: 20px; justify-content: center; min-width: max-content; padding-bottom: 20px; }
+    .year-row { display: flex; gap: 20px; justify-content: center; min-width: max-content; padding-bottom: 20px; align-items: flex-start; }
+    
+    /* COLUMNA NORMAL */
     .year-column { display: flex; flex-direction: column; align-items: center; gap: 12px; }
     .year-column h2 { border-bottom: 2px solid var(--accent-light); padding-bottom: 5px; font-size: 1.2rem; margin-bottom: 15px; text-align: center; width: 100%; }
+    
+    /* COLUMNA DE ELECTIVAS (GRILLA DOBLE) */
+    .electives-column { 
+      background: rgba(255,255,255,0.05); padding: 15px; border-radius: 20px; 
+      border: 2px dashed var(--accent-light);
+    }
+    .electives-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+    .elec-counter { display: block; font-size: 0.85rem; font-family: 'Poppins'; font-weight: normal; color: var(--accent-light); opacity: 0.9;}
+
     .course {
       padding: 14px 16px; border-radius: 12px; border: 1px solid rgba(255,195,204,0.3);
       min-width: 160px; max-width: 160px; text-align: center; font-size: 0.85rem;
       font-weight: 600; position: relative; cursor: not-allowed; opacity: 0.5;
       transition: all 0.3s; color: #28301c; background: #fff;
     }
+    /* Materias electivas un poco más chicas para que entren bien en la grilla */
+    .electives-grid .course { min-width: 130px; max-width: 130px; font-size: 0.75rem; padding: 10px; }
+
     .course.enabled { cursor: pointer; opacity: 1; border-color: var(--accent-light); }
-    .course.enabled:hover { transform: translateY(-3px); background: #fff9fa; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+    .course.enabled:hover { transform: translateY(-3px); box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
     .course.completed { opacity: 1; border-color: var(--accent-light); background: var(--accent-light); color: var(--accent-dark); text-decoration: line-through; }
     .course.completed::after { content: '★'; position: absolute; top: -8px; right: -8px; background: var(--accent-dark); color: var(--accent-light); border-radius: 50%; width: 20px; height: 20px; font-size: 12px; line-height: 20px; text-align: center; }
 
-    /* CALENDARIO */
-    #view-calendar { max-width: 1100px; margin: 0 auto 50px; }
-    .cal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; background: #fff; padding: 15px 25px; border-radius: 15px; border: 2px solid var(--accent-light); flex-wrap: wrap; gap: 10px; }
-    .cal-header h3 { color: var(--accent-dark); margin: 0; }
-    .cal-nav { display: flex; align-items: center; gap: 15px; }
-    .cal-nav-btn { background: var(--accent-light); color: var(--accent-dark); border: none; padding: 8px 15px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 1.2rem; }
-    .cal-month-display { font-size: 1.2rem; font-weight: 700; color: var(--accent-dark); min-width: 150px; text-align: center; }
-    .calendar-container { background: #fff; border-radius: 20px; padding: 20px; border: 2px solid var(--accent-light); box-sizing: border-box; }
-    .cal-weekdays { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; margin-bottom: 10px; text-align: center; font-weight: 700; color: var(--accent-dark); }
-    .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; }
-    .cal-day { min-height: 100px; border: 1px solid var(--accent-light); border-radius: 10px; padding: 5px; background: #fff9fa; cursor: pointer; transition: 0.2s; display: flex; flex-direction: column; }
-    .cal-day.empty { background: transparent; border: none; cursor: default; }
-    .cal-date-num { font-weight: 700; color: var(--accent-dark); margin-bottom: 5px; text-align: right; font-size: 0.9rem; }
-    .cal-event-pill { font-size: 0.75rem; padding: 4px 6px; border-radius: 5px; margin-bottom: 4px; color: #fff; font-weight: 600; text-align: left; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
-
-    /* HORARIO */
-    #view-schedule { max-width: 1100px; margin: 0 auto; padding-bottom: 50px; }
-    .table-responsive-wrapper { width: 100%; background: #fff; border-radius: 20px; padding: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); box-sizing: border-box; }
-    .schedule-table { width: 100%; border-collapse: collapse; color: var(--accent-dark); }
+    /* Modales, tablas y progreso (mantienen tu diseño) */
+    .schedule-table { width: 100%; border-collapse: collapse; color: var(--accent-dark); background: #fff;}
     .schedule-table th, .schedule-table td { border: 1px solid var(--accent-light); padding: 0; text-align: center; height: 50px; }
-    .schedule-table th { background: var(--accent-light); padding: 10px; font-weight: 700; color: var(--accent-dark); font-family: 'Lora', serif; }
+    .schedule-table th { background: var(--accent-light); padding: 10px; font-weight: 700; }
     .hour-col { background: #fff9fa; font-weight: 700; width: 100px; }
-    .schedule-input { width: 100%; height: 100%; border: none; outline: none; background: transparent; padding: 5px; text-align: center; color: var(--accent-dark); resize: none; font-size: 0.85rem; font-weight: 600; font-family: 'Poppins', sans-serif; box-sizing: border-box; }
-    .schedule-input:focus { background: #fff9fa; }
+    .schedule-input { width: 100%; height: 100%; border: none; outline: none; background: transparent; padding: 5px; text-align: center; color: var(--accent-dark); font-weight: 600; font-family: 'Poppins'; }
     .occupied-cell { background-color: var(--accent-bg) !important; color: #faffc7 !important; }
 
-    /* NOTAS */
-    #view-grades { max-width: 800px; margin: 0 auto; }
-    .average-card { background: var(--accent-light); color: var(--accent-dark); padding: 30px; border-radius: 15px; text-align: center; margin-bottom: 30px; }
-    .average-card h2 { color: var(--accent-dark); margin-top: 0; }
-    .average-card .big-number { font-size: 3.5rem; font-weight: 900; margin: 10px 0; font-family: 'Poppins', sans-serif; }
-    .grade-row { display: flex; justify-content: space-between; align-items: center; padding: 15px; border-bottom: 1px dashed rgba(255,195,204,0.3); }
-    .grade-input { width: 80px; padding: 10px; border: 1px solid var(--accent-light); border-radius: 8px; text-align: center; font-weight: bold; color: #28301c; font-size: 1rem; outline: none; background: #fff9fa; font-family: 'Poppins', sans-serif; }
-
-    /* PROGRESO */
-    #view-stats { max-width: 900px; margin: 0 auto; padding-bottom: 50px; }
-    .stats-header { display: flex; gap: 30px; flex-wrap: wrap; justify-content: center; margin-bottom: 40px; }
-    .progress-circle-container { position: relative; width: 180px; height: 180px; background: #fff; border-radius: 50%; display: flex; justify-content: center; align-items: center; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
-    .progress-circle-bg { width: 100%; height: 100%; border-radius: 50%; display: flex; justify-content: center; align-items: center; transition: background 1s ease; }
-    .progress-circle-inner { width: 80%; height: 80%; background: #fff; border-radius: 50%; display: flex; flex-direction: column; justify-content: center; align-items: center; color: #28301c; }
-    .pc-percentage { font-size: 2rem; font-weight: 700; }
-    .pc-label { font-size: 0.8rem; letter-spacing: 1px; opacity: 0.8; }
-    .stat-card { background: var(--accent-light); color: var(--accent-dark); padding: 20px; border-radius: 15px; width: 150px; text-align: center; border: 2px solid var(--accent-light); display: flex; flex-direction: column; justify-content: center; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
-    .stat-val { font-size: 2.5rem; font-weight: 700; color: var(--accent-dark); }
-    .stat-desc { font-size: 0.9rem; opacity: 0.9; color: var(--accent-dark); }
-    .available-courses-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 15px; }
-    .plan-card { padding: 15px; border: 1px dashed var(--accent-dark); border-radius: 12px; color: var(--accent-dark); font-weight: 600; font-size: 0.9rem; cursor: pointer; transition: all 0.2s; background: transparent; position: relative; user-select: none; text-align: center; }
-    .plan-card:hover { background: rgba(255,195,204,0.3); }
-    .plan-card.planned { background: var(--accent-light); color: var(--accent-dark); border-style: solid; border-color: var(--accent-light); }
-    .plan-card.planned::after { content: '♡'; position: absolute; top: -12px; right: -8px; font-size: 1.5rem; color: var(--accent-dark); }
-
-    /* MODALES */
-    .schedule-modal-overlay { position: fixed; inset: 0; background: rgba(69,21,27,0.9); z-index: 2000; display: none; justify-content: center; align-items: center; animation: fadeIn 0.3s ease; }
-    .schedule-modal-content { background: #fff; color: var(--accent-dark); padding: 30px; border-radius: 20px; max-width: 90%; width: 400px; text-align: center; border: 4px solid var(--accent-light); box-sizing: border-box; }
-    .schedule-modal-content select, .schedule-modal-content input { width: 100%; padding: 12px; margin-bottom: 15px; border-radius: 8px; border: 2px solid var(--accent-light); font-family: 'Poppins', sans-serif; background: #fff9fa; color: var(--accent-dark); font-weight: 600; outline: none; box-sizing: border-box; }
-    .btn-add { background: var(--accent-light); color: var(--accent-dark); border: none; padding: 12px 25px; border-radius: 10px; font-weight: 700; font-family: 'Poppins', sans-serif; cursor: pointer; transition: 0.3s; }
-    .btn-add:hover { opacity: 0.8; }
-    .btn-close { background: transparent; border: 2px solid var(--accent-dark); color: var(--accent-dark); width: 100%; margin-top: 10px; }
-
-    /* RESPONSIVE */
+    /* Responsive */
     @media (max-width: 768px) {
       .main-content { padding: 0 15px; }
       header { flex-direction: column; text-align: center; padding: 15px; gap: 15px; margin-bottom: 25px; }
       .tabs-container { justify-content: center; }
-      .tab-btn { font-size: 0.85rem; padding: 6px 12px; margin-bottom: 5px; }
-      #view-map { overflow-x: hidden; }
+      .tab-btn { font-size: 0.85rem; padding: 6px 12px; }
       #view-map .year-row { flex-direction: column; align-items: center; }
-      #view-map .year-column { width: 100%; max-width: 100%; background: rgba(69,21,27,0.05); padding: 15px; border-radius: 15px; box-sizing: border-box; }
-      .course { width: 100%; max-width: 100%; box-sizing: border-box; }
-      .ob-card { padding: 1.5rem 1.2rem; }
-      .theme-grid { grid-template-columns: repeat(2, 1fr); }
-      .table-responsive-wrapper { padding: 0; background: transparent; box-shadow: none; }
+      #view-map .year-column { width: 100%; max-width: 100%; background: rgba(69,21,27,0.05); padding: 15px; border-radius: 15px; }
+      .course { width: 100%; max-width: 100%; }
+      .electives-grid { width: 100%; grid-template-columns: repeat(2, 1fr); }
+      .electives-grid .course { width: 100%; max-width: 100%; min-width: auto; }
       .schedule-table, .schedule-table tbody, .schedule-table tr, .schedule-table td { display: block; width: 100%; box-sizing: border-box; }
       .schedule-table thead { display: none; }
-      .schedule-table tr { margin-bottom: 20px; border: 2px solid var(--accent-light); border-radius: 15px; overflow: hidden; background: #fff; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
-      .schedule-table td { display: flex; justify-content: space-between; align-items: center; padding: 10px 15px; border: none; border-bottom: 1px solid rgba(255,195,204,0.4); min-height: 40px; text-align: right; }
-      .schedule-table td::before { content: attr(data-label); font-weight: bold; color: var(--accent-dark); width: 40%; text-align: left; font-family: 'Poppins', sans-serif; }
-      .schedule-input { width: 55%; text-align: right; background: transparent; padding: 5px; margin: 0; font-size: 0.9rem; }
-      .hour-col { background: var(--accent-bg) !important; color: #fff !important; justify-content: center !important; font-size: 1.2rem; font-weight: 900; }
+      .schedule-table tr { margin-bottom: 20px; border: 2px solid var(--accent-light); border-radius: 15px; overflow: hidden; background: #fff; }
+      .schedule-table td { display: flex; justify-content: space-between; align-items: center; padding: 10px 15px; border-bottom: 1px solid rgba(255,195,204,0.4); min-height: 40px; text-align: right; }
+      .schedule-table td::before { content: attr(data-label); font-weight: bold; width: 40%; text-align: left; }
+      .schedule-input { width: 55%; text-align: right; }
+      .hour-col { background: var(--accent-bg) !important; color: #fff !important; justify-content: center !important; }
       .hour-col::before { display: none; }
-      .stats-header { flex-direction: column; align-items: center; gap: 20px; }
     }
   </style>
 </head>
 <body>
 
+<div id="loginOverlay">
+  <div class="login-box">
+    <h2>Mi Malla Pro</h2>
+    <p>Ingresá para ver tu progreso guardado.</p>
+    
+    <input type="email" id="loginEmail" class="login-input" placeholder="Tu email">
+    <input type="password" id="loginPass" class="login-input" placeholder="Contraseña">
+    <button class="btn-login" onclick="iniciarSesion()">Iniciar sesión</button>
+    
+    <div class="register-link-box">
+      <p>¿Todavía no tenés una cuenta?</p>
+      <button class="btn-goto-register" onclick="abrirRegistro()">¡Registrate y armá tu malla!</button>
+    </div>
+  </div>
+</div>
+
 <div id="onboardingScreen">
   <div class="ob-card">
-    <div class="ob-progress"><div class="ob-progress-fill" id="obProgress" style="width:20%"></div></div>
+    <div class="ob-progress"><div class="ob-progress-fill" id="obProgress" style="width:25%"></div></div>
 
     <div class="ob-step active" id="obs1">
       <div class="ob-step-label">Paso 1 de 4</div>
-      <div class="ob-step-title">¡Bienvenido/a! 👋</div>
-      <div class="ob-step-sub">Vamos a crear tu malla curricular personal. Solo tarda 2 minutos.</div>
+      <div class="ob-step-title">¡Creemos tu Malla! 👋</div>
+      <div class="ob-step-sub">Primero, contanos qué estás estudiando.</div>
       <div class="ob-field">
         <label class="ob-label">Nombre de tu carrera</label>
-        <input class="ob-input" type="text" id="ob-career" placeholder="Ej: Ingeniería en Sistemas">
+        <input class="ob-input" type="text" id="ob-career" placeholder="Ej: Ingeniería Industrial">
       </div>
       <div class="ob-field">
         <label class="ob-label">Universidad o institución</label>
-        <input class="ob-input" type="text" id="ob-uni" placeholder="Ej: Universidad de Buenos Aires">
+        <input class="ob-input" type="text" id="ob-uni" placeholder="Ej: Universidad de Morón">
       </div>
       <div class="ob-field">
         <label class="ob-label">Duración de la carrera</label>
@@ -460,94 +324,54 @@
         </select>
       </div>
       <div class="ob-nav">
+        <button class="ob-btn-back" onclick="volverAlLogin()">← Cancelar</button>
         <button class="ob-btn-next" onclick="obGo(2)">Continuar →</button>
       </div>
     </div>
 
     <div class="ob-step" id="obs2">
       <div class="ob-step-label">Paso 2 de 4</div>
-      <div class="ob-step-title">Elegí tu tema 🎨</div>
-      <div class="ob-step-sub">Este color va a ser el look de toda tu malla.</div>
+      <div class="ob-step-title">Elegí tu estilo 🎨</div>
+      <div class="ob-step-sub">Este color va a ser la onda de toda tu plataforma.</div>
       <div class="theme-grid">
-        <div class="theme-card selected"
-          data-accent="#c43670" data-dark="#45151b" data-light="#ffc3cc" data-bg="#c43670" data-label="Rosa vibrante"
-          onclick="obSelectTheme(this)">
+        <div class="theme-card selected" data-accent="#c43670" data-dark="#45151b" data-light="#ffc3cc" data-bg="#c43670" data-label="Rosa vibrante" onclick="obSelectTheme(this)">
           <div class="theme-swatch" style="background:linear-gradient(135deg,#c43670,#ffc3cc)"></div>
           <div class="theme-name">Rosa</div>
-          <div class="theme-desc">El original</div>
         </div>
-        <div class="theme-card"
-          data-accent="#185FA5" data-dark="#0C447C" data-light="#85B7EB" data-bg="#185FA5" data-label="Azul universitario"
-          onclick="obSelectTheme(this)">
+        <div class="theme-card" data-accent="#185FA5" data-dark="#0C447C" data-light="#85B7EB" data-bg="#185FA5" data-label="Azul universitario" onclick="obSelectTheme(this)">
           <div class="theme-swatch" style="background:linear-gradient(135deg,#185FA5,#85B7EB)"></div>
           <div class="theme-name">Azul</div>
-          <div class="theme-desc">Clásico</div>
         </div>
-        <div class="theme-card"
-          data-accent="#3B6D11" data-dark="#173404" data-light="#97C459" data-bg="#3B6D11" data-label="Verde esmeralda"
-          onclick="obSelectTheme(this)">
+        <div class="theme-card" data-accent="#3B6D11" data-dark="#173404" data-light="#97C459" data-bg="#3B6D11" data-label="Verde esmeralda" onclick="obSelectTheme(this)">
           <div class="theme-swatch" style="background:linear-gradient(135deg,#3B6D11,#97C459)"></div>
           <div class="theme-name">Verde</div>
-          <div class="theme-desc">Fresco</div>
-        </div>
-        <div class="theme-card"
-          data-accent="#534AB7" data-dark="#26215C" data-light="#AFA9EC" data-bg="#534AB7" data-label="Púrpura digital"
-          onclick="obSelectTheme(this)">
-          <div class="theme-swatch" style="background:linear-gradient(135deg,#534AB7,#AFA9EC)"></div>
-          <div class="theme-name">Púrpura</div>
-          <div class="theme-desc">Digital</div>
-        </div>
-        <div class="theme-card"
-          data-accent="#D85A30" data-dark="#4A1B0C" data-light="#F0997B" data-bg="#D85A30" data-label="Coral cálido"
-          onclick="obSelectTheme(this)">
-          <div class="theme-swatch" style="background:linear-gradient(135deg,#D85A30,#F0997B)"></div>
-          <div class="theme-name">Coral</div>
-          <div class="theme-desc">Energético</div>
-        </div>
-        <div class="theme-card"
-          data-accent="#444441" data-dark="#2C2C2A" data-light="#B4B2A9" data-bg="#444441" data-label="Gris minimalista"
-          onclick="obSelectTheme(this)">
-          <div class="theme-swatch" style="background:linear-gradient(135deg,#444441,#B4B2A9)"></div>
-          <div class="theme-name">Gris</div>
-          <div class="theme-desc">Elegante</div>
         </div>
       </div>
       <div class="ob-nav">
         <button class="ob-btn-back" onclick="obGo(1)">← Atrás</button>
-        <button class="ob-btn-next" id="obBtn2" onclick="obGo(3)">Continuar →</button>
+        <button class="ob-btn-next" onclick="obGo(3)">Continuar →</button>
       </div>
     </div>
 
     <div class="ob-step" id="obs3">
       <div class="ob-step-label">Paso 3 de 4</div>
       <div class="ob-step-title">Subí tu plan de estudios 📄</div>
-      <div class="ob-step-sub">Asegurate de que el servidor local (puerto 5000) esté encendido antes de subir el archivo.</div>
-
+      <div class="ob-step-sub">Asegurate de que tu servidor Python local esté encendido.</div>
       <div class="ob-upload" id="obUploadZone">
-        <input type="file" id="obFileInput" accept=".pdf,.png,.jpg,.jpeg" onchange="obHandleFile(this)">
+        <input type="file" id="obFileInput" accept=".pdf" onchange="obHandleFile(this)">
         <div class="ob-upload-icon">📎</div>
-        <div class="ob-upload-title">Tocá acá o arrastrá tu PDF</div>
-        <div class="ob-upload-sub">Solo PDF o Imágenes · Máx. 10 MB</div>
+        <div class="ob-upload-title">Tocá acá para subir tu PDF</div>
       </div>
-
       <div class="ob-file-preview" id="obFilePreview">
-        <span id="obFileIcon">📄</span>
-        <span class="ob-file-name" id="obFileName"></span>
-        <span class="ob-file-remove" onclick="obRemoveFile()">✕</span>
+        <span id="obFileIcon">📄</span><span class="ob-file-name" id="obFileName"></span><span class="ob-file-remove" onclick="obRemoveFile()">✕</span>
       </div>
-
       <div class="ob-ai-analyzing" id="obAnalyzing">
-        <div class="ob-spinner"></div>
-        <div class="ob-ai-text">Enviando al servidor para análisis con Inteligencia Artificial...<br>Esto tarda unos segundos.</div>
+        <div class="ob-spinner"></div><div class="ob-ai-text">Enviando a la Inteligencia Artificial...</div>
       </div>
-
       <div class="ob-ai-error" id="obAiError"></div>
-
       <div class="ob-ai-result" id="obAiResult">
-        <span style="font-size:20px">✅</span>
-        <div id="obAiResultText"></div>
+        <span style="font-size:20px">✅</span><div id="obAiResultText"></div>
       </div>
-
       <div class="ob-nav">
         <button class="ob-btn-back" onclick="obGo(2)">← Atrás</button>
         <button class="ob-btn-next" id="obBtn3" onclick="obGo(4)" disabled>Continuar →</button>
@@ -556,73 +380,21 @@
 
     <div class="ob-step" id="obs4">
       <div class="ob-step-label">Paso 4 de 4</div>
-      <div class="ob-step-title">¡Todo listo! 🎉</div>
-      <div class="ob-step-sub">Revisá tus datos y tocá el botón para crear tu malla.</div>
-      <div style="background:#fafafa;border-radius:12px;padding:1rem 1.2rem;margin-bottom:1.2rem;border:1px solid #eee">
-        <div class="ob-summary-row"><span class="ob-summary-key">Carrera</span><span class="ob-summary-val" id="sum-career">—</span></div>
-        <div class="ob-summary-row"><span class="ob-summary-key">Universidad</span><span class="ob-summary-val" id="sum-uni">—</span></div>
-        <div class="ob-summary-row"><span class="ob-summary-key">Duración</span><span class="ob-summary-val" id="sum-years">—</span></div>
-        <div class="ob-summary-row"><span class="ob-summary-key">Tema visual</span><span class="ob-summary-val" id="sum-theme">—</span></div>
-        <div class="ob-summary-row"><span class="ob-summary-key">Materias detectadas</span><span class="ob-summary-val" id="sum-count">—</span></div>
+      <div class="ob-step-title">¡Último paso! 🚀</div>
+      <div class="ob-step-sub">Creá tu usuario para guardar esta malla en la nube para siempre.</div>
+      
+      <div style="background:#fafafa; border:1px solid #e5e5e5; padding: 15px; border-radius: 12px; margin-bottom: 20px;">
+        <label class="ob-label">Email de tu nueva cuenta</label>
+        <input type="email" id="regisEmail" class="ob-input" placeholder="tu@email.com" style="margin-bottom: 10px; border-color:#ccc;">
+        <label class="ob-label">Contraseña</label>
+        <input type="password" id="regisPass" class="ob-input" placeholder="Mínimo 6 caracteres" style="border-color:#ccc;">
       </div>
+
       <div class="ob-nav">
         <button class="ob-btn-back" onclick="obGo(3)">← Atrás</button>
-        <button class="ob-btn-next" onclick="obFinish()" style="font-size:15px">✦ Crear mi malla</button>
+        <button class="ob-btn-next" onclick="obFinish()" style="font-size:15px; background: #28301c;">✦ Crear Cuenta y Malla</button>
       </div>
     </div>
-  </div>
-</div>
-
-<div id="loginOverlay">
-  <div class="login-box">
-    <button class="btn-close-login" onclick="document.getElementById('loginOverlay').style.display='none'">×</button>
-    <h2>Mi Malla</h2>
-    <p>Guardá tu progreso en la nube.</p>
-    <input type="email" id="loginEmail" class="login-input" placeholder="Tu email">
-    <input type="password" id="loginPass" class="login-input" placeholder="Contraseña">
-    <button class="btn-login" onclick="iniciarSesion()">Iniciar sesión</button>
-    <button class="btn-login btn-register" onclick="registrarse()">Crear cuenta nueva</button>
-  </div>
-</div>
-
-<div id="scheduleModal" class="schedule-modal-overlay">
-  <div class="schedule-modal-content">
-    <h2 style="color:var(--accent-dark);margin-top:0">📝 Agendar Materia</h2>
-    <label>Materia:</label><select id="schSubject"></select>
-    <label>Día:</label>
-    <select id="schDay">
-      <option value="lunes">Lunes</option><option value="martes">Martes</option>
-      <option value="miercoles">Miércoles</option><option value="jueves">Jueves</option>
-      <option value="viernes">Viernes</option><option value="sabado">Sábado</option>
-    </select>
-    <div style="display:flex;gap:10px">
-      <div style="flex:1"><label>Inicio:</label><select id="schStart"></select></div>
-      <div style="flex:1"><label>Fin:</label><select id="schEnd"></select></div>
-    </div>
-    <button class="btn-add" style="width:100%;padding:15px;font-size:1.1rem;margin-top:10px" onclick="saveToSchedule()">✔️ Asignar</button>
-    <button class="btn-add btn-close" onclick="closeScheduleModal()">Cancelar</button>
-  </div>
-</div>
-
-<div id="calModal" class="schedule-modal-overlay">
-  <div class="schedule-modal-content">
-    <h2 style="color:var(--accent-dark);margin-top:0">📅 Agregar Actividad</h2>
-    <p id="calModalDateDisplay" style="font-size:0.9rem;font-weight:bold"></p>
-    <input type="hidden" id="calDateKey">
-    <label>¿Qué tenés que hacer?</label>
-    <input type="text" id="calTitle" placeholder="Ej: Estudiar Física" autocomplete="off">
-    <label>Horario (opcional):</label>
-    <input type="text" id="calTime" placeholder="Ej: 14:00 o 'Todo el día'" autocomplete="off">
-    <label>Color:</label>
-    <select id="calColor">
-      <option value="#c43670">Rosa</option>
-      <option value="#45151b">Bordó</option>
-      <option value="#185FA5">Azul</option>
-      <option value="#3B6D11">Verde</option>
-    </select>
-    <button class="btn-add" style="width:100%;padding:15px;font-size:1.1rem;margin-top:10px" onclick="saveCalEvent(false)">✔️ Guardar</button>
-    <button class="btn-add" style="width:100%;padding:15px;font-size:1rem;margin-top:10px;background:#4285F4;color:white;border:none" onclick="saveCalEvent(true)">☁️ Guardar y abrir Google Calendar</button>
-    <button class="btn-add btn-close" onclick="closeCalModal()">Cancelar</button>
   </div>
 </div>
 
@@ -636,256 +408,149 @@
       <button class="tab-btn active" onclick="switchTab('map', event)">🗺️ Plan</button>
       <button class="tab-btn" onclick="switchTab('calendar', event)">🗓️ Calendario</button>
       <button class="tab-btn" onclick="switchTab('schedule', event)">📅 Horario</button>
-      <button class="tab-btn" onclick="switchTab('grades', event)">📝 Notas</button>
       <button class="tab-btn" onclick="switchTab('stats', event)">📊 Progreso</button>
-      <button class="tab-btn btn-auth" id="btnOpenLogin" onclick="document.getElementById('loginOverlay').style.display='flex'">👤 Iniciar Sesión</button>
       <button class="tab-btn btn-logout" id="btnLogout" onclick="logout()">Cerrar Sesión</button>
     </div>
   </header>
 
   <main class="main-content">
-
     <div id="view-map" class="view-section active">
       <div class="year-row" id="mallaContainer">
         </div>
     </div>
 
-    <div id="view-calendar" class="view-section">
-      <div class="cal-header">
-        <h3>Mis Fechas Importantes</h3>
-        <div class="cal-nav">
-          <button class="cal-nav-btn" onclick="changeMonth(-1)">❮ Anterior</button>
-          <div id="monthYearDisplay" class="cal-month-display"></div>
-          <button class="cal-nav-btn" onclick="changeMonth(1)">Siguiente ❯</button>
-        </div>
-      </div>
-      <div class="calendar-container">
-        <div class="cal-weekdays"><div>Dom</div><div>Lun</div><div>Mar</div><div>Mié</div><div>Jue</div><div>Vie</div><div>Sáb</div></div>
-        <div id="calendarGrid" class="cal-grid"></div>
-      </div>
-    </div>
-
-    <div id="view-schedule" class="view-section">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:10px">
-        <h3 style="margin:0;font-size:1.5rem">Mi Semana</h3>
-        <button class="btn-add" onclick="openScheduleModal()">➕ Asignar Materia</button>
-      </div>
-      <div class="table-responsive-wrapper">
-        <table class="schedule-table">
-          <thead><tr><th class="hour-col">Hora</th><th>Lunes</th><th>Martes</th><th>Miércoles</th><th>Jueves</th><th>Viernes</th><th>Sábado</th></tr></thead>
-          <tbody id="scheduleBody"></tbody>
-        </table>
-      </div>
-    </div>
-
-    <div id="view-grades" class="view-section panel-box">
-      <div class="average-card">
-        <h2 style="margin-top:0">Promedio General</h2>
-        <div class="big-number" id="averageDisplay">0.00</div>
-      </div>
-      <p style="text-align:center;opacity:0.7;font-size:0.9rem;margin-bottom:20px">* Ingresá tus notas para calcular el promedio.</p>
-      <div id="gradesContainer"></div>
-    </div>
-
     <div id="view-stats" class="view-section">
-      <div class="stats-header">
-        <div class="progress-circle-container">
-          <div class="progress-circle-bg" id="progressCircle">
-            <div class="progress-circle-inner">
-              <span class="pc-percentage" id="statsPercentage">0%</span>
-              <span class="pc-label">Avance</span>
-            </div>
-          </div>
+      <div class="panel-box" style="display:flex; justify-content:space-around; align-items:center; flex-wrap:wrap;">
+        <div style="text-align:center;">
+          <h2 id="statsPercentage" style="font-size: 3rem; color: var(--accent-dark); margin:0;">0%</h2>
+          <p style="margin:0; font-weight:bold; color:#666;">Aprobado</p>
         </div>
-        <div class="stat-card"><span class="stat-val" id="statsCompleted">0</span><span class="stat-desc">Aprobadas</span></div>
-        <div class="stat-card"><span class="stat-val" id="statsRemaining">0</span><span class="stat-desc">Pendientes</span></div>
-      </div>
-      <div class="panel-box">
-        <h3>📅 Planificador de Cursada</h3>
-        <p style="opacity:0.8;margin-bottom:20px;font-size:0.9rem">Tocá las materias que querés cursar este cuatrimestre.</p>
-        <div class="available-courses-grid" id="plannerGrid"></div>
+        <div style="text-align:center;">
+          <h2 id="statsCompleted" style="font-size: 2rem; color: var(--accent-dark); margin:0;">0</h2>
+          <p style="margin:0; font-weight:bold; color:#666;">Materias Listas</p>
+        </div>
       </div>
     </div>
-
-  </main>
+    
+    </main>
 </div>
 
 <script>
 // ============================================
-// ESTADO GLOBAL DEL ONBOARDING
+// LÓGICA DE REGISTRO / NAVEGACIÓN
 // ============================================
+function abrirRegistro() {
+  document.getElementById('loginOverlay').style.display = 'none';
+  document.getElementById('onboardingScreen').style.display = 'flex';
+}
+function volverAlLogin() {
+  document.getElementById('onboardingScreen').style.display = 'none';
+  document.getElementById('loginOverlay').style.display = 'flex';
+}
+
 let obState = {
   career: '', uni: '', years: '', theme: 'Rosa vibrante',
   accent: '#c43670', dark: '#45151b', light: '#ffc3cc', bg: '#c43670',
   file: null, fileData: null, materias: [], currentStep: 1
 };
 
-// ============================================
-// NAVEGACIÓN DEL ONBOARDING
-// ============================================
 function obGo(n) {
   if (n === 2) {
     obState.career = document.getElementById('ob-career').value.trim();
     obState.uni = document.getElementById('ob-uni').value.trim();
     obState.years = document.getElementById('ob-years').value;
-    if (!obState.career || !obState.uni || !obState.years) {
-      alert('Por favor completá todos los campos para continuar.');
-      return;
-    }
-  }
-  if (n === 4) {
-    document.getElementById('sum-career').textContent = obState.career;
-    document.getElementById('sum-uni').textContent = obState.uni;
-    document.getElementById('sum-years').textContent = obState.years;
-    document.getElementById('sum-theme').textContent = obState.theme;
-    document.getElementById('sum-count').textContent = obState.materias.length > 0
-      ? obState.materias.length + ' materias detectadas' : '—';
+    if (!obState.career || !obState.uni) { alert('Completá tu carrera para seguir.'); return; }
   }
   document.querySelectorAll('.ob-step').forEach(s => s.classList.remove('active'));
   document.getElementById('obs' + n).classList.add('active');
-  const pct = [20, 40, 60, 100][n - 1];
+  const pct = [25, 50, 75, 100][n - 1];
   document.getElementById('obProgress').style.width = pct + '%';
   obState.currentStep = n;
 }
 
-// ============================================
-// SELECCIÓN DE TEMA
-// ============================================
 function obSelectTheme(el) {
   document.querySelectorAll('.theme-card').forEach(c => c.classList.remove('selected'));
   el.classList.add('selected');
-  obState.accent = el.dataset.accent;
-  obState.dark = el.dataset.dark;
-  obState.light = el.dataset.light;
-  obState.bg = el.dataset.bg;
-  obState.theme = el.dataset.label;
+  obState.accent = el.dataset.accent; obState.dark = el.dataset.dark;
+  obState.light = el.dataset.light; obState.bg = el.dataset.bg; obState.theme = el.dataset.label;
   document.getElementById('obProgress').style.background = obState.accent;
   document.querySelectorAll('.ob-btn-next').forEach(b => b.style.background = obState.accent);
 }
 
-// ============================================
-// MANEJO DE ARCHIVO Y LLAMADA A TU SERVIDOR
-// ============================================
+// CONEXIÓN CON TU SERVIDOR DE IA
 async function obHandleFile(input) {
   const f = input.files[0];
   if (!f) return;
-  if (f.size > 10 * 1024 * 1024) { alert('El archivo es muy grande. Máximo 10 MB.'); return; }
   obState.file = f;
-
-  const ext = f.name.split('.').pop().toLowerCase();
-  const icons = { pdf: '📄', doc: '📝', docx: '📝', jpg: '🖼️', jpeg: '🖼️', png: '🖼️', webp: '🖼️' };
-  document.getElementById('obFileIcon').textContent = icons[ext] || '📄';
+  
   document.getElementById('obFileName').textContent = f.name;
   document.getElementById('obFilePreview').classList.add('show');
   document.getElementById('obUploadZone').style.opacity = '0.4';
   document.getElementById('obAnalyzing').classList.add('show');
   document.getElementById('obAiError').classList.remove('show');
-  document.getElementById('obAiResult').classList.remove('show');
   document.getElementById('obBtn3').disabled = true;
 
   try {
-    // 1. Armamos el paquete con el archivo para mandar al servidor
     const formData = new FormData();
     formData.append('archivo', f);
-
-    // 2. Le pegamos a TU servidor local en el puerto 5000
-    const response = await fetch('http://127.0.0.1:5000/analizar-pdf', {
-      method: 'POST',
-      body: formData
-    });
-
-    if (!response.ok) {
-      throw new Error('El servidor local no respondió. ¿Asegurate de que python servidor.py esté corriendo en la terminal?');
-    }
-
-    // 3. Recibimos la respuesta de tu servidor (que a su vez le preguntó a Gemini)
-    const data = await response.json();
+    const response = await fetch('http://127.0.0.1:5000/analizar-pdf', { method: 'POST', body: formData });
     
-    if (data.error) {
-      throw new Error(data.error);
-    }
+    if (!response.ok) throw new Error('El servidor local no respondió. Encendelo con python servidor.py');
+    const data = await response.json();
+    if (data.error) throw new Error(data.error);
 
-    // Limpiar el JSON por si Gemini agregó formato ```json extra
-    let jsonString = data.resultado;
-    const jsonMatch = jsonString.match(/\{[\s\S]*\}/);
-    if (!jsonMatch) throw new Error('No se pudo entender la respuesta de la IA.');
-
+    const jsonMatch = data.resultado.match(/\{[\s\S]*\}/);
     const parsed = JSON.parse(jsonMatch[0]);
 
-    if (!parsed.anios || !Array.isArray(parsed.anios)) {
-      throw new Error('El archivo no parece ser un plan de estudios válido.');
-    }
-
-    // Contar materias totales
     let total = 0;
     parsed.anios.forEach(a => { total += (a.materias || []).length; });
-
-    if (total === 0) throw new Error('No se encontraron materias en el documento.');
 
     obState.materias = parsed.anios;
     obState.fileData = parsed;
 
-    // Mostrar resultado
     document.getElementById('obAnalyzing').classList.remove('show');
     document.getElementById('obAiResult').classList.add('show');
-    document.getElementById('obAiResultText').innerHTML =
-      `<strong>¡Listo!</strong> Encontré <strong>${total} materias</strong> distribuidas en <strong>${parsed.anios.length} bloque/s</strong>.<br>
-       <span style="font-size:11px;opacity:0.8">Tu servidor analizó el PDF correctamente.</span>`;
+    document.getElementById('obAiResultText').innerHTML = `<strong>¡Listo!</strong> Encontré <strong>${total} materias</strong>.`;
     document.getElementById('obBtn3').disabled = false;
 
   } catch (err) {
     document.getElementById('obAnalyzing').classList.remove('show');
     const errEl = document.getElementById('obAiError');
     errEl.classList.add('show');
-    errEl.innerHTML = `⚠️ <strong>Error de conexión o lectura.</strong><br>
-      <span style="font-size:11px">${err.message}<br>
-      Verificá que la terminal de VS Code diga 'Corriendo en puerto 5000'.</span>`;
-    document.getElementById('obBtn3').disabled = true;
+    errEl.innerHTML = `⚠️ <strong>Error.</strong><br><span style="font-size:11px">${err.message}</span>`;
   }
 }
 
-function obRemoveFile() {
-  obState.file = null;
-  obState.fileData = null;
-  obState.materias = [];
-  document.getElementById('obFileInput').value = '';
-  document.getElementById('obFilePreview').classList.remove('show');
-  document.getElementById('obUploadZone').style.opacity = '1';
-  document.getElementById('obAnalyzing').classList.remove('show');
-  document.getElementById('obAiError').classList.remove('show');
-  document.getElementById('obAiResult').classList.remove('show');
-  document.getElementById('obBtn3').disabled = true;
-}
+// ============================================
+// FINALIZAR Y CREAR CUENTA
+// ============================================
+async function obFinish() {
+  const email = document.getElementById('regisEmail').value;
+  const pass = document.getElementById('regisPass').value;
+  if (!email || pass.length < 6) { alert("Escribí un mail válido y contraseña de 6+ letras."); return; }
 
-// ============================================
-// FINALIZAR ONBOARDING Y CREAR LA MALLA
-// ============================================
-function obFinish() {
+  // 1. Crear cuenta en Firebase
+  const exito = await window.crearCuentaFinal(email, pass);
+  if (!exito) return; // Se frena si el mail ya existe
+
+  // 2. Si se creó bien, guardamos configuración
   const config = {
-    career: obState.career,
-    uni: obState.uni,
-    years: obState.years,
-    theme: { accent: obState.accent, dark: obState.dark, light: obState.light, bg: obState.bg, label: obState.theme },
-    materias: obState.materias,
-    setup: true
+    career: obState.career, uni: obState.uni, years: obState.years,
+    theme: { accent: obState.accent, dark: obState.dark, light: obState.light, bg: obState.bg },
+    materias: obState.materias, setup: true
   };
   localStorage.setItem('userConfig', JSON.stringify(config));
-  if (window.syncCloud) window.syncCloud();
+  if (window.syncCloud) window.syncCloud(); // Sube todo al nuevo usuario
 
-  aplicarTema(config.theme);
+  // 3. Mostrar App
   document.getElementById('onboardingScreen').style.display = 'none';
   document.getElementById('appContent').style.display = 'block';
-  document.getElementById('headerCareer').textContent = config.career;
-  document.getElementById('headerUni').textContent = config.uni;
-
-  construirMalla(config.materias);
-  initApp();
-
+  window.initApp();
   confetti({ particleCount: 150, spread: 80, origin: { y: 0.5 }, colors: [obState.accent, obState.light, '#ffffff'] });
 }
 
 // ============================================
-// CONSTRUIR LA MALLA DESDE LOS DATOS DE IA
+// LÓGICA DE ELECTIVAS (LA MAGIA DE LA GRILLA)
 // ============================================
 function construirMalla(anios) {
   const container = document.getElementById('mallaContainer');
@@ -893,105 +558,83 @@ function construirMalla(anios) {
 
   anios.forEach(anio => {
     const col = document.createElement('div');
-    col.className = 'year-column';
-    col.innerHTML = `<h2>${anio.nombre}</h2>`;
+    
+    // Si la IA detectó que es electiva, aplicamos los estilos especiales
+    if (anio.es_electiva) {
+      col.className = 'year-column electives-column';
+      col.dataset.reqCount = anio.requeridas || 3; // Guardamos cuántas hay que aprobar
+      
+      col.innerHTML = `
+        <h2>${anio.nombre} <br><span class="elec-counter" id="counter-${anio.nombre.replace(/\s+/g, '')}">Aprobadas: 0 / ${anio.requeridas || 3}</span></h2>
+        <div class="electives-grid" id="grid-${anio.nombre.replace(/\s+/g, '')}"></div>
+      `;
+      
+      const grid = col.querySelector('.electives-grid');
+      (anio.materias || []).forEach(m => {
+        const div = document.createElement('div');
+        div.className = 'course enabled'; 
+        div.dataset.id = m.id;
+        div.dataset.isElective = "true"; // Marcamos que es electiva para la lógica
+        div.textContent = m.nombre;
+        grid.appendChild(div);
+      });
+      container.appendChild(col);
 
-    (anio.materias || []).forEach(m => {
-      const div = document.createElement('div');
-      div.className = 'course enabled'; // Vienen habilitadas por defecto hasta que se corra updateStates()
-      div.dataset.id = m.id;
-      if (m.correlativas && m.correlativas.length > 0) {
-        div.dataset.req = m.correlativas.join(',');
-      }
-      div.textContent = m.nombre;
-      col.appendChild(div);
-    });
-
-    container.appendChild(col);
+    } else {
+      // Columna normal
+      col.className = 'year-column';
+      col.innerHTML = `<h2>${anio.nombre}</h2>`;
+      (anio.materias || []).forEach(m => {
+        const div = document.createElement('div');
+        div.className = 'course enabled'; 
+        div.dataset.id = m.id;
+        if (m.correlativas && m.correlativas.length > 0) div.dataset.req = m.correlativas.join(',');
+        div.textContent = m.nombre;
+        col.appendChild(div);
+      });
+      container.appendChild(col);
+    }
   });
 
   asignarEventosMaterias();
 }
 
 // ============================================
-// APP PRINCIPAL - INICIALIZACIÓN
+// APP GENERAL
 // ============================================
 window.initApp = function() {
   const config = JSON.parse(localStorage.getItem('userConfig') || '{}');
-
   if (config.setup) {
-    document.getElementById('onboardingScreen').style.display = 'none';
-    document.getElementById('appContent').style.display = 'block';
-    aplicarTema(config.theme || {});
-    document.getElementById('headerCareer').textContent = config.career || 'Mi Carrera';
-    document.getElementById('headerUni').textContent = config.uni || 'Mi Universidad';
-    if (config.materias && config.materias.length > 0) {
-      construirMalla(config.materias);
-    }
+    document.documentElement.style.setProperty('--accent', config.theme.accent);
+    document.documentElement.style.setProperty('--accent-dark', config.theme.dark);
+    document.documentElement.style.setProperty('--accent-light', config.theme.light);
+    document.documentElement.style.setProperty('--accent-bg', config.theme.bg);
+    document.body.style.backgroundColor = config.theme.bg;
+    
+    document.getElementById('headerCareer').textContent = config.career;
+    document.getElementById('headerUni').textContent = config.uni;
+    if (config.materias) construirMalla(config.materias);
   }
-
-  tableData = JSON.parse(localStorage.getItem('materiasTabla') || '{}');
-  gradesData = JSON.parse(localStorage.getItem('materiasNotas') || '{}');
-  calendarData = JSON.parse(localStorage.getItem('indCalendar') || '{}');
-  plannedData = JSON.parse(localStorage.getItem('materiasPlanificadas') || '{}');
-
-  initScheduleModal();
   loadProgress();
   updateStates();
-  renderCalendar();
-  buildSchedule();
-  renderGrades();
-  renderStatsAndPlanner();
 };
 
-// ============================================
-// APLICAR TEMA DE COLOR
-// ============================================
-function aplicarTema(theme) {
-  if (!theme || !theme.accent) return;
-  const r = document.documentElement;
-  r.style.setProperty('--accent', theme.accent);
-  r.style.setProperty('--accent-dark', theme.dark);
-  r.style.setProperty('--accent-light', theme.light);
-  r.style.setProperty('--accent-bg', theme.bg);
-  document.body.style.backgroundColor = theme.bg;
-}
-
-// ============================================
-// LÓGICA DE MATERIAS
-// ============================================
-let tableData = {}, gradesData = {}, calendarData = {}, plannedData = {};
-
-function getCourses() {
-  return document.querySelectorAll('.course');
-}
+function getCourses() { return document.querySelectorAll('.course'); }
 
 function asignarEventosMaterias() {
   getCourses().forEach(c => {
     c.addEventListener('click', () => {
       if (!c.classList.contains('enabled')) return;
       c.classList.toggle('completed');
-      const config = JSON.parse(localStorage.getItem('userConfig') || '{}');
-      const accent = config.theme ? config.theme.accent : '#c43670';
-      const light = config.theme ? config.theme.light : '#ffc3cc';
+      
       if (c.classList.contains('completed')) {
-        confetti({ origin: { y: 0.7 }, colors: [accent, light, '#ffffff'] });
-      } else {
-        delete gradesData[c.dataset.id];
-        delete plannedData[c.dataset.id];
-        localStorage.setItem('materiasNotas', JSON.stringify(gradesData));
-        localStorage.setItem('materiasPlanificadas', JSON.stringify(plannedData));
-        renderGrades();
+        const config = JSON.parse(localStorage.getItem('userConfig') || '{}');
+        confetti({ origin: { y: 0.7 }, colors: [config.theme?.accent || '#c43670', '#ffffff'] });
       }
-      saveProgress(); updateStates();
+      
+      saveProgress(); 
+      updateStates();
     });
-    c.addEventListener('mouseenter', () => {
-      const myId = c.dataset.id;
-      getCourses().forEach(reqC => {
-        if ((reqC.dataset.req || '').split(',').includes(myId)) reqC.classList.add('is-unlocked');
-      });
-    });
-    c.addEventListener('mouseleave', () => getCourses().forEach(rc => rc.classList.remove('is-unlocked')));
   });
 }
 
@@ -1011,239 +654,70 @@ function loadProgress() {
 }
 
 function updateStates() {
-  const completed = new Set();
-  getCourses().forEach(c => { if (c.classList.contains('completed')) completed.add(c.dataset.id); });
-  getCourses().forEach(c => {
-    const reqs = c.dataset.req ? c.dataset.req.split(',').filter(Boolean) : [];
-    const allMet = reqs.every(r => completed.has(r));
-    if (reqs.length === 0 || allMet) c.classList.add('enabled');
-    else { c.classList.remove('enabled'); c.classList.remove('completed'); }
+  const completedIds = new Set();
+  let totalComunes = 0, aprobadasComunes = 0;
+  let totalElectivasRequeridas = 0, electivasAprobadasCalculadas = 0;
+
+  // 1. Recolectar aprobadas
+  getCourses().forEach(c => { 
+    if (c.classList.contains('completed')) completedIds.add(c.dataset.id); 
   });
-  renderStatsAndPlanner();
+
+  // 2. Analizar por columnas (para el contador y las electivas)
+  document.querySelectorAll('.year-column').forEach(col => {
+    if (col.classList.contains('electives-column')) {
+      const requeridas = parseInt(col.dataset.reqCount) || 3;
+      const cursosElectivos = col.querySelectorAll('.course');
+      
+      let aprobadasAca = 0;
+      cursosElectivos.forEach(c => { if(c.classList.contains('completed')) aprobadasAca++; });
+      
+      // Actualizar el numerito visual (ej: 2/4)
+      const counterSpan = col.querySelector('.elec-counter');
+      if(counterSpan) counterSpan.textContent = `Aprobadas: ${aprobadasAca} / ${requeridas}`;
+      
+      // Sumar al progreso global (máximo hasta las requeridas, si hacés de más no te suma porcentaje extra)
+      totalElectivasRequeridas += requeridas;
+      electivasAprobadasCalculadas += Math.min(aprobadasAca, requeridas);
+
+    } else {
+      // Columna normal
+      const cursosNormales = col.querySelectorAll('.course');
+      totalComunes += cursosNormales.length;
+      cursosNormales.forEach(c => {
+        if(c.classList.contains('completed')) aprobadasComunes++;
+        
+        // Revisar correlativas
+        const reqs = c.dataset.req ? c.dataset.req.split(',').filter(Boolean) : [];
+        const allMet = reqs.every(r => completedIds.has(r));
+        if (reqs.length === 0 || allMet) c.classList.add('enabled');
+        else { c.classList.remove('enabled', 'completed'); }
+      });
+    }
+  });
+
+  // 3. Actualizar la rosquita de progreso
+  const granTotal = totalComunes + totalElectivasRequeridas;
+  const granAprobadas = aprobadasComunes + electivasAprobadasCalculadas;
+  const pct = granTotal > 0 ? Math.round((granAprobadas / granTotal) * 100) : 0;
+  
+  const elPct = document.getElementById('statsPercentage');
+  const elComp = document.getElementById('statsCompleted');
+  if(elPct) elPct.textContent = pct + '%';
+  if(elComp) elComp.textContent = granAprobadas;
 }
 
 window.switchTab = (tabName, event) => {
   document.querySelectorAll('.view-section').forEach(s => s.classList.remove('active'));
   document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-  const el = document.getElementById('view-' + tabName);
-  if (el) el.classList.add('active');
-  if (event && event.currentTarget) event.currentTarget.classList.add('active');
+  document.getElementById('view-' + tabName).classList.add('active');
+  if (event) event.currentTarget.classList.add('active');
 };
 
-// HORARIO
-const horas = ["08:00","09:00","10:00","11:00","12:00","13:00","14:00","15:00","16:00","17:00","18:00","19:00","20:00","21:00","22:00","23:00"];
-const dias = ["Lunes","Martes","Miercoles","Jueves","Viernes","Sabado"];
-
-function buildSchedule() {
-  const body = document.getElementById('scheduleBody');
-  body.innerHTML = '';
-  horas.forEach(h => {
-    const row = document.createElement('tr');
-    row.innerHTML = `<td class="hour-col" data-label="Hora">${h}</td>`;
-    dias.forEach(d => {
-      const diaId = d.toLowerCase().replace('é','e').replace('á','a');
-      const cellId = `${diaId}-${h}`;
-      const content = tableData[cellId] || '';
-      const occ = content.trim() !== '' ? 'occupied-cell' : '';
-      row.innerHTML += `<td data-label="${d}"><textarea class="schedule-input ${occ}" data-id="${cellId}" oninput="saveTableCell(this)">${content}</textarea></td>`;
-    });
-    body.appendChild(row);
-  });
-}
-
-window.saveTableCell = (el) => {
-  tableData[el.dataset.id] = el.value;
-  localStorage.setItem('materiasTabla', JSON.stringify(tableData));
-  el.value.trim() !== '' ? el.classList.add('occupied-cell') : el.classList.remove('occupied-cell');
-  if (window.syncCloud) window.syncCloud();
-};
-
-function initScheduleModal() {
-  const ss = document.getElementById('schStart');
-  const se = document.getElementById('schEnd');
-  if (!ss || !se) return;
-  ss.innerHTML = ''; se.innerHTML = '';
-  horas.forEach((h, i) => {
-    ss.innerHTML += `<option value="${i}">${h}</option>`;
-    se.innerHTML += `<option value="${i+1}">${parseInt(h)+1}:00</option>`;
-  });
-}
-
-window.openScheduleModal = () => {
-  const sel = document.getElementById('schSubject');
-  sel.innerHTML = '';
-  const enabled = document.querySelectorAll('.course.enabled:not(.completed)');
-  if (enabled.length === 0) sel.innerHTML = '<option>No hay materias disponibles</option>';
-  else enabled.forEach(c => sel.innerHTML += `<option>${c.textContent}</option>`);
-  document.getElementById('scheduleModal').style.display = 'flex';
-};
-
-window.closeScheduleModal = () => document.getElementById('scheduleModal').style.display = 'none';
-
-window.saveToSchedule = () => {
-  const subject = document.getElementById('schSubject').value;
-  const day = document.getElementById('schDay').value;
-  const si = parseInt(document.getElementById('schStart').value);
-  const ei = parseInt(document.getElementById('schEnd').value);
-  if (!subject) return;
-  if (si >= ei) { alert("Revisá la hora de fin."); return; }
-  for (let i = si; i < ei; i++) tableData[`${day}-${horas[i]}`] = subject;
-  localStorage.setItem('materiasTabla', JSON.stringify(tableData));
-  if (window.syncCloud) window.syncCloud();
-  buildSchedule(); closeScheduleModal();
-};
-
-// CALENDARIO
-const monthNames = ["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"];
-let currentMonth = new Date().getMonth();
-let currentYear = new Date().getFullYear();
-
-window.changeMonth = (offset) => {
-  currentMonth += offset;
-  if (currentMonth > 11) { currentMonth = 0; currentYear++; }
-  if (currentMonth < 0) { currentMonth = 11; currentYear--; }
-  renderCalendar();
-};
-
-function renderCalendar() {
-  const grid = document.getElementById('calendarGrid');
-  if (!grid) return;
-  grid.innerHTML = '';
-  document.getElementById('monthYearDisplay').textContent = `${monthNames[currentMonth]} ${currentYear}`;
-  const firstDay = new Date(currentYear, currentMonth, 1).getDay();
-  const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
-  for (let i = 0; i < firstDay; i++) grid.innerHTML += `<div class="cal-day empty"></div>`;
-  for (let d = 1; d <= daysInMonth; d++) {
-    const key = `${currentYear}-${currentMonth}-${d}`;
-    let evHtml = '';
-    if (calendarData[key]) {
-      calendarData[key].forEach((ev, idx) => {
-        evHtml += `<div class="cal-event-pill" style="background:${ev.color}" onclick="deleteCalEvent('${key}',${idx},event)" title="${ev.time} - ${ev.title}">${ev.time} - ${ev.title}</div>`;
-      });
-    }
-    grid.innerHTML += `<div class="cal-day" onclick="openCalModal('${key}',${d})"><div class="cal-date-num">${d}</div>${evHtml}</div>`;
-  }
-}
-
-window.openCalModal = (key, day) => {
-  document.getElementById('calDateKey').value = key;
-  document.getElementById('calModalDateDisplay').textContent = `${day} de ${monthNames[currentMonth]} de ${currentYear}`;
-  document.getElementById('calTitle').value = '';
-  document.getElementById('calTime').value = '';
-  document.getElementById('calModal').style.display = 'flex';
-};
-
-window.closeCalModal = () => document.getElementById('calModal').style.display = 'none';
-
-window.saveCalEvent = (openGoogle) => {
-  const key = document.getElementById('calDateKey').value;
-  const title = document.getElementById('calTitle').value;
-  const time = document.getElementById('calTime').value || "Todo el día";
-  const color = document.getElementById('calColor').value;
-  if (!title) { alert("Escribí qué vas a hacer."); return; }
-  if (!calendarData[key]) calendarData[key] = [];
-  calendarData[key].push({ title, time, color });
-  localStorage.setItem('indCalendar', JSON.stringify(calendarData));
-  if (window.syncCloud) window.syncCloud();
-  renderCalendar(); closeCalModal();
-  if (openGoogle) {
-    const [y, m, d] = key.split('-');
-    const fm = (parseInt(m)+1).toString().padStart(2,'0');
-    const fd = d.padStart(2,'0');
-    const gd = `${y}${fm}${fd}/${y}${fm}${fd}`;
-    window.open(`https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(title)}&dates=${gd}&details=${encodeURIComponent("Horario: "+time)}`,'_blank');
-  }
-};
-
-window.deleteCalEvent = (key, idx, e) => {
-  e.stopPropagation();
-  if (confirm("¿Borrar esta actividad?")) {
-    calendarData[key].splice(idx, 1);
-    if (calendarData[key].length === 0) delete calendarData[key];
-    localStorage.setItem('indCalendar', JSON.stringify(calendarData));
-    if (window.syncCloud) window.syncCloud();
-    renderCalendar();
-  }
-};
-
-// NOTAS
-function renderGrades() {
-  const container = document.getElementById('gradesContainer');
-  if (!container) return;
-  container.innerHTML = '';
-  const completed = Array.from(getCourses()).filter(c => c.classList.contains('completed'));
-  if (completed.length === 0) {
-    container.innerHTML = '<div style="text-align:center;opacity:0.6">Aún no hay materias aprobadas.</div>';
-    document.getElementById('averageDisplay').textContent = '0.00';
-    return;
-  }
-  completed.forEach(course => {
-    const id = course.dataset.id;
-    const row = document.createElement('div');
-    row.className = 'grade-row';
-    row.innerHTML = `<span>${course.textContent}</span><input type="text" class="grade-input" placeholder="-" value="${gradesData[id]||''}" oninput="updateGrade('${id}',this.value)">`;
-    container.appendChild(row);
-  });
-  calculateAverage();
-}
-
-window.updateGrade = (id, value) => {
-  const num = parseFloat(value);
-  if (!isNaN(num)) { if(num>10) value='10'; if(num<0) value='0'; }
-  value === '' ? delete gradesData[id] : gradesData[id] = value;
-  localStorage.setItem('materiasNotas', JSON.stringify(gradesData));
-  if (window.syncCloud) window.syncCloud();
-  calculateAverage();
-};
-
-function calculateAverage() {
-  const vals = Object.values(gradesData).map(v => parseFloat(v)).filter(v => !isNaN(v));
-  document.getElementById('averageDisplay').textContent = vals.length === 0 ? '0.00' : (vals.reduce((a,b)=>a+b,0)/vals.length).toFixed(2);
-}
-
-// PROGRESO
-function renderStatsAndPlanner() {
-  const total = getCourses().length;
-  const completed = document.querySelectorAll('.course.completed').length;
-  const pct = total > 0 ? Math.round((completed/total)*100) : 0;
-  const spEl = document.getElementById('statsPercentage');
-  const scEl = document.getElementById('statsCompleted');
-  const srEl = document.getElementById('statsRemaining');
-  const pcEl = document.getElementById('progressCircle');
-  if (spEl) spEl.textContent = pct + '%';
-  if (scEl) scEl.textContent = completed;
-  if (srEl) srEl.textContent = total - completed;
-  if (pcEl) pcEl.style.background = `conic-gradient(var(--accent-light) ${pct}%, #ffffff ${pct}% 100%)`;
-
-  const grid = document.getElementById('plannerGrid');
-  if (!grid) return;
-  grid.innerHTML = '';
-  const available = Array.from(getCourses()).filter(c => c.classList.contains('enabled') && !c.classList.contains('completed'));
-  if (available.length === 0) { grid.innerHTML = '<div style="opacity:0.6;font-style:italic">No hay materias disponibles por ahora.</div>'; return; }
-  available.forEach(course => {
-    const id = course.dataset.id;
-    const card = document.createElement('div');
-    card.className = `plan-card ${plannedData[id] ? 'planned' : ''}`;
-    card.textContent = course.textContent;
-    card.onclick = () => {
-      plannedData[id] ? delete plannedData[id] : plannedData[id] = true;
-      card.classList.toggle('planned');
-      localStorage.setItem('materiasPlanificadas', JSON.stringify(plannedData));
-      if (window.syncCloud) window.syncCloud();
-    };
-    grid.appendChild(card);
-  });
-}
-
-// Arrancar la app al cargar la página
 window.addEventListener('load', () => {
   const config = JSON.parse(localStorage.getItem('userConfig') || '{}');
-  if (!config.setup) {
-    document.getElementById('onboardingScreen').style.display = 'flex';
-    document.getElementById('appContent').style.display = 'none';
-  } else {
-    window.initApp();
-  }
+  if (!config.setup) { document.getElementById('loginOverlay').style.display = 'flex'; }
+  else { window.initApp(); }
 });
 </script>
 </body>
