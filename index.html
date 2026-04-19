@@ -24,8 +24,10 @@
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
     const db = getFirestore(app);
+    
+    // Guardamos 'auth' globalmente para que el otro script lo pueda usar
+    window.firebaseAuth = auth;
 
-    // EXPONEMOS FUNCIONES GLOBALES DE FIREBASE
     window.iniciarSesion = async () => {
       const email = document.getElementById('loginEmail').value;
       const pass = document.getElementById('loginPass').value;
@@ -40,9 +42,9 @@
     window.crearCuentaFinal = async (email, pass) => {
       try {
         await createUserWithEmailAndPassword(auth, email, pass);
-        return true; // Éxito
+        return true; 
       } catch (e) {
-        if (e.code === 'auth/email-already-in-use') alert("Ese email ya está registrado. Por favor, iniciá sesión.");
+        if (e.code === 'auth/email-already-in-use') alert("Ese email ya está registrado. Por favor, volvé atrás e iniciá sesión.");
         else alert("Error al crear cuenta: " + e.message);
         return false;
       }
@@ -54,16 +56,29 @@
       location.reload();
     };
 
+    // MAGIA DE RUTEADO: Decide a qué pantalla mandarte
     onAuthStateChanged(auth, async (user) => {
       if (user) {
-        document.getElementById('loginOverlay').style.display = 'none';
-        document.getElementById('onboardingScreen').style.display = 'none';
-        document.getElementById('btnOpenLogin').style.display = 'none';
-        document.getElementById('btnLogout').style.display = 'inline-block';
         await loadFromCloud(user.uid);
+        const config = JSON.parse(localStorage.getItem('userConfig') || '{}');
+        
+        if (config.setup && config.materias) {
+          // Todo listo: Entra a la app
+          document.getElementById('loginOverlay').style.display = 'none';
+          document.getElementById('onboardingScreen').style.display = 'none';
+          document.getElementById('appContent').style.display = 'block';
+          if (window.initApp) window.initApp();
+        } else {
+          // Logueado pero SIN PDF subido: Lo manda al cuestionario
+          document.getElementById('loginOverlay').style.display = 'none';
+          document.getElementById('appContent').style.display = 'none';
+          document.getElementById('onboardingScreen').style.display = 'flex';
+        }
       } else {
-        document.getElementById('btnOpenLogin').style.display = 'inline-block';
-        document.getElementById('btnLogout').style.display = 'none';
+        // Deslogueado: Muestra el inicio de sesión
+        document.getElementById('loginOverlay').style.display = 'flex';
+        document.getElementById('onboardingScreen').style.display = 'none';
+        document.getElementById('appContent').style.display = 'none';
       }
     });
 
@@ -74,8 +89,6 @@
         materiasAprobadas: JSON.parse(localStorage.getItem('materiasAprobadas') || '{}'),
         materiasNotas: JSON.parse(localStorage.getItem('materiasNotas') || '{}'),
         materiasPlanificadas: JSON.parse(localStorage.getItem('materiasPlanificadas') || '{}'),
-        materiasPremios: JSON.parse(localStorage.getItem('materiasPremios') || '[]'),
-        materiasExamenes: JSON.parse(localStorage.getItem('materiasExamenes') || '[]'),
         materiasTabla: JSON.parse(localStorage.getItem('materiasTabla') || '{}'),
         indCalendar: JSON.parse(localStorage.getItem('indCalendar') || '{}'),
         userConfig: JSON.parse(localStorage.getItem('userConfig') || '{}')
@@ -90,17 +103,13 @@
         localStorage.setItem('materiasAprobadas', JSON.stringify(data.materiasAprobadas || {}));
         localStorage.setItem('materiasNotas', JSON.stringify(data.materiasNotas || {}));
         localStorage.setItem('materiasPlanificadas', JSON.stringify(data.materiasPlanificadas || {}));
-        localStorage.setItem('materiasPremios', JSON.stringify(data.materiasPremios || []));
-        localStorage.setItem('materiasExamenes', JSON.stringify(data.materiasExamenes || []));
         localStorage.setItem('materiasTabla', JSON.stringify(data.materiasTabla || {}));
         localStorage.setItem('indCalendar', JSON.stringify(data.indCalendar || {}));
         localStorage.setItem('userConfig', JSON.stringify(data.userConfig || {}));
       } else {
         await saveToCloud();
       }
-      if (window.initApp) window.initApp();
     }
-
     window.syncCloud = saveToCloud;
   </script>
 
@@ -176,7 +185,6 @@
     .theme-card.selected { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-light); }
     .theme-swatch { height: 40px; border-radius: 8px; margin-bottom: 8px; }
     .theme-name { font-size: 12px; font-weight: 700; color: #1a1a1a; }
-    .theme-desc { font-size: 10px; color: #888; margin-top: 2px; }
 
     /* Upload */
     .ob-upload { border: 2px dashed #ddd; border-radius: 14px; padding: 2rem 1rem; text-align: center; cursor: pointer; background: #fafafa; position: relative; margin-bottom: 1rem; }
@@ -184,7 +192,6 @@
     .ob-upload input[type=file] { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%; }
     .ob-upload-icon { font-size: 32px; margin-bottom: 0.5rem; }
     .ob-upload-title { font-size: 14px; font-weight: 600; color: #333; margin-bottom: 4px; }
-    .ob-upload-sub { font-size: 12px; color: #888; }
     .ob-file-preview { display: none; align-items: center; gap: 10px; background: #f0fff4; border: 1.5px solid #86efac; border-radius: 10px; padding: 10px 14px; margin-bottom: 1rem; }
     .ob-file-preview.show { display: flex; }
     .ob-file-name { font-size: 13px; font-weight: 600; color: #166534; flex: 1; }
@@ -216,7 +223,7 @@
     .tabs-container { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
     .tab-btn { padding: 8px 16px; border: none; border-radius: 20px; font-size: 0.95rem; font-weight: 600; cursor: pointer; background: transparent; color: var(--accent-light); opacity: 0.7; font-family: 'Poppins', sans-serif; }
     .tab-btn.active { opacity: 1; background: var(--accent-light); color: var(--accent-dark); }
-    .btn-auth { border: 2px solid var(--accent-light); opacity: 1; }
+    .btn-logout { background: rgba(255,255,255,0.1); border: 1px solid var(--accent-light); }
     
     .main-content { padding: 0 40px; box-sizing: border-box; }
     .view-section { display: none; animation: fadeIn 0.4s ease; width: 100%; }
@@ -244,21 +251,13 @@
       font-weight: 600; position: relative; cursor: not-allowed; opacity: 0.5;
       transition: all 0.3s; color: #28301c; background: #fff;
     }
-    /* Materias electivas un poco más chicas para que entren bien en la grilla */
+    /* Materias electivas un poco más chicas */
     .electives-grid .course { min-width: 130px; max-width: 130px; font-size: 0.75rem; padding: 10px; }
 
     .course.enabled { cursor: pointer; opacity: 1; border-color: var(--accent-light); }
     .course.enabled:hover { transform: translateY(-3px); box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
     .course.completed { opacity: 1; border-color: var(--accent-light); background: var(--accent-light); color: var(--accent-dark); text-decoration: line-through; }
     .course.completed::after { content: '★'; position: absolute; top: -8px; right: -8px; background: var(--accent-dark); color: var(--accent-light); border-radius: 50%; width: 20px; height: 20px; font-size: 12px; line-height: 20px; text-align: center; }
-
-    /* Modales, tablas y progreso (mantienen tu diseño) */
-    .schedule-table { width: 100%; border-collapse: collapse; color: var(--accent-dark); background: #fff;}
-    .schedule-table th, .schedule-table td { border: 1px solid var(--accent-light); padding: 0; text-align: center; height: 50px; }
-    .schedule-table th { background: var(--accent-light); padding: 10px; font-weight: 700; }
-    .hour-col { background: #fff9fa; font-weight: 700; width: 100px; }
-    .schedule-input { width: 100%; height: 100%; border: none; outline: none; background: transparent; padding: 5px; text-align: center; color: var(--accent-dark); font-weight: 600; font-family: 'Poppins'; }
-    .occupied-cell { background-color: var(--accent-bg) !important; color: #faffc7 !important; }
 
     /* Responsive */
     @media (max-width: 768px) {
@@ -271,14 +270,6 @@
       .course { width: 100%; max-width: 100%; }
       .electives-grid { width: 100%; grid-template-columns: repeat(2, 1fr); }
       .electives-grid .course { width: 100%; max-width: 100%; min-width: auto; }
-      .schedule-table, .schedule-table tbody, .schedule-table tr, .schedule-table td { display: block; width: 100%; box-sizing: border-box; }
-      .schedule-table thead { display: none; }
-      .schedule-table tr { margin-bottom: 20px; border: 2px solid var(--accent-light); border-radius: 15px; overflow: hidden; background: #fff; }
-      .schedule-table td { display: flex; justify-content: space-between; align-items: center; padding: 10px 15px; border-bottom: 1px solid rgba(255,195,204,0.4); min-height: 40px; text-align: right; }
-      .schedule-table td::before { content: attr(data-label); font-weight: bold; width: 40%; text-align: left; }
-      .schedule-input { width: 55%; text-align: right; }
-      .hour-col { background: var(--accent-bg) !important; color: #fff !important; justify-content: center !important; }
-      .hour-col::before { display: none; }
     }
   </style>
 </head>
@@ -381,9 +372,9 @@
     <div class="ob-step" id="obs4">
       <div class="ob-step-label">Paso 4 de 4</div>
       <div class="ob-step-title">¡Último paso! 🚀</div>
-      <div class="ob-step-sub">Creá tu usuario para guardar esta malla en la nube para siempre.</div>
+      <div class="ob-step-sub">Guardá tu malla en la nube para siempre.</div>
       
-      <div style="background:#fafafa; border:1px solid #e5e5e5; padding: 15px; border-radius: 12px; margin-bottom: 20px;">
+      <div id="registroInputs" style="background:#fafafa; border:1px solid #e5e5e5; padding: 15px; border-radius: 12px; margin-bottom: 20px;">
         <label class="ob-label">Email de tu nueva cuenta</label>
         <input type="email" id="regisEmail" class="ob-input" placeholder="tu@email.com" style="margin-bottom: 10px; border-color:#ccc;">
         <label class="ob-label">Contraseña</label>
@@ -392,7 +383,7 @@
 
       <div class="ob-nav">
         <button class="ob-btn-back" onclick="obGo(3)">← Atrás</button>
-        <button class="ob-btn-next" onclick="obFinish()" style="font-size:15px; background: #28301c;">✦ Crear Cuenta y Malla</button>
+        <button class="ob-btn-next" id="btnFinishOb" onclick="obFinish()" style="font-size:15px; background: #28301c;">✦ Crear Cuenta y Malla</button>
       </div>
     </div>
   </div>
@@ -406,10 +397,8 @@
     </div>
     <div class="tabs-container">
       <button class="tab-btn active" onclick="switchTab('map', event)">🗺️ Plan</button>
-      <button class="tab-btn" onclick="switchTab('calendar', event)">🗓️ Calendario</button>
-      <button class="tab-btn" onclick="switchTab('schedule', event)">📅 Horario</button>
       <button class="tab-btn" onclick="switchTab('stats', event)">📊 Progreso</button>
-      <button class="tab-btn btn-logout" id="btnLogout" onclick="logout()">Cerrar Sesión</button>
+      <button class="tab-btn btn-logout" onclick="logout()">Cerrar Sesión</button>
     </div>
   </header>
 
@@ -431,8 +420,7 @@
         </div>
       </div>
     </div>
-    
-    </main>
+  </main>
 </div>
 
 <script>
@@ -461,6 +449,19 @@ function obGo(n) {
     obState.years = document.getElementById('ob-years').value;
     if (!obState.career || !obState.uni) { alert('Completá tu carrera para seguir.'); return; }
   }
+  
+  // Si va al paso 4 y ya está logueado, escondemos el pedir contraseña
+  if (n === 4) {
+    const user = window.firebaseAuth ? window.firebaseAuth.currentUser : null;
+    if (user) {
+      document.getElementById('registroInputs').style.display = 'none';
+      document.getElementById('btnFinishOb').textContent = '✦ Guardar mi malla';
+    } else {
+      document.getElementById('registroInputs').style.display = 'block';
+      document.getElementById('btnFinishOb').textContent = '✦ Crear Cuenta y Malla';
+    }
+  }
+
   document.querySelectorAll('.ob-step').forEach(s => s.classList.remove('active'));
   document.getElementById('obs' + n).classList.add('active');
   const pct = [25, 50, 75, 100][n - 1];
@@ -525,24 +526,26 @@ async function obHandleFile(input) {
 // FINALIZAR Y CREAR CUENTA
 // ============================================
 async function obFinish() {
-  const email = document.getElementById('regisEmail').value;
-  const pass = document.getElementById('regisPass').value;
-  if (!email || pass.length < 6) { alert("Escribí un mail válido y contraseña de 6+ letras."); return; }
+  const user = window.firebaseAuth ? window.firebaseAuth.currentUser : null;
+  
+  // Si no hay cuenta, la creamos
+  if (!user) {
+    const email = document.getElementById('regisEmail').value;
+    const pass = document.getElementById('regisPass').value;
+    if (!email || pass.length < 6) { alert("Escribí un mail válido y contraseña de 6+ letras."); return; }
+    const exito = await window.crearCuentaFinal(email, pass);
+    if (!exito) return; 
+  }
 
-  // 1. Crear cuenta en Firebase
-  const exito = await window.crearCuentaFinal(email, pass);
-  if (!exito) return; // Se frena si el mail ya existe
-
-  // 2. Si se creó bien, guardamos configuración
+  // Guardamos configuración
   const config = {
     career: obState.career, uni: obState.uni, years: obState.years,
     theme: { accent: obState.accent, dark: obState.dark, light: obState.light, bg: obState.bg },
     materias: obState.materias, setup: true
   };
   localStorage.setItem('userConfig', JSON.stringify(config));
-  if (window.syncCloud) window.syncCloud(); // Sube todo al nuevo usuario
+  if (window.syncCloud) window.syncCloud(); 
 
-  // 3. Mostrar App
   document.getElementById('onboardingScreen').style.display = 'none';
   document.getElementById('appContent').style.display = 'block';
   window.initApp();
@@ -559,10 +562,9 @@ function construirMalla(anios) {
   anios.forEach(anio => {
     const col = document.createElement('div');
     
-    // Si la IA detectó que es electiva, aplicamos los estilos especiales
     if (anio.es_electiva) {
       col.className = 'year-column electives-column';
-      col.dataset.reqCount = anio.requeridas || 3; // Guardamos cuántas hay que aprobar
+      col.dataset.reqCount = anio.requeridas || 3; 
       
       col.innerHTML = `
         <h2>${anio.nombre} <br><span class="elec-counter" id="counter-${anio.nombre.replace(/\s+/g, '')}">Aprobadas: 0 / ${anio.requeridas || 3}</span></h2>
@@ -574,14 +576,13 @@ function construirMalla(anios) {
         const div = document.createElement('div');
         div.className = 'course enabled'; 
         div.dataset.id = m.id;
-        div.dataset.isElective = "true"; // Marcamos que es electiva para la lógica
+        div.dataset.isElective = "true"; 
         div.textContent = m.nombre;
         grid.appendChild(div);
       });
       container.appendChild(col);
 
     } else {
-      // Columna normal
       col.className = 'year-column';
       col.innerHTML = `<h2>${anio.nombre}</h2>`;
       (anio.materias || []).forEach(m => {
@@ -631,7 +632,6 @@ function asignarEventosMaterias() {
         const config = JSON.parse(localStorage.getItem('userConfig') || '{}');
         confetti({ origin: { y: 0.7 }, colors: [config.theme?.accent || '#c43670', '#ffffff'] });
       }
-      
       saveProgress(); 
       updateStates();
     });
@@ -663,7 +663,7 @@ function updateStates() {
     if (c.classList.contains('completed')) completedIds.add(c.dataset.id); 
   });
 
-  // 2. Analizar por columnas (para el contador y las electivas)
+  // 2. Analizar por columnas
   document.querySelectorAll('.year-column').forEach(col => {
     if (col.classList.contains('electives-column')) {
       const requeridas = parseInt(col.dataset.reqCount) || 3;
@@ -672,22 +672,18 @@ function updateStates() {
       let aprobadasAca = 0;
       cursosElectivos.forEach(c => { if(c.classList.contains('completed')) aprobadasAca++; });
       
-      // Actualizar el numerito visual (ej: 2/4)
       const counterSpan = col.querySelector('.elec-counter');
       if(counterSpan) counterSpan.textContent = `Aprobadas: ${aprobadasAca} / ${requeridas}`;
       
-      // Sumar al progreso global (máximo hasta las requeridas, si hacés de más no te suma porcentaje extra)
       totalElectivasRequeridas += requeridas;
       electivasAprobadasCalculadas += Math.min(aprobadasAca, requeridas);
 
     } else {
-      // Columna normal
       const cursosNormales = col.querySelectorAll('.course');
       totalComunes += cursosNormales.length;
       cursosNormales.forEach(c => {
         if(c.classList.contains('completed')) aprobadasComunes++;
         
-        // Revisar correlativas
         const reqs = c.dataset.req ? c.dataset.req.split(',').filter(Boolean) : [];
         const allMet = reqs.every(r => completedIds.has(r));
         if (reqs.length === 0 || allMet) c.classList.add('enabled');
@@ -713,12 +709,6 @@ window.switchTab = (tabName, event) => {
   document.getElementById('view-' + tabName).classList.add('active');
   if (event) event.currentTarget.classList.add('active');
 };
-
-window.addEventListener('load', () => {
-  const config = JSON.parse(localStorage.getItem('userConfig') || '{}');
-  if (!config.setup) { document.getElementById('loginOverlay').style.display = 'flex'; }
-  else { window.initApp(); }
-});
 </script>
 </body>
 </html>
