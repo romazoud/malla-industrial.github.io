@@ -3,91 +3,207 @@
 <head>
   <meta charset="UTF-8" />
   <title>Malla Curricular - Ingeniería Industrial</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
   <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,700;1,400&family=Poppins:wght@400;600;700;900&display=swap" rel="stylesheet">
-  
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+    import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyDFtB_22y_4lkVjjQXMyhd0pltKjOeYiv0",
+      authDomain: "facu-app-5bef9.firebaseapp.com",
+      projectId: "facu-app-5bef9",
+      storageBucket: "facu-app-5bef9.firebasestorage.app",
+      messagingSenderId: "633251183436",
+      appId: "1:633251183436:web:8a2b36bd8a215c4c5a2de9"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    // --- MANEJO DE SESIÓN Y REGISTRO ---
+    window.iniciarSesion = async () => {
+      const email = document.getElementById('loginEmail').value;
+      const pass = document.getElementById('loginPass').value;
+      if(!email || !pass) { alert("Por favor, completá tu email y contraseña para entrar."); return; }
+      try {
+        await signInWithEmailAndPassword(auth, email, pass);
+      } catch (error) {
+        alert("Email o contraseña incorrectos. Si todavía no tenés cuenta, tocá 'Crear Cuenta Nueva'.");
+      }
+    };
+
+    window.registrarse = async () => {
+      const email = document.getElementById('loginEmail').value;
+      const pass = document.getElementById('loginPass').value;
+      if(!email || !pass) { alert("Completá email y contraseña para registrarte."); return; }
+      if(pass.length < 6) { alert("La contraseña debe tener al menos 6 letras o números."); return; }
+      try {
+        await createUserWithEmailAndPassword(auth, email, pass);
+        alert("¡Cuenta creada con éxito! Ya podés empezar a guardar tu progreso.");
+      } catch (error) {
+        if (error.code === 'auth/email-already-in-use') {
+          alert("Ese email ya está registrado. Por favor, tocá 'Iniciar Sesión'.");
+        } else {
+          alert("Hubo un error: " + error.message);
+        }
+      }
+    };
+
+    window.logout = () => signOut(auth);
+
+    onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        document.getElementById('loginOverlay').style.display = 'none';
+        document.getElementById('btnOpenLogin').style.display = 'none';
+        document.getElementById('btnLogout').style.display = 'inline-block';
+        await loadFromCloud(user.uid);
+      } else {
+        document.getElementById('btnOpenLogin').style.display = 'inline-block';
+        document.getElementById('btnLogout').style.display = 'none';
+      }
+    });
+
+    async function saveToCloud() {
+      const user = auth.currentUser;
+      if (!user) return; 
+      
+      const data = {
+        materiasAprobadas: JSON.parse(localStorage.getItem('materiasAprobadas') || '{}'),
+        materiasNotas: JSON.parse(localStorage.getItem('materiasNotas') || '{}'),
+        materiasPlanificadas: JSON.parse(localStorage.getItem('materiasPlanificadas') || '{}'),
+        materiasPremios: JSON.parse(localStorage.getItem('materiasPremios') || '[]'),
+        materiasExamenes: JSON.parse(localStorage.getItem('materiasExamenes') || '[]'),
+        materiasTabla: JSON.parse(localStorage.getItem('materiasTabla') || '{}'),
+        indCalendar: JSON.parse(localStorage.getItem('indCalendar') || '{}')
+      };
+      await setDoc(doc(db, "users", user.uid), data);
+    }
+
+    async function loadFromCloud(uid) {
+      const docRef = doc(db, "users", uid);
+      const docSnap = await getDoc(docRef);
+
+      if (docSnap.exists()) {
+        const data = docSnap.data();
+        localStorage.setItem('materiasAprobadas', JSON.stringify(data.materiasAprobadas || {}));
+        localStorage.setItem('materiasNotas', JSON.stringify(data.materiasNotas || {}));
+        localStorage.setItem('materiasPlanificadas', JSON.stringify(data.materiasPlanificadas || {}));
+        localStorage.setItem('materiasPremios', JSON.stringify(data.materiasPremios || []));
+        localStorage.setItem('materiasExamenes', JSON.stringify(data.materiasExamenes || []));
+        localStorage.setItem('materiasTabla', JSON.stringify(data.materiasTabla || {}));
+        localStorage.setItem('indCalendar', JSON.stringify(data.indCalendar || {}));
+      } else {
+        await saveToCloud(); 
+      }
+      window.syncInterface();
+    }
+
+    window.syncCloud = saveToCloud;
+  </script>
 
   <style>
   /* --- COLORES BASE Y TIPOGRAFÍA --- */
-  body {
-    font-family: 'Poppins', sans-serif;
-    background-color: #c43670; 
-    color: #faffc7; 
-    margin: 0;
-    padding: 0; 
-  }
+  body { font-family: 'Poppins', sans-serif; background-color: #c43670; color: #faffc7; margin: 0; padding: 0; overflow-x: hidden; }
+  h1, h2, h3 { font-family: 'Lora', serif; color: #ffc3cc; margin: 10px 0; font-weight: 700; }
 
-  h1, h2, h3 {
-    font-family: 'Lora', serif;
-    color: #ffc3cc;
-    margin: 10px 0;
-    font-weight: 700;
+  /* --- PANTALLA DE INICIO DE SESIÓN --- */
+  #loginOverlay {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background-color: rgba(196, 54, 112, 0.95); z-index: 9999;
+    display: none; justify-content: center; align-items: center;
   }
+  .login-box {
+    background: #ffffff; padding: 40px; border-radius: 20px; box-shadow: 0 15px 40px rgba(0,0,0,0.3);
+    width: 90%; max-width: 350px; text-align: center; border: 4px solid #ffc3cc; position: relative;
+  }
+  .login-box h2 { color: #45151b; margin-top: 0; font-size: 1.8rem; }
+  .login-box p { color: #45151b; opacity: 0.8; font-size: 0.9rem; margin-bottom: 25px; }
+  .login-input {
+    width: 100%; padding: 12px; margin-bottom: 15px; border-radius: 8px; border: 2px solid #ffc3cc; 
+    font-family: 'Poppins', sans-serif; background: #fff9fa; color: #45151b; font-weight: 600; outline: none; box-sizing: border-box;
+  }
+  .btn-login { width: 100%; background: #45151b; color: #ffffff; border: none; padding: 12px; border-radius: 8px; font-weight: 700; cursor: pointer; transition: 0.3s; margin-bottom: 10px; font-family: 'Poppins', sans-serif; }
+  .btn-login:hover { transform: translateY(-2px); opacity: 0.9; }
+  .btn-register { background: #ffc3cc; color: #45151b; margin-bottom: 0; border: 2px solid #ffc3cc; }
+  .btn-close-login { position: absolute; top: 10px; right: 15px; background: transparent; border: none; font-size: 1.5rem; color: #45151b; cursor: pointer; font-weight: bold; }
 
   /* --- NAVBAR --- */
-  header {
-    display: flex; justify-content: space-between; align-items: center;
-    background-color: #45151b; padding: 15px 40px;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.4); margin-bottom: 40px;
-    flex-wrap: wrap; gap: 20px;
-  }
-  .logo-container h1 { font-size: 1.8rem; margin: 0; font-weight: 900; letter-spacing: 0.5px; }
+  header { display: flex; justify-content: space-between; align-items: center; background-color: #45151b; padding: 15px 40px; box-shadow: 0 4px 15px rgba(0,0,0,0.4); margin-bottom: 40px; flex-wrap: wrap; gap: 20px; }
+  .logo-container h1 { font-size: 1.8rem; margin: 0; font-weight: 900; }
   .logo-container h2 { font-size: 0.95rem; margin: 0; opacity: 0.8; font-weight: 400; text-transform: uppercase; }
-
   .tabs-container { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
-  .tab-btn {
-    padding: 8px 16px; border: none; border-radius: 20px; font-size: 0.95rem; font-weight: 600;
-    cursor: pointer; transition: all 0.3s ease; background-color: transparent; color: #ffc3cc; opacity: 0.7;
-  }
+  .tab-btn { padding: 8px 16px; border: none; border-radius: 20px; font-size: 0.95rem; font-weight: 600; cursor: pointer; transition: all 0.3s ease; background-color: transparent; color: #ffc3cc; opacity: 0.7; font-family: 'Poppins', sans-serif; }
   .tab-btn:hover { opacity: 1; background-color: rgba(255, 195, 204, 0.1); }
   .tab-btn.active { opacity: 1; background-color: #ffc3cc; color: #45151b; font-weight: 700; }
+  .btn-auth { border: 2px solid #ffc3cc; opacity: 1; }
+  .btn-logout { background-color: rgba(255, 255, 255, 0.1); display: none; }
 
-  /* --- CONTENEDOR PRINCIPAL --- */
-  .main-content { padding: 0 40px; }
-  .view-section { display: none; animation: fadeIn 0.4s ease; }
+  /* --- VISTAS GLOBALES --- */
+  .main-content { padding: 0 40px; box-sizing: border-box; }
+  .view-section { display: none; animation: fadeIn 0.4s ease; width: 100%; box-sizing: border-box;}
   .view-section.active { display: block; }
   @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+  .panel-box { background: #ffffff; color: #45151b; padding: 30px; border-radius: 20px; border: 2px solid #ffc3cc; box-shadow: 0 10px 30px rgba(0,0,0,0.1); margin-bottom: 30px; box-sizing: border-box; }
 
-  /* --- MAPA --- */
+  /* --- MAPA DE MATERIAS --- */
   #view-map { overflow-x: auto; padding-bottom: 40px; }
   .year-row { display: flex; gap: 20px; justify-content: center; min-width: max-content; padding-bottom: 20px; }
   .year-column { display: flex; flex-direction: column; align-items: center; gap: 12px; }
-  .year-column h2 { border-bottom: 2px solid #ffc3cc; padding-bottom: 5px; font-size: 1.2rem; margin-bottom: 15px; }
+  .year-column h2 { border-bottom: 2px solid #ffc3cc; padding-bottom: 5px; font-size: 1.2rem; margin-bottom: 15px; text-align: center; width: 100%;}
+  .course { padding: 14px 16px; border-radius: 12px; border: 1px solid rgba(255, 195, 204, 0.3); min-width: 160px; max-width: 160px; text-align: center; font-size: 0.85rem; font-weight: 600; position: relative; cursor: not-allowed; opacity: 0.5; transition: all 0.3s; color: #28301c; background-color: #ffffff; }
   
-  .course {
-    padding: 14px 16px; border-radius: 12px; border: 1px solid rgba(255, 195, 204, 0.3);
-    min-width: 160px; max-width: 160px; text-align: center; font-size: 0.85rem; font-weight: 600;
-    position: relative; cursor: not-allowed; opacity: 0.5; transition: all 0.3s;
-    color: #28301c; background-color: #ffffff; z-index: 1;
-  }
-
   .course[data-type="calculo"], .course[data-id="400"], .course[data-id="401"], .course[data-id="402"], .course[data-id="406"], .course[data-id="407"], .course[data-id="408"], .course[data-id="494"], .course[data-id="711"], .course[data-id="458"] { border-left: 6px solid #ff85a8; }
   .course[data-type="logica"], .course[data-id="404"], .course[data-id="409"], .course[data-id="90002"] { border-left: 6px solid #8585d1; }
   .course[data-type="quimica"], .course[data-id="411"], .course[data-id="278"], .course[data-id="280"], .course[data-id="468"] { border-left: 6px solid #5dbda5; }
   .course[data-type="gestion"], .course[data-id="412"], .course[data-id="466"], .course[data-id="467"], .course[data-id="472"], .course[data-id="473"], .course[data-id="813"], .course[data-id="814"], .course[data-id="815"], .course[data-id="816"] { border-left: 6px solid #ff6666; }
   .course[data-type="ingenieria"], .course[data-id="405"], .course[data-id="800"], .course[data-id="410"], .course[data-id="457"], .course[data-id="281"], .course[data-id="803"], .course[data-id="283"], .course[data-id="284"], .course[data-id="279"], .course[data-id="287"], .course[data-id="291"], .course[data-id="469"], .course[data-id="470"], .course[data-id="474"], .course[data-id="475"], .course[data-id="817"], .course[data-id="478"], .course[data-id="479"], .course[data-id="480"], .course[data-id="830"], .course[data-id="297"], .course[data-id="477"], .course[data-id="801"] { border-left: 6px solid #d991dd; }
 
-  .course.enabled { cursor: pointer; opacity: 1; border-color: #ffc3cc; background-color: #ffffff; }
-  .course.enabled:hover { transform: translateY(-3px); z-index: 10; background-color: #fff9fa; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
-  
+  .course.enabled { cursor: pointer; opacity: 1; border-color: #ffc3cc; }
+  .course.enabled:hover { transform: translateY(-3px); background-color: #fff9fa; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
   .course.completed { opacity: 1; filter: none; border-color: #ffc3cc; background-color: #ffc3cc; color: #45151b; text-decoration: line-through; }
-  .course.completed::after { content: '★'; position: absolute; top: -8px; right: -8px; background: #45151b; color: #ffc3cc; border-radius: 50%; width: 20px; height: 20px; font-size: 12px; line-height: 20px; text-align: center; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
-  .course.is-unlocked { box-shadow: 0 0 15px rgba(255, 195, 204, 0.8); transform: scale(1.05); z-index: 5; border-color: #ffc3cc !important; animation: pulse 1.5s infinite; }
-  @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(255, 195, 204, 0.4); } 70% { box-shadow: 0 0 0 10px rgba(255, 195, 204, 0); } 100% { box-shadow: 0 0 0 0 rgba(255, 195, 204, 0); } }
+  .course.completed::after { content: '★'; position: absolute; top: -8px; right: -8px; background: #45151b; color: #ffc3cc; border-radius: 50%; width: 20px; height: 20px; font-size: 12px; line-height: 20px; text-align: center; }
 
-  /* --- CONTENEDORES SECUNDARIOS --- */
-  .panel-box { background: #ffffff; color: #45151b; padding: 30px; border-radius: 20px; border: 2px solid #ffc3cc; box-shadow: 0 10px 30px rgba(0,0,0,0.1); margin-bottom: 30px; }
+  /* --- CALENDARIO DINÁMICO --- */
+  #view-calendar { max-width: 1100px; margin: 0 auto 50px; }
+  .cal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; background: #ffffff; padding: 15px 25px; border-radius: 15px; border: 2px solid #ffc3cc; flex-wrap: wrap; gap:10px;}
+  .cal-header h3 { color: #45151b; margin: 0; }
+  .cal-nav { display: flex; align-items: center; gap: 15px; }
+  .cal-nav-btn { background: #ffc3cc; color: #45151b; border: none; padding: 8px 15px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 1.2rem; }
+  .cal-month-display { font-size: 1.2rem; font-weight: 700; color: #45151b; min-width: 150px; text-align: center; }
+  .calendar-container { background: #ffffff; border-radius: 20px; padding: 20px; border: 2px solid #ffc3cc; box-sizing: border-box;}
+  .cal-weekdays { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; margin-bottom: 10px; text-align: center; font-weight: 700; color: #45151b; }
+  .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; }
+  .cal-day { min-height: 100px; border: 1px solid #ffc3cc; border-radius: 10px; padding: 5px; background: #fff9fa; cursor: pointer; transition: 0.2s; display: flex; flex-direction: column; }
+  .cal-day.empty { background: transparent; border: none; cursor: default; }
+  .cal-date-num { font-weight: 700; color: #45151b; margin-bottom: 5px; text-align: right; font-size: 0.9rem; }
+  .cal-event-pill { font-size: 0.75rem; padding: 4px 6px; border-radius: 5px; margin-bottom: 4px; color: #ffffff; font-weight: 600; text-align: left; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+
+  /* --- HORARIO ESCRITORIO --- */
+  #view-schedule { max-width: 1100px; margin: 0 auto; padding-bottom: 50px; }
+  .table-responsive-wrapper { width: 100%; background: #ffffff; border-radius: 20px; padding: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); box-sizing: border-box; }
+  .schedule-table { width: 100%; border-collapse: collapse; color: #45151b; }
+  .schedule-table th, .schedule-table td { border: 1px solid #ffc3cc; padding: 0; text-align: center; height: 50px; }
+  .schedule-table th { background: #ffc3cc; padding: 10px; font-weight: 700; color:#45151b; font-family: 'Lora', serif;}
+  .hour-col { background: #fff9fa; font-weight: 700; width: 100px; }
+  .schedule-input { width: 100%; height: 100%; border: none; outline: none; background: transparent; padding: 5px; text-align: center; color: #45151b; resize: none; font-size: 0.85rem; font-weight: 600; font-family: 'Poppins', sans-serif; box-sizing: border-box;}
+  .schedule-input:focus { background: #fff9fa; }
+  .occupied-cell { background-color: #c43670 !important; color: #faffc7 !important; }
 
   /* --- NOTAS --- */
   #view-grades { max-width: 800px; margin: 0 auto; }
   .average-card { background: #ffc3cc; color: #45151b; padding: 30px; border-radius: 15px; text-align: center; margin-bottom: 30px; }
   .average-card h2 { color: #45151b; margin-top:0; }
-  .average-card .big-number { font-size: 3.5rem; font-family: 'Poppins', sans-serif; font-weight: 900; margin: 10px 0; }
+  .average-card .big-number { font-size: 3.5rem; font-weight: 900; margin: 10px 0; font-family: 'Poppins', sans-serif;}
   .grade-row { display: flex; justify-content: space-between; align-items: center; padding: 15px; border-bottom: 1px dashed rgba(255,195,204,0.3); }
-  .grade-input { width: 80px; padding: 10px; border: 1px solid #ffc3cc; border-radius: 8px; text-align: center; font-family: 'Poppins', sans-serif; font-weight: bold; color: #28301c; font-size: 1rem; outline: none; background: #fff9fa; }
+  .grade-input { width: 80px; padding: 10px; border: 1px solid #ffc3cc; border-radius: 8px; text-align: center; font-weight: bold; color: #28301c; font-size: 1rem; outline: none; background: #fff9fa; font-family: 'Poppins', sans-serif;}
 
-  /* --- STATS Y PLANIFICADOR --- */
+  /* --- PROGRESO Y PLANIFICADOR --- */
   #view-stats { max-width: 900px; margin: 0 auto; padding-bottom: 50px; }
   .stats-header { display: flex; gap: 30px; flex-wrap: wrap; justify-content: center; margin-bottom: 40px; }
   .progress-circle-container { position: relative; width: 180px; height: 180px; background: #ffffff; border-radius: 50%; display: flex; justify-content: center; align-items: center; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
@@ -95,77 +211,84 @@
   .progress-circle-inner { width: 80%; height: 80%; background: #ffffff; border-radius: 50%; display: flex; flex-direction: column; justify-content: center; align-items: center; color: #28301c; }
   .pc-percentage { font-size: 2rem; font-weight: 700; }
   .pc-label { font-size: 0.8rem; letter-spacing: 1px; opacity: 0.8; }
-  
   .stat-card { background: #ffc3cc; color: #45151b; padding: 20px; border-radius: 15px; width: 150px; text-align: center; border: 2px solid #ffc3cc; display: flex; flex-direction: column; justify-content: center; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
   .stat-val { font-size: 2.5rem; font-weight: 700; color: #45151b; }
   .stat-desc { font-size: 0.9rem; opacity: 0.9; color: #45151b; }
-  
   .available-courses-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 15px; }
-  .plan-card { padding: 15px; border: 1px dashed #45151b; border-radius: 12px; color: #45151b; font-weight: 600; font-size: 0.9rem; cursor: pointer; transition: all 0.2s; background: transparent; position: relative; user-select: none; }
+  .plan-card { padding: 15px; border: 1px dashed #45151b; border-radius: 12px; color: #45151b; font-weight: 600; font-size: 0.9rem; cursor: pointer; transition: all 0.2s; background: transparent; position: relative; user-select: none; text-align: center;}
   .plan-card:hover { background: rgba(255,195,204,0.3); }
   .plan-card.planned { background: #ffc3cc; color: #45151b; border-style: solid; border-color: #ffc3cc; }
   .plan-card.planned::after { content: '♡'; position: absolute; top: -12px; right: -8px; font-size: 1.5rem; color: #45151b; }
 
-  /* --- HORARIO --- */
-  #view-schedule { max-width: 1100px; margin: 0 auto; padding-bottom: 50px; }
-  .table-container { background: #ffffff; padding: 20px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); overflow-x: auto; }
-  .schedule-table { width: 100%; border-collapse: collapse; color: #45151b; min-width: 700px; }
-  .schedule-table th, .schedule-table td { border: 1px solid #ffc3cc; padding: 0; text-align: center; height: 50px; }
-  .schedule-table th { background: #ffc3cc; font-family: 'Lora', serif; padding: 10px; font-weight: 700; color:#45151b; }
-  .hour-col { background: #fff9fa; font-weight: 700; width: 100px; }
-  .schedule-input { width: 100%; height: 100%; border: none; outline: none; background: transparent; padding: 5px; font-family: 'Poppins', sans-serif; text-align: center; color: #45151b; resize: none; font-size: 0.85rem; box-sizing: border-box; font-weight: 600; }
-  .schedule-input:focus { background: #fff9fa; }
-  .occupied-cell { background-color: #c43670 !important; color: #faffc7 !important; font-weight: 700; }
-
+  /* MODALES Y BOTONES GRALES */
   .schedule-modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(69, 21, 27, 0.9); z-index: 2000; display: none; justify-content: center; align-items: center; animation: fadeIn 0.3s ease; }
-  .schedule-modal-content { background: #ffffff; color: #45151b; padding: 30px; border-radius: 20px; max-width: 90%; width: 400px; text-align: center; border: 4px solid #ffc3cc; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
-  .schedule-modal-content select, .schedule-modal-content input { width: 100%; padding: 12px; margin-bottom: 15px; border-radius: 8px; border: 2px solid #ffc3cc; font-family: 'Poppins', sans-serif; background: #fff9fa; color: #45151b; font-weight: 600; outline: none; box-sizing: border-box; }
-  .schedule-modal-content label { display: block; text-align: left; font-size: 0.85rem; font-weight: bold; margin-bottom: 5px; }
-
-  /* BOTONES Y GENERALES */
-  .add-exam-box { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
-  .input-exam { flex: 1; min-width: 200px; padding: 12px; border: 1px solid #ffc3cc; border-radius: 10px; outline: none; background: #fff9fa; color: #28301c; font-family: 'Poppins', sans-serif; }
+  .schedule-modal-content { background: #ffffff; color: #45151b; padding: 30px; border-radius: 20px; max-width: 90%; width: 400px; text-align: center; border: 4px solid #ffc3cc; box-sizing: border-box;}
+  .schedule-modal-content select, .schedule-modal-content input { width: 100%; padding: 12px; margin-bottom: 15px; border-radius: 8px; border: 2px solid #ffc3cc; font-family: 'Poppins', sans-serif; background: #fff9fa; color: #45151b; font-weight: 600; outline: none; box-sizing: border-box;}
   .btn-add { background: #ffc3cc; color: #45151b; border: none; padding: 12px 25px; border-radius: 10px; font-weight: 700; font-family: 'Poppins', sans-serif; cursor: pointer; transition: 0.3s; }
   .btn-add:hover { opacity: 0.8; }
   .btn-close { background: transparent; border: 2px solid #45151b; color: #45151b; width: 100%; margin-top: 10px; }
-  .btn-close:hover { background: #45151b; color: #ffffff; }
 
-  .exam-list { display: flex; flex-direction: column; gap: 10px; }
-  .exam-item { display: flex; justify-content: space-between; align-items: center; padding: 15px 20px; background: #fff9fa; border-left: 4px solid #ffc3cc; border-radius: 10px; }
-  .exam-subject { font-size: 1rem; font-weight: 600; }
-  .exam-badge { background: #ffc3cc; color: #45151b; padding: 4px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: 700; margin-right: 15px; }
+  /* =========================================
+     MEDIA QUERIES - RESPONSIVE PARA CELULARES
+     ========================================= */
+  @media (max-width: 768px) {
+    body { padding: 10px 0; } 
+    .main-content { padding: 0 15px; }
+    
+    header { flex-direction: column; text-align: center; padding: 15px; gap: 15px; margin-bottom: 25px;}
+    .logo-container { margin-bottom: 5px; }
+    .tabs-container { justify-content: center; }
+    .tab-btn { font-size: 0.85rem; padding: 6px 12px; margin-bottom: 5px;}
 
-  /* --- CALENDARIO --- */
-  #view-calendar { max-width: 1100px; margin: 0 auto 50px; }
-  .cal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-  .cal-header select { padding: 10px 20px; font-size: 1.1rem; border-radius: 10px; border: 2px solid #45151b; background: #ffc3cc; color: #45151b; font-weight: 700; font-family: 'Poppins', sans-serif; outline: none; cursor: pointer; }
-  .calendar-container { background: #ffffff; border-radius: 20px; padding: 20px; border: 2px solid #ffc3cc; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
-  .cal-weekdays { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; margin-bottom: 10px; text-align: center; font-weight: 700; color: #45151b; }
-  .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; }
-  .cal-day { min-height: 100px; border: 1px solid #ffc3cc; border-radius: 10px; padding: 5px; background: #fff9fa; cursor: pointer; transition: 0.2s; display: flex; flex-direction: column; }
-  .cal-day:hover { background: #ffc3cc; border-color: #45151b; }
-  .cal-day.empty { background: transparent; border: none; cursor: default; }
-  .cal-date-num { font-weight: 700; color: #45151b; margin-bottom: 5px; text-align: right; font-size: 0.9rem; }
-  .cal-event-pill { font-size: 0.75rem; padding: 4px 6px; border-radius: 5px; margin-bottom: 4px; color: #ffffff; font-weight: 600; text-align: left; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
-  .cal-event-pill:hover { opacity: 0.8; }
+    .panel-box { padding: 15px; }
+    .average-card .big-number { font-size: 2.5rem; }
 
-  /* --- REWARDS --- */
-  #view-rewards { max-width: 600px; margin: 0 auto; }
-  .add-reward-box { display: flex; gap: 10px; margin-bottom: 30px; flex-wrap: wrap; }
-  .input-reward { flex: 1; padding: 12px; border: 1px solid #ffc3cc; border-radius: 10px; outline: none; background: #fff9fa; color: #28301c; font-family: 'Poppins', sans-serif; }
-  .reward-list { display: flex; flex-direction: column; gap: 15px; }
-  .reward-item { display: flex; align-items: center; justify-content: space-between; padding: 15px; border: 1px dashed #ffc3cc; border-radius: 12px; background: #fff9fa; transition: 0.3s; }
-  .reward-item.done { border-style: solid; background: rgba(255,195,204,0.3); opacity: 0.6; }
-  .r-goal { font-weight: 600; font-size: 1rem; }
-  .r-prize { font-size: 0.85rem; opacity: 0.8; }
-  .reward-item.done .r-goal, .reward-item.done .r-prize { text-decoration: line-through; }
-  .check-btn { width: 30px; height: 30px; border: 2px solid #ffc3cc; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; color: transparent; background: transparent; transition: 0.2s; }
-  .reward-item.done .check-btn { background: #ffc3cc; color: #45151b; }
-  .delete-btn { margin-left: 10px; color: #45151b; cursor: pointer; font-size: 1.2rem; background: none; border: none; opacity: 0.5; }
-  .delete-btn:hover { opacity: 1; color: #ff6666; }
+    #view-map { overflow-x: hidden; padding-bottom: 20px; }
+    #view-map .year-row { flex-direction: column; align-items: center; }
+    #view-map .year-column { width: 100%; max-width: 100%; background: rgba(69, 21, 27, 0.05); padding: 15px; border-radius: 15px; box-sizing: border-box;}
+    .course { width: 100%; max-width: 100%; box-sizing: border-box; }
+
+    .cal-header { flex-direction: column; gap: 15px; text-align: center; padding: 15px;}
+    .cal-day { min-height: 70px; padding: 2px; }
+    .cal-date-num { font-size: 0.8rem; margin-bottom: 2px; }
+    .cal-event-pill { font-size: 0.65rem; padding: 2px; }
+
+    /* --- HORARIO TRANSFORMADO A TARJETAS --- */
+    .table-responsive-wrapper { padding: 0; background: transparent; box-shadow: none; }
+    .schedule-table, .schedule-table tbody, .schedule-table tr, .schedule-table td { display: block; width: 100%; box-sizing: border-box; }
+    .schedule-table thead { display: none; }
+    .schedule-table tr { margin-bottom: 20px; border: 2px solid #ffc3cc; border-radius: 15px; overflow: hidden; background: #ffffff; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
+    .schedule-table td { 
+      display: flex; justify-content: space-between; align-items: center; 
+      padding: 10px 15px; border: none; border-bottom: 1px solid rgba(255, 195, 204, 0.4); 
+      min-height: 40px; text-align: right;
+    }
+    .schedule-table td::before { 
+      content: attr(data-label); font-weight: bold; color: #45151b; width: 40%; text-align: left; font-family: 'Poppins', sans-serif;
+    }
+    .schedule-input { width: 55%; text-align: right; background: transparent; padding: 5px; margin: 0; font-size: 0.9rem;}
+    .hour-col { background: #c43670 !important; color: #ffffff !important; justify-content: center !important; font-size: 1.2rem; font-weight: 900; }
+    .hour-col::before { display: none; }
+
+    .stats-header { flex-direction: column; align-items: center; gap: 20px; }
+  }
   </style>
 </head>
 <body>
+
+  <div id="loginOverlay">
+    <div class="login-box">
+      <button class="btn-close-login" onclick="document.getElementById('loginOverlay').style.display='none'">×</button>
+      <h2>Mi Malla Pro</h2>
+      <p>Guardá tu progreso en la nube y accedé desde cualquier lugar.</p>
+      
+      <input type="email" id="loginEmail" class="login-input" placeholder="Tu email">
+      <input type="password" id="loginPass" class="login-input" placeholder="Contraseña">
+      
+      <button class="btn-login" onclick="iniciarSesion()">Iniciar Sesión</button>
+      <button class="btn-login btn-register" onclick="registrarse()">Crear Cuenta Nueva</button>
+    </div>
+  </div>
 
   <div id="scheduleModal" class="schedule-modal-overlay">
     <div class="schedule-modal-content">
@@ -192,43 +315,45 @@
       <h2 style="color: #45151b; margin-top:0;">📅 Agregar Actividad</h2>
       <p id="calModalDateDisplay" style="font-size: 0.9rem; margin-bottom: 20px; font-weight:bold;"></p>
       <input type="hidden" id="calDateKey">
-      
       <label>¿Qué tenés que hacer?</label>
-      <input type="text" id="calTitle" placeholder="Ej: Estudiar Física, TP Integrador..." autocomplete="off">
-      
+      <input type="text" id="calTitle" placeholder="Ej: Estudiar Física, TP..." autocomplete="off">
       <label>Horario (Opcional):</label>
       <input type="text" id="calTime" placeholder="Ej: 14:00 o 'Todo el día'" autocomplete="off">
-
       <label>Color de la etiqueta:</label>
       <select id="calColor">
-        <option value="#c43670">Rosa Fuerte / Magenta</option>
-        <option value="#45151b">Bordó / Vino</option>
+        <option value="#c43670">Rosa Fuerte</option>
+        <option value="#45151b">Bordó</option>
         <option value="#7a9650">Verde Oliva</option>
         <option value="#001a6d">Azul Oscuro</option>
-        <option value="#e68a00">Naranja Pastel</option>
       </select>
-
-      <button class="btn-add" style="width: 100%; padding: 15px; font-size: 1.1rem; margin-top: 10px;" onclick="saveCalEvent()">✔️ Guardar Actividad</button>
+      <button class="btn-add" style="width: 100%; padding: 15px; font-size: 1.1rem; margin-top: 10px;" onclick="saveCalEvent(false)">✔️ Guardar en la página</button>
+      
+      <button class="btn-add" style="width: 100%; padding: 15px; font-size: 1rem; margin-top: 10px; background: #4285F4; color: white; border: none;" onclick="saveCalEvent(true)">☁️ Guardar y abrir en Google Calendar</button>
+      
       <button class="btn-add btn-close" onclick="closeCalModal()">Cancelar</button>
     </div>
   </div>
 
-  <header>
-    <div class="logo-container">
-      <h1>Ingeniería Industrial</h1>
-      <h2>Universidad de Morón</h2>
-    </div>
-    <div class="tabs-container">
-      <button class="tab-btn active" onclick="switchTab('map')">🗺️ Plan de Estudios</button>
-      <button class="tab-btn" onclick="switchTab('calendar')">🗓️ Calendario</button>
-      <button class="tab-btn" onclick="switchTab('grades')">📝 Promedio</button>
-      <button class="tab-btn" onclick="switchTab('stats')">📊 Progreso</button>
-      <button class="tab-btn" onclick="switchTab('schedule')">📅 Horario</button>
-      <button class="tab-btn" onclick="switchTab('rewards')">🎁 Metas</button>
-    </div>
-  </header>
+  <div id="appContent">
+    <header>
+      <div class="logo-container">
+        <h1>Ingeniería Industrial</h1>
+        <h2>Universidad de Morón</h2>
+      </div>
+      <div class="tabs-container">
+        <button class="tab-btn active" onclick="switchTab('map')">🗺️ Plan</button>
+        <button class="tab-btn" onclick="switchTab('calendar')">🗓️ Calendario</button>
+        <button class="tab-btn" onclick="switchTab('schedule')">📅 Horario</button>
+        <button class="tab-btn" onclick="switchTab('grades')">📝 Notas</button>
+        <button class="tab-btn" onclick="switchTab('stats')">📊 Progreso</button>
+        
+        <button class="tab-btn btn-auth" id="btnOpenLogin" onclick="document.getElementById('loginOverlay').style.display='flex'">👤 Iniciar Sesión / Registrarse</button>
+        <button class="tab-btn btn-logout" id="btnLogout" onclick="logout()">Cerrar Sesión</button>
+      </div>
+    </header>
 
-  <main class="main-content">
+    <main class="main-content">
+      
       <div id="view-map" class="view-section active">
         <div class="year-row">
           <div class="year-column">
@@ -300,22 +425,32 @@
 
       <div id="view-calendar" class="view-section">
         <div class="cal-header">
-          <h3 style="margin: 0; color: #faffc7; font-size: 1.5rem;">Mis Fechas Importantes</h3>
-          <select id="monthSelect" onchange="renderCalendar()">
-            <option value="2">Marzo 2026</option>
-            <option value="3">Abril 2026</option>
-            <option value="4">Mayo 2026</option>
-            <option value="5">Junio 2026</option>
-            <option value="6">Julio 2026</option>
-          </select>
+          <h3>Mis Fechas Importantes</h3>
+          <div class="cal-nav">
+            <button class="cal-nav-btn" onclick="changeMonth(-1)">❮ Anterior</button>
+            <div id="monthYearDisplay" class="cal-month-display">Mes Año</div>
+            <button class="cal-nav-btn" onclick="changeMonth(1)">Siguiente ❯</button>
+          </div>
         </div>
         <div class="calendar-container">
-          <div class="cal-weekdays">
-            <div>Dom</div><div>Lun</div><div>Mar</div><div>Mié</div><div>Jue</div><div>Vie</div><div>Sáb</div>
-          </div>
+          <div class="cal-weekdays"><div>Dom</div><div>Lun</div><div>Mar</div><div>Mié</div><div>Jue</div><div>Vie</div><div>Sáb</div></div>
           <div id="calendarGrid" class="cal-grid"></div>
         </div>
-        <p style="text-align:center; opacity:0.8; font-size:0.9rem; margin-top:15px;">* Hacé clic en cualquier día para agregar tareas, exámenes o eventos. Hacé clic en una etiqueta para borrarla.</p>
+      </div>
+
+      <div id="view-schedule" class="view-section">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 10px;">
+          <h3 style="margin: 0; font-size: 1.5rem;">Mi Semana</h3>
+          <button class="btn-add" onclick="openScheduleModal()">➕ Asignar Materia Rápido</button>
+        </div>
+        <div class="table-responsive-wrapper">
+          <table class="schedule-table">
+            <thead>
+              <tr><th class="hour-col">Hora</th><th>Lunes</th><th>Martes</th><th>Miércoles</th><th>Jueves</th><th>Viernes</th><th>Sábado</th></tr>
+            </thead>
+            <tbody id="scheduleBody"></tbody>
+          </table>
+        </div>
       </div>
 
       <div id="view-grades" class="view-section panel-box">
@@ -323,8 +458,8 @@
           <h2 style="margin-top:0;">Promedio General</h2>
           <div class="big-number" id="averageDisplay">0.00</div>
         </div>
-        <p style="text-align:center; opacity:0.7; font-size: 0.9rem; margin-bottom:20px;">* Escribe "AC" para las materias dadas por equivalencia.</p>
-        <div id="gradesContainer" class="grades-table-container"></div>
+        <p style="text-align:center; opacity:0.7; font-size: 0.9rem; margin-bottom:20px;">* Ingresá tus notas para calcular el promedio automáticamente.</p>
+        <div id="gradesContainer" style="display: flex; flex-direction: column;"></div>
       </div>
 
       <div id="view-stats" class="view-section">
@@ -348,169 +483,119 @@
         </div>
       </div>
 
-      <div id="view-schedule" class="view-section">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-          <h3 style="margin: 0; color: #ffc3cc; font-family: 'Lora', serif; font-size: 1.5rem;">Mi Semana</h3>
-          <button class="btn-add" onclick="openScheduleModal()">➕ Asignar Materia Rápido</button>
-        </div>
-
-        <div class="table-container">
-          <table class="schedule-table">
-            <thead>
-              <tr>
-                <th class="hour-col">Hora</th><th>Lunes</th><th>Martes</th><th>Miércoles</th><th>Jueves</th><th>Viernes</th><th>Sábado</th>
-              </tr>
-            </thead>
-            <tbody id="scheduleBody"></tbody>
-          </table>
-        </div>
-
-        <div class="panel-box exams-container" style="margin-top:30px;">
-          <h3 style="margin-top:0;">📝 Exámenes y Entregas</h3>
-          <div class="add-exam-box">
-            <input type="text" id="examName" class="input-exam" placeholder="Detalle (Ej: 1° Parcial Física)">
-            <input type="date" id="examDate" class="input-exam" style="flex: 0.5;">
-            <button class="btn-add" onclick="addExam()">Agendar</button>
-          </div>
-          <div id="examList" class="exam-list"></div>
-        </div>
-      </div>
-
-      <div id="view-rewards" class="view-section panel-box">
-        <h3 style="text-align:center; margin-top:0;">✨ Mis Objetivos y Premios</h3>
-        <div class="add-reward-box">
-          <input type="text" id="goalInput" class="input-reward" placeholder="Objetivo (ej: Final de Química)">
-          <input type="text" id="prizeInput" class="input-reward" placeholder="Premio (ej: Día de Spa)">
-          <button class="btn-add" onclick="addReward()">Añadir</button>
-        </div>
-        <div id="rewardList" class="reward-list"></div>
-      </div>
-  </main>
+    </main>
+  </div>
 
   <script>
+    // --- LÓGICA PRINCIPAL ---
     const courses = document.querySelectorAll('.course');
-    const gradesContainer = document.getElementById('gradesContainer');
-    const averageDisplay = document.getElementById('averageDisplay');
-    const plannerGrid = document.getElementById('plannerGrid');
-    const rewardList = document.getElementById('rewardList');
-    const examList = document.getElementById('examList');
-    const scheduleBody = document.getElementById('scheduleBody');
-    const calendarGrid = document.getElementById('calendarGrid');
-    
-    let gradesData = JSON.parse(localStorage.getItem('materiasNotas') || '{}');
-    let plannedData = JSON.parse(localStorage.getItem('materiasPlanificadas') || '{}');
-    let rewardsData = JSON.parse(localStorage.getItem('materiasPremios') || '[]');
-    let examsData = JSON.parse(localStorage.getItem('materiasExamenes') || '[]');
     let tableData = JSON.parse(localStorage.getItem('materiasTabla') || '{}');
+    let gradesData = JSON.parse(localStorage.getItem('materiasNotas') || '{}');
+    let calendarData = JSON.parse(localStorage.getItem('indCalendar') || '{}');
+    let plannedData = JSON.parse(localStorage.getItem('materiasPlanificadas') || '{}');
 
-    // --- LÓGICA DE CALENDARIO CON SORPRESA PRE-CARGADA ---
-    let calendarData = JSON.parse(localStorage.getItem('indCalendar'));
-    if (!calendarData) {
-      calendarData = {
-        "2026-6-10": [{ title: "Viaje a Bariloche ✈️", time: "Todo el día", color: "#001a6d" }],
-        "2026-6-11": [{ title: "Bariloche ❄️", time: "Todo el día", color: "#001a6d" }],
-        "2026-6-12": [{ title: "Bariloche ❄️", time: "Todo el día", color: "#001a6d" }],
-        "2026-6-13": [{ title: "Bariloche ❄️", time: "Todo el día", color: "#001a6d" }],
-        "2026-6-14": [{ title: "Bariloche ❄️", time: "Todo el día", color: "#001a6d" }],
-        "2026-6-15": [{ title: "Regreso 🏠", time: "Todo el día", color: "#001a6d" }]
-      };
-      localStorage.setItem('indCalendar', JSON.stringify(calendarData));
-    }
+    let currentDate = new Date();
+    let currentMonth = currentDate.getMonth(); 
+    let currentYear = currentDate.getFullYear();
 
-    function renderCalendar() {
-      const month = parseInt(document.getElementById('monthSelect').value);
-      const year = 2026;
-      calendarGrid.innerHTML = '';
-      
-      const firstDay = new Date(year, month, 1).getDay(); // 0 (Dom) a 6 (Sab)
-      const daysInMonth = new Date(year, month + 1, 0).getDate();
-      
-      for(let i = 0; i < firstDay; i++) {
-        calendarGrid.innerHTML += `<div class="cal-day empty"></div>`;
-      }
-      
-      for(let d = 1; d <= daysInMonth; d++) {
-        const dateKey = `${year}-${month}-${d}`;
-        let eventsHtml = '';
-        if(calendarData[dateKey]) {
-          calendarData[dateKey].forEach((ev, idx) => {
-             eventsHtml += `<div class="cal-event-pill" style="background-color:${ev.color};" onclick="deleteCalEvent('${dateKey}', ${idx}, event)" title="${ev.time} - ${ev.title}">${ev.time} - ${ev.title}</div>`;
-          });
-        }
-        
-        calendarGrid.innerHTML += `
-          <div class="cal-day" onclick="openCalModal('${dateKey}', ${d})">
-            <div class="cal-date-num">${d}</div>
-            <div class="cal-events-container">${eventsHtml}</div>
-          </div>
-        `;
-      }
-    }
-
-    function openCalModal(dateKey, dayNum) {
-      document.getElementById('calDateKey').value = dateKey;
-      const monthNames = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
-      const monthIdx = parseInt(document.getElementById('monthSelect').value);
-      document.getElementById('calModalDateDisplay').textContent = `${dayNum} de ${monthNames[monthIdx]} de 2026`;
-      
-      document.getElementById('calTitle').value = '';
-      document.getElementById('calTime').value = '';
-      document.getElementById('calModal').style.display = 'flex';
-    }
-
-    function closeCalModal() { document.getElementById('calModal').style.display = 'none'; }
-
-    function saveCalEvent() {
-      const dateKey = document.getElementById('calDateKey').value;
-      const title = document.getElementById('calTitle').value;
-      const time = document.getElementById('calTime').value || "Todo el día";
-      const color = document.getElementById('calColor').value;
-
-      if(!title) { alert("¡Poné qué vas a hacer!"); return; }
-
-      if(!calendarData[dateKey]) calendarData[dateKey] = [];
-      calendarData[dateKey].push({ title, time, color });
-      
-      localStorage.setItem('indCalendar', JSON.stringify(calendarData));
+    window.syncInterface = () => {
+      loadProgress();
+      updateStates();
       renderCalendar();
-      closeCalModal();
+      buildSchedule();
+      renderGrades();
+      renderStatsAndPlanner();
+    };
+
+    window.onload = () => {
+      initScheduleModal();
+      window.syncInterface();
+    };
+
+    function saveProgress() {
+      const saved = {};
+      courses.forEach(c => saved[c.dataset.id] = c.classList.contains('completed'));
+      localStorage.setItem('materiasAprobadas', JSON.stringify(saved));
+      if (window.syncCloud) window.syncCloud();
     }
 
-    function deleteCalEvent(dateKey, idx, event) {
-      event.stopPropagation(); // Evita que se abra el modal al borrar
-      if(confirm("¿Querés borrar esta actividad?")) {
-        calendarData[dateKey].splice(idx, 1);
-        if(calendarData[dateKey].length === 0) delete calendarData[dateKey];
-        localStorage.setItem('indCalendar', JSON.stringify(calendarData));
-        renderCalendar();
-      }
+    function loadProgress() {
+      const saved = JSON.parse(localStorage.getItem('materiasAprobadas') || '{}');
+      courses.forEach(c => {
+        if (saved[c.dataset.id]) c.classList.add('completed');
+        else c.classList.remove('completed');
+      });
     }
 
-    // --- HORARIOS ---
+    function updateStates() {
+      const completed = new Set();
+      courses.forEach(c => { if (c.classList.contains('completed')) completed.add(c.dataset.id); });
+      courses.forEach(c => {
+        const reqs = c.dataset.req ? c.dataset.req.split(',') : [];
+        const allMet = reqs.every(r => completed.has(r));
+        if (reqs.length === 0 || allMet) c.classList.add('enabled');
+        else { c.classList.remove('enabled'); c.classList.remove('completed'); }
+      });
+      renderStatsAndPlanner();
+    }
+
+    courses.forEach(c => {
+      c.addEventListener('click', () => {
+        if (!c.classList.contains('enabled')) return;
+        c.classList.toggle('completed');
+        if (c.classList.contains('completed')) confetti({ origin: { y: 0.7 }, colors: ['#ffc3cc', '#ffffff', '#c43670'] });
+        else { 
+          delete gradesData[c.dataset.id]; 
+          delete plannedData[c.dataset.id];
+          localStorage.setItem('materiasNotas', JSON.stringify(gradesData)); 
+          localStorage.setItem('materiasPlanificadas', JSON.stringify(plannedData));
+          renderGrades(); 
+        }
+        saveProgress(); updateStates();
+      });
+      c.addEventListener('mouseenter', () => {
+        const myId = c.dataset.id;
+        courses.forEach(reqC => { if ((reqC.dataset.req || '').split(',').includes(myId)) reqC.classList.add('is-unlocked'); });
+      });
+      c.addEventListener('mouseleave', () => courses.forEach(reqC => reqC.classList.remove('is-unlocked')));
+    });
+
+    window.switchTab = (tabName) => {
+      document.querySelectorAll('.view-section').forEach(s => s.classList.remove('active'));
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      const tabElement = document.getElementById('view-' + tabName);
+      if(tabElement) tabElement.classList.add('active');
+      event.currentTarget.classList.add('active'); 
+    };
+
+    // --- LÓGICA DE HORARIOS ---
     const horas = ["08:00", "09:00", "10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00", "17:00", "18:00", "19:00", "20:00", "21:00", "22:00", "23:00"];
-    const dias = ["lunes", "martes", "miercoles", "jueves", "viernes", "sabado"];
+    const dias = ["Lunes", "Martes", "Miercoles", "Jueves", "Viernes", "Sabado"];
 
     function buildSchedule() {
+      const scheduleBody = document.getElementById('scheduleBody');
       scheduleBody.innerHTML = '';
       horas.forEach(h => {
         const row = document.createElement('tr');
-        row.innerHTML = `<td class="hour-col">${h}</td>`;
+        row.innerHTML = `<td class="hour-col" data-label="Hora">${h}</td>`;
         dias.forEach(d => {
-          const cellId = `${d}-${h}`;
+          const diaId = d.toLowerCase().replace('é', 'e').replace('á', 'a');
+          const cellId = `${diaId}-${h}`;
           const content = tableData[cellId] || "";
           const occupiedClass = content.trim() !== "" ? "occupied-cell" : "";
-          row.innerHTML += `<td><textarea class="schedule-input ${occupiedClass}" data-id="${cellId}" oninput="saveTableCell(this)">${content}</textarea></td>`;
+          row.innerHTML += `<td data-label="${d}"><textarea class="schedule-input ${occupiedClass}" data-id="${cellId}" oninput="saveTableCell(this)">${content}</textarea></td>`;
         });
         scheduleBody.appendChild(row);
       });
     }
 
-    function saveTableCell(el) {
+    window.saveTableCell = (el) => {
       tableData[el.dataset.id] = el.value;
       localStorage.setItem('materiasTabla', JSON.stringify(tableData));
       if (el.value.trim() !== '') el.classList.add('occupied-cell');
       else el.classList.remove('occupied-cell');
-    }
+      if (window.syncCloud) window.syncCloud();
+    };
 
     function initScheduleModal() {
       const startSel = document.getElementById('schStart');
@@ -523,193 +608,182 @@
       });
     }
 
-    function openScheduleModal() {
+    window.openScheduleModal = () => {
       const selectSubject = document.getElementById('schSubject');
       selectSubject.innerHTML = '';
       const enabledCourses = document.querySelectorAll('.course.enabled:not(.completed)');
       if(enabledCourses.length === 0) selectSubject.innerHTML = '<option value="">No hay materias disponibles</option>';
       else enabledCourses.forEach(c => { selectSubject.innerHTML += `<option value="${c.textContent}">${c.textContent}</option>`; });
       document.getElementById('scheduleModal').style.display = 'flex';
-    }
+    };
 
-    function closeScheduleModal() { document.getElementById('scheduleModal').style.display = 'none'; }
+    window.closeScheduleModal = () => document.getElementById('scheduleModal').style.display = 'none';
 
-    function saveToSchedule() {
+    window.saveToSchedule = () => {
       const subject = document.getElementById('schSubject').value;
       const day = document.getElementById('schDay').value;
       const startIdx = parseInt(document.getElementById('schStart').value);
       const endIdx = parseInt(document.getElementById('schEnd').value);
-      if(!subject) { alert("Seleccioná una materia."); return; }
+      if(!subject) return;
       if(startIdx >= endIdx) { alert("Revisá la hora de fin."); return; }
       for(let i = startIdx; i < endIdx; i++) tableData[`${day}-${horas[i]}`] = subject;
       localStorage.setItem('materiasTabla', JSON.stringify(tableData));
+      if (window.syncCloud) window.syncCloud();
       buildSchedule(); closeScheduleModal();
-    }
+    };
 
-    // --- GENERAL ---
-    function switchTab(tabName) {
-      document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
-      document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
-      const tabs = document.querySelectorAll('.tab-btn');
+    // --- LÓGICA DEL CALENDARIO DINÁMICO ---
+    const monthNames = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
+
+    window.changeMonth = (offset) => {
+      currentMonth += offset;
+      if(currentMonth > 11) { currentMonth = 0; currentYear++; }
+      if(currentMonth < 0) { currentMonth = 11; currentYear--; }
+      renderCalendar();
+    };
+
+    function renderCalendar() {
+      const grid = document.getElementById('calendarGrid');
+      grid.innerHTML = '';
+      document.getElementById('monthYearDisplay').textContent = `${monthNames[currentMonth]} ${currentYear}`;
       
-      if (tabName === 'map') { document.getElementById('view-map').classList.add('active'); tabs[0].classList.add('active'); } 
-      else if (tabName === 'calendar') { document.getElementById('view-calendar').classList.add('active'); tabs[1].classList.add('active'); renderCalendar(); }
-      else if (tabName === 'grades') { document.getElementById('view-grades').classList.add('active'); tabs[2].classList.add('active'); renderGrades(); } 
-      else if (tabName === 'stats') { document.getElementById('view-stats').classList.add('active'); tabs[3].classList.add('active'); renderStatsAndPlanner(); } 
-      else if (tabName === 'schedule') { document.getElementById('view-schedule').classList.add('active'); tabs[4].classList.add('active'); renderExams(); openScheduleModal(); } 
-      else if (tabName === 'rewards') { document.getElementById('view-rewards').classList.add('active'); tabs[5].classList.add('active'); renderRewards(); }
+      const firstDay = new Date(currentYear, currentMonth, 1).getDay();
+      const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+      
+      for(let i = 0; i < firstDay; i++) {
+        grid.innerHTML += `<div class="cal-day empty"></div>`;
+      }
+      
+      for(let d = 1; d <= daysInMonth; d++) {
+        const dateKey = `${currentYear}-${currentMonth}-${d}`;
+        let eventsHtml = '';
+        if(calendarData[dateKey]) {
+          calendarData[dateKey].forEach((ev, idx) => {
+             eventsHtml += `<div class="cal-event-pill" style="background-color:${ev.color};" onclick="deleteCalEvent('${dateKey}', ${idx}, event)" title="${ev.time} - ${ev.title}">${ev.time} - ${ev.title}</div>`;
+          });
+        }
+        grid.innerHTML += `
+          <div class="cal-day" onclick="openCalModal('${dateKey}', ${d})">
+            <div class="cal-date-num">${d}</div>
+            <div class="cal-events-container">${eventsHtml}</div>
+          </div>
+        `;
+      }
     }
 
-    function saveProgress() {
-      const saved = {};
-      courses.forEach(course => saved[course.dataset.id] = course.classList.contains('completed'));
-      localStorage.setItem('materiasAprobadas', JSON.stringify(saved));
-      localStorage.setItem('materiasNotas', JSON.stringify(gradesData));
-      localStorage.setItem('materiasPlanificadas', JSON.stringify(plannedData));
-      localStorage.setItem('materiasPremios', JSON.stringify(rewardsData));
-      localStorage.setItem('materiasExamenes', JSON.stringify(examsData));
-    }
+    window.openCalModal = (dateKey, dayNum) => {
+      document.getElementById('calDateKey').value = dateKey;
+      document.getElementById('calModalDateDisplay').textContent = `${dayNum} de ${monthNames[currentMonth]} de ${currentYear}`;
+      document.getElementById('calTitle').value = '';
+      document.getElementById('calTime').value = '';
+      document.getElementById('calModal').style.display = 'flex';
+    };
 
-    function loadProgress() {
-      const saved = JSON.parse(localStorage.getItem('materiasAprobadas') || '{}');
-      courses.forEach(course => { if (saved[course.dataset.id]) course.classList.add('completed'); });
-    }
+    window.closeCalModal = () => document.getElementById('calModal').style.display = 'none';
 
-    function updateStates() {
-      const completed = new Set();
-      courses.forEach(course => { if (course.classList.contains('completed')) completed.add(course.dataset.id); });
-      courses.forEach(course => {
-        const reqs = course.dataset.req ? course.dataset.req.split(',') : [];
-        const allMet = reqs.every(r => completed.has(r));
-        if (reqs.length === 0 || allMet) { course.classList.add('enabled'); } 
-        else { course.classList.remove('enabled'); course.classList.remove('completed'); }
-      });
-      saveProgress();
-    }
+    // GUARDAR EVENTO Y ABRIR GOOGLE CALENDAR
+    window.saveCalEvent = (openGoogle) => {
+      const dateKey = document.getElementById('calDateKey').value;
+      const title = document.getElementById('calTitle').value;
+      const time = document.getElementById('calTime').value || "Todo el día";
+      const color = document.getElementById('calColor').value;
 
+      if(!title) { alert("Escribí qué vas a hacer."); return; }
+      if(!calendarData[dateKey]) calendarData[dateKey] = [];
+      calendarData[dateKey].push({ title, time, color });
+      
+      localStorage.setItem('indCalendar', JSON.stringify(calendarData));
+      if (window.syncCloud) window.syncCloud();
+      renderCalendar(); 
+      closeCalModal();
+
+      if (openGoogle) {
+        const [y, m, d] = dateKey.split('-');
+        const formatMonth = (parseInt(m) + 1).toString().padStart(2, '0');
+        const formatDay = d.padStart(2, '0');
+        const googleDate = `${y}${formatMonth}${formatDay}/${y}${formatMonth}${formatDay}`;
+        const url = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(title)}&dates=${googleDate}&details=${encodeURIComponent("Horario anotado: " + time)}`;
+        window.open(url, '_blank');
+      }
+    };
+
+    window.deleteCalEvent = (dateKey, idx, event) => {
+      event.stopPropagation();
+      if(confirm("¿Borrar esta actividad?")) {
+        calendarData[dateKey].splice(idx, 1);
+        if(calendarData[dateKey].length === 0) delete calendarData[dateKey];
+        localStorage.setItem('indCalendar', JSON.stringify(calendarData));
+        if (window.syncCloud) window.syncCloud();
+        renderCalendar();
+      }
+    };
+
+    // --- NOTAS ---
     function renderGrades() {
-        gradesContainer.innerHTML = '';
+        const container = document.getElementById('gradesContainer');
+        container.innerHTML = '';
         const completedCourses = Array.from(courses).filter(c => c.classList.contains('completed'));
-        if (completedCourses.length === 0) { gradesContainer.innerHTML = '<div style="text-align:center; opacity:0.6;">Aún no hay materias aprobadas.</div>'; calculateAverage(); return; }
+        if (completedCourses.length === 0) { 
+          container.innerHTML = '<div style="text-align:center; opacity:0.6;">Aún no hay materias aprobadas.</div>'; 
+          document.getElementById('averageDisplay').textContent = '0.00'; 
+          return; 
+        }
+        
         completedCourses.forEach(course => {
             const id = course.dataset.id;
-            const row = document.createElement('div'); row.className = 'grade-row';
-            row.innerHTML = `<span class="grade-name">${course.textContent}</span><input type="text" class="grade-input" placeholder="-" value="${gradesData[id] || ''}" oninput="updateGrade('${id}', this.value)">`;
-            gradesContainer.appendChild(row);
+            const row = document.createElement('div'); 
+            row.className = 'grade-row';
+            row.innerHTML = `<span>${course.textContent}</span><input type="text" class="grade-input" placeholder="-" value="${gradesData[id] || ''}" oninput="updateGrade('${id}', this.value)">`;
+            container.appendChild(row);
         });
         calculateAverage();
     }
-    function updateGrade(id, value) {
+
+    window.updateGrade = (id, value) => {
         const num = parseFloat(value);
         if (!isNaN(num)) { if(num > 10) value = 10; if(num < 0) value = 0; }
         value === '' ? delete gradesData[id] : gradesData[id] = value;
-        calculateAverage(); saveProgress();
-    }
+        localStorage.setItem('materiasNotas', JSON.stringify(gradesData));
+        if (window.syncCloud) window.syncCloud();
+        calculateAverage();
+    };
+
     function calculateAverage() {
         const values = Object.values(gradesData).map(v => parseFloat(v)).filter(v => !isNaN(v));
-        if (values.length === 0) { averageDisplay.textContent = '0.00'; return; }
-        averageDisplay.textContent = (values.reduce((a, b) => a + b, 0) / values.length).toFixed(2);
+        if (values.length === 0) { document.getElementById('averageDisplay').textContent = '0.00'; return; }
+        document.getElementById('averageDisplay').textContent = (values.reduce((a, b) => a + b, 0) / values.length).toFixed(2);
     }
 
+    // --- PROGRESO Y PLANIFICADOR ---
     function renderStatsAndPlanner() {
       const total = courses.length;
       const completed = document.querySelectorAll('.course.completed').length;
-      const percentage = Math.round((completed / total) * 100);
+      const percentage = total > 0 ? Math.round((completed / total) * 100) : 0;
+      
       document.getElementById('statsPercentage').textContent = `${percentage}%`;
       document.getElementById('statsCompleted').textContent = completed;
       document.getElementById('statsRemaining').textContent = total - completed;
       document.getElementById('progressCircle').style.background = `conic-gradient(#ffc3cc ${percentage}%, #ffffff ${percentage}% 100%)`;
       
+      const plannerGrid = document.getElementById('plannerGrid');
       plannerGrid.innerHTML = '';
       const available = Array.from(courses).filter(c => c.classList.contains('enabled') && !c.classList.contains('completed'));
       if (available.length === 0) { plannerGrid.innerHTML = '<div style="opacity:0.6; font-style:italic;">No hay materias disponibles por ahora.</div>'; return; }
+      
       available.forEach(course => {
         const id = course.dataset.id;
-        const card = document.createElement('div'); card.className = `plan-card ${plannedData[id] ? 'planned' : ''}`;
-        card.textContent = course.textContent; card.onclick = () => {
+        const card = document.createElement('div'); 
+        card.className = `plan-card ${plannedData[id] ? 'planned' : ''}`;
+        card.textContent = course.textContent; 
+        card.onclick = () => {
            plannedData[id] ? delete plannedData[id] : plannedData[id] = true;
-           card.classList.toggle('planned'); saveProgress();
+           card.classList.toggle('planned'); 
+           localStorage.setItem('materiasPlanificadas', JSON.stringify(plannedData));
+           if (window.syncCloud) window.syncCloud();
         };
         plannerGrid.appendChild(card);
       });
     }
-
-    function renderExams() {
-      examList.innerHTML = '';
-      if(examsData.length === 0) { examList.innerHTML = '<div style="text-align:center; opacity:0.6; padding:10px;">Sin fechas agendadas. ☕</div>'; return; }
-      examsData.sort((a, b) => new Date(a.date) - new Date(b.date));
-      examsData.forEach((exam, index) => {
-        const div = document.createElement('div'); div.className = 'exam-item';
-        const [year, month, day] = exam.date.split('-');
-        const formattedDate = `${day}/${month}/${year}`;
-        const examDate = new Date(exam.date); const today = new Date();
-        today.setHours(0,0,0,0); examDate.setMinutes(examDate.getMinutes() + examDate.getTimezoneOffset());
-        const diffDays = Math.ceil((examDate - today) / (1000 * 60 * 60 * 24));
-        let badgeText = diffDays === 0 ? "HOY" : diffDays === 1 ? "Mañana" : diffDays < 0 ? "Pasado" : `En ${diffDays} d.`;
-        div.innerHTML = `
-          <div class="exam-info"><span class="exam-subject">${exam.name}</span><br><span class="exam-date-text" style="font-size:0.85rem; opacity:0.7;">📅 ${formattedDate}</span></div>
-          <div class="exam-actions">
-            ${diffDays >= 0 ? `<span class="exam-badge">${badgeText}</span>` : `<span class="exam-badge" style="background:rgba(40,48,28,0.1); color:#28301c;">Listo</span>`}
-            <button class="delete-btn" onclick="deleteExam(${index})">✕</button>
-          </div>
-        `;
-        examList.appendChild(div);
-      });
-    }
-
-    function addExam() {
-      const name = document.getElementById('examName').value; const date = document.getElementById('examDate').value;
-      if(!name || !date) return;
-      examsData.push({ name, date }); document.getElementById('examName').value = ''; document.getElementById('examDate').value = '';
-      saveProgress(); renderExams();
-    }
-    function deleteExam(index) { examsData.splice(index, 1); saveProgress(); renderExams(); }
-
-    function renderRewards() {
-      rewardList.innerHTML = '';
-      if(rewardsData.length === 0) { rewardList.innerHTML = '<div style="text-align:center; opacity:0.6;">Sin objetivos aún. 🎁</div>'; return; }
-      rewardsData.forEach((item, index) => {
-        const div = document.createElement('div'); div.className = `reward-item ${item.done ? 'done' : ''}`;
-        div.innerHTML = `
-          <div class="reward-text-group"><span class="r-goal">${item.goal}</span><br><span class="r-prize">Premio: ${item.prize}</span></div>
-          <div style="display:flex; align-items:center;"><button class="check-btn" onclick="toggleReward(${index})">✔</button><button class="delete-btn" onclick="deleteReward(${index})">✕</button></div>
-        `;
-        rewardList.appendChild(div);
-      });
-    }
-    function addReward() {
-      const goal = document.getElementById('goalInput').value; const prize = document.getElementById('prizeInput').value;
-      if(!goal || !prize) return;
-      rewardsData.push({ goal, prize, done: false }); document.getElementById('goalInput').value = ''; document.getElementById('prizeInput').value = '';
-      saveProgress(); renderRewards();
-    }
-    function toggleReward(index) {
-      rewardsData[index].done = !rewardsData[index].done;
-      if(rewardsData[index].done) confetti({ particleCount: 150, spread: 80, origin: { y: 0.6 }, colors: ['#ffc3cc', '#ffffff', '#28301c'] });
-      saveProgress(); renderRewards();
-    }
-    function deleteReward(index) { rewardsData.splice(index, 1); saveProgress(); renderRewards(); }
-
-    courses.forEach(course => {
-      course.addEventListener('click', () => {
-        if (!course.classList.contains('enabled')) return;
-        const isCompleting = !course.classList.contains('completed');
-        course.classList.toggle('completed');
-        if (isCompleting) confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 }, colors: ['#ffc3cc', '#ffffff', '#28301c'] });
-        else { delete gradesData[course.dataset.id]; delete plannedData[course.dataset.id]; }
-        updateStates();
-      });
-      course.addEventListener('mouseenter', () => {
-        const myId = course.dataset.id;
-        courses.forEach(c => { if ((c.dataset.req || '').split(',').includes(myId)) c.classList.add('is-unlocked'); });
-      });
-      course.addEventListener('mouseleave', () => courses.forEach(c => c.classList.remove('is-unlocked')));
-    });
-
-    window.onload = () => { 
-      loadProgress(); updateStates(); buildSchedule(); initScheduleModal(); renderCalendar();
-    };
   </script>
 </body>
 </html>
-
