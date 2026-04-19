@@ -189,13 +189,14 @@
     .panel-box { background:#fff; color:var(--accent-dark); padding:30px; border-radius:20px; border:2px solid var(--accent-light); box-shadow:0 10px 30px rgba(0,0,0,.1); margin-bottom:30px; box-sizing:border-box; }
  
     /* MAPA con scroll horizontal */
-    #view-map { padding-bottom:40px; }
-    .mapa-scroll-wrapper { overflow-x:auto; overflow-y:visible; padding-bottom:12px; scrollbar-width:thin; scrollbar-color:var(--accent-light) transparent; }
-    .mapa-scroll-wrapper::-webkit-scrollbar { height:6px; }
-    .mapa-scroll-wrapper::-webkit-scrollbar-track { background:transparent; }
-    .mapa-scroll-wrapper::-webkit-scrollbar-thumb { background:var(--accent-light); border-radius:3px; }
-    .year-row { display:flex; gap:16px; padding-bottom:16px; width:max-content; }
-    .year-column { display:flex; flex-direction:column; align-items:center; gap:10px; width:170px; flex-shrink:0; }
+    /* MAPA con scroll horizontal y centrado */
+    #view-map { padding-bottom:40px; }
+    .mapa-scroll-wrapper { overflow-x:auto; overflow-y:visible; padding-bottom:12px; scrollbar-width:thin; scrollbar-color:var(--accent-light) transparent; text-align:center; }
+    .mapa-scroll-wrapper::-webkit-scrollbar { height:6px; }
+    .mapa-scroll-wrapper::-webkit-scrollbar-track { background:transparent; }
+    .mapa-scroll-wrapper::-webkit-scrollbar-thumb { background:var(--accent-light); border-radius:3px; }
+    .year-row { display:inline-flex; gap:12px; padding-bottom:16px; text-align:left; margin:0 auto; }
+    .year-column { display:flex; flex-direction:column; align-items:center; gap:8px; width:155px; flex-shrink:0; }
     .year-column h2 { border-bottom:2px solid var(--accent-light); padding-bottom:5px; font-size:1rem; margin-bottom:10px; text-align:center; width:100%; }
     .course { padding:12px 14px; border-radius:12px; border:1px solid rgba(255,195,204,.3); width:100%; text-align:center; font-size:.82rem; font-weight:600; position:relative; cursor:not-allowed; opacity:.5; transition:all .3s; color:#28301c; background:#fff; }
     .course.enabled { cursor:pointer; opacity:1; border-color:var(--accent-light); }
@@ -289,7 +290,8 @@
       header { flex-direction:column; text-align:center; padding:15px; gap:12px; margin-bottom:20px; }
       .tabs-container { justify-content:center; }
       .tab-btn { font-size:.78rem; padding:6px 9px; }
-      .year-column { width:148px; }
+      .year-column { width:125px; }
+      .course { padding:10px 6px; font-size:.72rem; }
       .theme-grid,.profile-grid { grid-template-columns:repeat(2,1fr); }
       .stats-header { flex-direction:column; align-items:center; gap:20px; }
       .cal-day { min-height:65px; }
