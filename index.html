@@ -55,7 +55,15 @@
       }
     };
 
-    window.logout = () => signOut(auth);
+    window.logout = async () => {
+      await signOut(auth);
+      // ESCOBA: Borrar datos locales para que el próximo vea todo en blanco
+      const keys = ['materiasAprobadas', 'materiasNotas', 'materiasPlanificadas', 'materiasPremios', 'materiasExamenes', 'materiasTabla', 'indCalendar'];
+      keys.forEach(k => localStorage.removeItem(k));
+      
+      // Refrescar la pantalla vacía
+      if (window.syncInterface) window.syncInterface();
+    };
 
     onAuthStateChanged(auth, async (user) => {
       if (user) {
@@ -91,6 +99,7 @@
 
       if (docSnap.exists()) {
         const data = docSnap.data();
+        // Sobreescribe la memoria de la compu con lo que bajó de la nube
         localStorage.setItem('materiasAprobadas', JSON.stringify(data.materiasAprobadas || {}));
         localStorage.setItem('materiasNotas', JSON.stringify(data.materiasNotas || {}));
         localStorage.setItem('materiasPlanificadas', JSON.stringify(data.materiasPlanificadas || {}));
@@ -99,9 +108,11 @@
         localStorage.setItem('materiasTabla', JSON.stringify(data.materiasTabla || {}));
         localStorage.setItem('indCalendar', JSON.stringify(data.indCalendar || {}));
       } else {
+        // Si es una cuenta nueva recién creada, sube el progreso que tenías sin cuenta
         await saveToCloud(); 
       }
-      window.syncInterface();
+      // Actualiza la pantalla
+      if (window.syncInterface) window.syncInterface();
     }
 
     window.syncCloud = saveToCloud;
@@ -195,7 +206,7 @@
   .schedule-input:focus { background: #fff9fa; }
   .occupied-cell { background-color: #c43670 !important; color: #faffc7 !important; }
 
-  /* --- NOTAS --- */
+  /* --- NOTAS (DISEÑO ORIGINAL) --- */
   #view-grades { max-width: 800px; margin: 0 auto; }
   .average-card { background: #ffc3cc; color: #45151b; padding: 30px; border-radius: 15px; text-align: center; margin-bottom: 30px; }
   .average-card h2 { color: #45151b; margin-top:0; }
@@ -203,7 +214,7 @@
   .grade-row { display: flex; justify-content: space-between; align-items: center; padding: 15px; border-bottom: 1px dashed rgba(255,195,204,0.3); }
   .grade-input { width: 80px; padding: 10px; border: 1px solid #ffc3cc; border-radius: 8px; text-align: center; font-weight: bold; color: #28301c; font-size: 1rem; outline: none; background: #fff9fa; font-family: 'Poppins', sans-serif;}
 
-  /* --- PROGRESO Y PLANIFICADOR --- */
+  /* --- PROGRESO (DISEÑO ORIGINAL) --- */
   #view-stats { max-width: 900px; margin: 0 auto; padding-bottom: 50px; }
   .stats-header { display: flex; gap: 30px; flex-wrap: wrap; justify-content: center; margin-bottom: 40px; }
   .progress-circle-container { position: relative; width: 180px; height: 180px; background: #ffffff; border-radius: 50%; display: flex; justify-content: center; align-items: center; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
@@ -214,6 +225,7 @@
   .stat-card { background: #ffc3cc; color: #45151b; padding: 20px; border-radius: 15px; width: 150px; text-align: center; border: 2px solid #ffc3cc; display: flex; flex-direction: column; justify-content: center; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
   .stat-val { font-size: 2.5rem; font-weight: 700; color: #45151b; }
   .stat-desc { font-size: 0.9rem; opacity: 0.9; color: #45151b; }
+  
   .available-courses-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 15px; }
   .plan-card { padding: 15px; border: 1px dashed #45151b; border-radius: 12px; color: #45151b; font-weight: 600; font-size: 0.9rem; cursor: pointer; transition: all 0.2s; background: transparent; position: relative; user-select: none; text-align: center;}
   .plan-card:hover { background: rgba(255,195,204,0.3); }
@@ -229,7 +241,7 @@
   .btn-close { background: transparent; border: 2px solid #45151b; color: #45151b; width: 100%; margin-top: 10px; }
 
   /* =========================================
-     MEDIA QUERIES - RESPONSIVE PARA CELULARES
+     MEDIA QUERIES - RESPONSIVE REAL PARA CELULARES
      ========================================= */
   @media (max-width: 768px) {
     body { padding: 10px 0; } 
@@ -279,7 +291,7 @@
   <div id="loginOverlay">
     <div class="login-box">
       <button class="btn-close-login" onclick="document.getElementById('loginOverlay').style.display='none'">×</button>
-      <h2>inicio sesiòn/ registro</h2>
+      <h2>Mi Malla Pro</h2>
       <p>Guardá tu progreso en la nube y accedé desde cualquier lugar.</p>
       
       <input type="email" id="loginEmail" class="login-input" placeholder="Tu email">
@@ -494,11 +506,19 @@
     let calendarData = JSON.parse(localStorage.getItem('indCalendar') || '{}');
     let plannedData = JSON.parse(localStorage.getItem('materiasPlanificadas') || '{}');
 
+    // Variables globales para el calendario (Arranca en mes actual)
     let currentDate = new Date();
     let currentMonth = currentDate.getMonth(); 
     let currentYear = currentDate.getFullYear();
 
     window.syncInterface = () => {
+      // 1. REFRESCAR LAS VARIABLES CON LO QUE BAJÓ DE LA NUBE A LA COMPU
+      tableData = JSON.parse(localStorage.getItem('materiasTabla') || '{}');
+      gradesData = JSON.parse(localStorage.getItem('materiasNotas') || '{}');
+      calendarData = JSON.parse(localStorage.getItem('indCalendar') || '{}');
+      plannedData = JSON.parse(localStorage.getItem('materiasPlanificadas') || '{}');
+
+      // 2. DIBUJAR TODO DE NUEVO
       loadProgress();
       updateStates();
       renderCalendar();
@@ -632,7 +652,7 @@
       buildSchedule(); closeScheduleModal();
     };
 
-    // --- LÓGICA DEL CALENDARIO DINÁMICO ---
+    // --- LÓGICA DEL CALENDARIO DINÁMICO E INFINITO ---
     const monthNames = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
 
     window.changeMonth = (offset) => {
@@ -718,7 +738,7 @@
       }
     };
 
-    // --- NOTAS ---
+    // --- NOTAS (RESTAURADAS AL DISEÑO ORIGINAL) ---
     function renderGrades() {
         const container = document.getElementById('gradesContainer');
         container.innerHTML = '';
@@ -754,7 +774,7 @@
         document.getElementById('averageDisplay').textContent = (values.reduce((a, b) => a + b, 0) / values.length).toFixed(2);
     }
 
-    // --- PROGRESO Y PLANIFICADOR ---
+    // --- PROGRESO Y PLANIFICADOR (RESTAURADO COMPLETO) ---
     function renderStatsAndPlanner() {
       const total = courses.length;
       const completed = document.querySelectorAll('.course.completed').length;
