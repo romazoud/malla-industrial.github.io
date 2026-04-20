@@ -189,22 +189,112 @@
     .panel-box { background:#fff; color:var(--accent-dark); padding:30px; border-radius:20px; border:2px solid var(--accent-light); box-shadow:0 10px 30px rgba(0,0,0,.1); margin-bottom:30px; box-sizing:border-box; }
  
     /* MAPA con scroll horizontal */
-    /* MAPA con scroll horizontal y centrado */
-    #view-map { padding-bottom:40px; }
-    .mapa-scroll-wrapper { overflow-x:auto; overflow-y:visible; padding-bottom:12px; scrollbar-width:thin; scrollbar-color:var(--accent-light) transparent; text-align:center; }
-    .mapa-scroll-wrapper::-webkit-scrollbar { height:6px; }
-    .mapa-scroll-wrapper::-webkit-scrollbar-track { background:transparent; }
-    .mapa-scroll-wrapper::-webkit-scrollbar-thumb { background:var(--accent-light); border-radius:3px; }
-    .year-row { display:inline-flex; gap:12px; padding-bottom:16px; text-align:left; margin:0 auto; }
-    .year-column { display:flex; flex-direction:column; align-items:center; gap:8px; width:155px; flex-shrink:0; }
-    .year-column h2 { border-bottom:2px solid var(--accent-light); padding-bottom:5px; font-size:1rem; margin-bottom:10px; text-align:center; width:100%; }
-    .course { padding:12px 14px; border-radius:12px; border:1px solid rgba(255,195,204,.3); width:100%; text-align:center; font-size:.82rem; font-weight:600; position:relative; cursor:not-allowed; opacity:.5; transition:all .3s; color:#28301c; background:#fff; }
-    .course.enabled { cursor:pointer; opacity:1; border-color:var(--accent-light); }
-    .course.enabled:hover { transform:translateY(-3px); background:#fff9fa; box-shadow:0 4px 10px rgba(0,0,0,.1); }
-    .course.completed { opacity:1; border-color:var(--accent-light); background:var(--accent-light); color:var(--accent-dark); text-decoration:line-through; }
-    .course.completed::after { content:'★'; position:absolute; top:-8px; right:-8px; background:var(--accent-dark); color:var(--accent-light); border-radius:50%; width:20px; height:20px; font-size:12px; line-height:20px; text-align:center; }
-    .electiva-counter { font-size:11px; color:var(--accent-light); opacity:.85; margin-top:-8px; margin-bottom:4px; }
- 
+     #view-map { 
+      overflow-x: auto; 
+      padding-bottom: 40px; 
+      -webkit-overflow-scrolling: touch; /* Smooth scroll en iOS */
+    }
+    .mapa-scroll-wrapper {
+      min-width: 100%;
+      display: flex;
+      justify-content: center;
+    }
+    .year-row { 
+      display: flex; 
+      gap: 15px; 
+      justify-content: center; 
+      min-width: max-content; 
+      padding: 20px 10px;
+      flex-wrap: nowrap;
+    }
+    .year-column { 
+      display: flex; 
+      flex-direction: column; 
+      align-items: center; 
+      gap: 10px;
+      flex-shrink: 0; /* No se comprime */
+    }
+    .year-column h2 { 
+      border-bottom: 2px solid #ffc3cc; 
+      padding-bottom: 8px; 
+      font-size: 1.1rem; 
+      margin: 0 0 12px 0; 
+      text-align: center; 
+      min-width: 140px;
+      font-weight: 700;
+    }
+    .course { 
+      padding: 12px 10px; 
+      border-radius: 12px; 
+      border: 1px solid rgba(255, 195, 204, 0.3); 
+      min-width: 140px; 
+      max-width: 140px; 
+      height: 60px; /* Altura fija para uniformidad */
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center; 
+      font-size: 0.8rem; 
+      font-weight: 600; 
+      position: relative; 
+      cursor: not-allowed; 
+      opacity: 0.5; 
+      transition: all 0.3s; 
+      color: #28301c; 
+      background-color: #ffffff; 
+      line-height: 1.2;
+      overflow: hidden;
+      white-space: normal;
+      box-sizing: border-box;
+    }
+    
+    /* Colores por tipo - igual que antes */
+    .course[data-type="calculo"], .course[data-id="400"], .course[data-id="401"], .course[data-id="402"], .course[data-id="406"], .course[data-id="407"], .course[data-id="408"], .course[data-id="494"], .course[data-id="711"], .course[data-id="458"] { border-left: 6px solid #ff85a8; }
+    .course[data-type="logica"], .course[data-id="404"], .course[data-id="409"], .course[data-id="90002"] { border-left: 6px solid #8585d1; }
+    .course[data-type="quimica"], .course[data-id="411"], .course[data-id="278"], .course[data-id="280"], .course[data-id="468"] { border-left: 6px solid #5dbda5; }
+    .course[data-type="gestion"], .course[data-id="412"], .course[data-id="466"], .course[data-id="467"], .course[data-id="472"], .course[data-id="473"], .course[data-id="813"], .course[data-id="814"], .course[data-id="815"], .course[data-id="816"] { border-left: 6px solid #ff6666; }
+    .course[data-type="ingenieria"], .course[data-id="405"], .course[data-id="800"], .course[data-id="410"], .course[data-id="457"], .course[data-id="281"], .course[data-id="803"], .course[data-id="283"], .course[data-id="284"], .course[data-id="279"], .course[data-id="287"], .course[data-id="291"], .course[data-id="469"], .course[data-id="470"], .course[data-id="474"], .course[data-id="475"], .course[data-id="817"], .course[data-id="478"], .course[data-id="479"], .course[data-id="480"], .course[data-id="830"], .course[data-id="297"], .course[data-id="477"], .course[data-id="801"] { border-left: 6px solid #d991dd; }
+
+    .course.enabled { 
+      cursor: pointer; 
+      opacity: 1; 
+      border-color: #ffc3cc; 
+    }
+    .course.enabled:hover { 
+      transform: translateY(-3px); 
+      background-color: #fff9fa; 
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1); 
+    }
+    .course.completed { 
+      opacity: 1; 
+      border-color: var(--accent-light); 
+      background: var(--accent-light); 
+      color: var(--accent-dark); 
+      text-decoration: line-through; 
+    }
+    .course.completed::after { 
+      content: '★'; 
+      position: absolute; 
+      top: -8px; 
+      right: -8px; 
+      background: var(--accent-dark); 
+      color: var(--accent-light); 
+      border-radius: 50%; 
+      width: 20px; 
+      height: 20px; 
+      font-size: 12px; 
+      line-height: 20px; 
+      text-align: center; 
+    }
+    .electiva-counter { 
+      font-size: 10px; 
+      color: var(--accent-light); 
+      opacity: .85; 
+      margin-top: -8px; 
+      margin-bottom: 4px; 
+      font-weight: 600;
+    }
+
     /* CALENDARIO */
     #view-calendar { max-width:1100px; margin:0 auto 50px; }
     .cal-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; background:#fff; padding:15px 25px; border-radius:15px; border:2px solid var(--accent-light); flex-wrap:wrap; gap:10px; }
@@ -290,11 +380,122 @@
       header { flex-direction:column; text-align:center; padding:15px; gap:12px; margin-bottom:20px; }
       .tabs-container { justify-content:center; }
       .tab-btn { font-size:.78rem; padding:6px 9px; }
-      .year-column { width:125px; }
-      .course { padding:10px 6px; font-size:.72rem; }
+      .year-column { width:148px; }
       .theme-grid,.profile-grid { grid-template-columns:repeat(2,1fr); }
       .stats-header { flex-direction:column; align-items:center; gap:20px; }
       .cal-day { min-height:65px; }
+      @media (max-width: 1200px) {
+      .year-row { gap: 12px; padding: 15px 8px; }
+      .year-column h2 { font-size: 1rem; min-width: 130px; }
+      .course { min-width: 130px; max-width: 130px; font-size: 0.75rem; height: 55px; padding: 10px 8px; }
+    }
+
+    @media (max-width: 992px) {
+      .year-row { gap: 10px; padding: 12px 6px; }
+      .year-column h2 { font-size: 0.95rem; min-width: 120px; }
+      .course { min-width: 120px; max-width: 120px; font-size: 0.72rem; height: 52px; padding: 9px 7px; }
+    }
+
+    @media (max-width: 768px) {
+      #view-map { padding-bottom: 30px; }
+      .year-row { 
+        gap: 8px; 
+        padding: 15px 5px;
+        /* En móviles pequeños, permitir wrap para evitar scroll excesivo */
+        flex-wrap: wrap;
+        justify-content: center;
+      }
+      .year-column { 
+        min-width: 110px;
+        max-width: 110px;
+      }
+      .year-column h2 { 
+        font-size: 0.85rem; 
+        min-width: 110px;
+        margin-bottom: 8px;
+        padding-bottom: 6px;
+      }
+      .course { 
+        min-width: 105px; 
+        max-width: 105px; 
+        height: 48px;
+        font-size: 0.68rem; 
+        padding: 8px 6px; 
+      }
+      .electiva-counter { font-size: 9px; }
+    }
+
+    @media (max-width: 480px) {
+      .year-row { gap: 6px; padding: 12px 3px; }
+      .year-column { min-width: 95px; max-width: 95px; }
+      .year-column h2 { 
+        font-size: 0.8rem; 
+        min-width: 95px;
+        padding-bottom: 4px;
+        margin-bottom: 6px;
+      }
+      .course { 
+        min-width: 90px; 
+        max-width: 90px; 
+        height: 44px;
+        font-size: 0.65rem; 
+        padding: 7px 5px; 
+      }
+      .course.completed::after { 
+        width: 18px; 
+        height: 18px; 
+        font-size: 11px; 
+        line-height: 18px;
+        top: -6px;
+        right: -6px;
+      }
+    }
+
+    @media (max-width: 360px) {
+      .year-row { gap: 5px; padding: 10px 2px; }
+      .year-column { min-width: 85px; max-width: 85px; gap: 6px; }
+      .year-column h2 { font-size: 0.75rem; min-width: 85px; }
+      .course { 
+        min-width: 80px; 
+        max-width: 80px; 
+        height: 40px;
+        font-size: 0.62rem; 
+        padding: 6px 4px; 
+      }
+    }
+
+    /* Indicador de scroll horizontal */
+    #view-map::after {
+      content: '↔ Deslizá para ver toda la malla';
+      position: absolute;
+      bottom: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(69,21,27,0.9);
+      color: #ffc3cc;
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      opacity: 0;
+      transition: opacity 0.3s;
+      pointer-events: none;
+      z-index: 10;
+    }
+
+    #view-map.scroll-hint::after {
+      opacity: 1;
+    }
+
+    @media (min-width: 769px) {
+      #view-map::after { display: none; }
+    }
+
+    /* Smooth scroll en contenedores */
+    .mapa-scroll-wrapper {
+      scroll-behavior: smooth;
+    }
+
     }
   </style>
 </head>
