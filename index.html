@@ -2,7 +2,8 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
-  <title>Mi Malla Curricular</title>
+ <title>Mi Malla Curricular</title>
+  <link rel="icon" href="logo.png" type="image/png">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,700;1,400&family=Poppins:wght@400;600;700;900&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
@@ -275,8 +276,8 @@
     .course.completed::after { 
       content: '★'; 
       position: absolute; 
-      top: -8px; 
-      right: -8px; 
+      top: 5px; 
+      right: 5px; 
       background: var(--accent-dark); 
       color: var(--accent-light); 
       border-radius: 50%; 
@@ -577,7 +578,7 @@
           <div class="theme-name">Verde</div><div class="theme-desc">Fresco</div>
         </div>
         <div class="theme-card" data-accent="#534AB7" data-dark="#26215C" data-light="#AFA9EC" data-bg="#534AB7" data-label="Púrpura" onclick="obSelectTheme(this)">
-          <div class="theme-swatch" style="background:linear-gradient(135deg,#534AB7,#AFA9EC)"></div>
+          <div class="theme-swatch" style="background:linear-gradient(135deg,#50166b,#580b55)"></div>
           <div class="theme-name">Púrpura</div><div class="theme-desc">Digital</div>
         </div>
         <div class="theme-card" data-accent="#D85A30" data-dark="#4A1B0C" data-light="#F0997B" data-bg="#D85A30" data-label="Coral" onclick="obSelectTheme(this)">
@@ -599,7 +600,7 @@
     <div class="ob-step" id="obs4">
       <div class="ob-step-label">Paso 4 de 4</div>
       <div class="ob-step-title">Subí tu plan de estudios 📄</div>
-      <div class="ob-step-sub">Asegurate de que el servidor Python esté corriendo (<strong>python servidor.py</strong> en la terminal). Aceptamos PDF o imagen.</div>
+      <div class="ob-step-sub"> (<strong>python servidor.py</strong> en la terminal). Aceptamos PDF o imagen.</div>
       <div class="ob-upload" id="obUploadZone">
         <input type="file" id="obFileInput" accept=".pdf,.png,.jpg,.jpeg" onchange="obHandleFile(this)">
         <div class="ob-upload-icon">📎</div>
@@ -670,10 +671,14 @@
  
 <!-- ===== APP ===== -->
 <div id="appContent">
-  <header>
-    <div class="logo-container">
-      <h1 id="headerCareer">Mi Carrera</h1>
-      <h2 id="headerUni">Mi Universidad</h2>
+<header>
+    <div class="logo-container" style="display: flex; align-items: center; gap: 15px;">
+      <img src="logonombre.png" alt="Organiza tu Facu" style="height: 60px; width: auto;">
+      
+      <div>
+        <h1 id="headerCareer">Mi Carrera</h1>
+        <h2 id="headerUni">Mi Universidad</h2>
+      </div>
     </div>
     <div class="tabs-container">
       <button class="tab-btn active" onclick="switchTab('map',event)">🗺️ Plan</button>
