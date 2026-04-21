@@ -4,14 +4,14 @@
   <meta charset="UTF-8" />
   <title>Mi Malla Curricular</title>
   
-  <link rel="icon" href="logo.png" type="image/png">
+  <link rel="icon" href="logo.png?v=2" type="image/png">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,700;1,400&family=Poppins:wght@400;600;700;900&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
   
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+   import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
     import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
   
     const firebaseConfig = {
@@ -115,6 +115,7 @@
     h1,h2,h3 { font-family:'Lora',serif; color:var(--accent-light); margin:10px 0; font-weight:700; }
   
     /* ONBOARDING */
+  
     #onboardingScreen { min-height:100vh; display:none; align-items:center; justify-content:center; padding:2rem 1rem; background:var(--accent-bg); position:relative; overflow:hidden; }
     #onboardingScreen.visible { display:flex; }
     #onboardingScreen::before { content:''; position:absolute; width:600px; height:600px; border-radius:50%; background:rgba(255,255,255,.04); top:-200px; right:-200px; pointer-events:none; }
@@ -337,27 +338,37 @@
   <div class="ob-card">
     <div class="ob-progress"><div class="ob-progress-fill" id="obProgress" style="width:25%"></div></div>
   
-    <div class="ob-step active" id="obs1">
+   <div class="ob-step active" id="obs1">
       <div class="ob-step-label">Paso 1 de 4</div>
-      <div class="ob-step-title">¡Bienvenido/a! 👋</div>
-      <div class="ob-step-sub">Creá tu cuenta para guardar tu progreso, o iniciá sesión si ya tenés una.</div>
-      <div class="auth-tabs">
+      <div class="ob-step-title" id="authTitle">¡Bienvenido/a! 👋</div>
+      <div class="ob-step-sub" id="authSub">Creá tu cuenta para guardar tu progreso, o iniciá sesión si ya tenés una.</div>
+      
+      <div class="auth-tabs" id="authTabsContainer">
         <button class="auth-tab active" id="tabRegistro" onclick="switchAuthTab('registro')">Crear cuenta</button>
         <button class="auth-tab" id="tabLogin" onclick="switchAuthTab('login')">Ya tengo cuenta</button>
       </div>
+      
       <div id="auth-error"></div>
+      
       <div class="ob-field">
         <label class="ob-label">Email</label>
         <input class="ob-input" type="email" id="ob-email" placeholder="tu@email.com">
       </div>
-      <div class="ob-field">
+      
+      <div class="ob-field" id="passFieldContainer">
         <label class="ob-label">Contraseña</label>
         <input class="ob-input" type="password" id="ob-pass" placeholder="Mínimo 6 caracteres">
+        <p style="text-align:right; margin-top:5px; margin-bottom:0;">
+          <span style="font-size:11px; color:var(--accent); cursor:pointer; font-weight:600;" id="btnForgotPass" onclick="mostrarRecuperarPass()" style="display:none;">¿Olvidaste tu contraseña?</span>
+        </p>
       </div>
+      
       <div class="ob-nav">
+        <button class="ob-btn-back" id="btnBackToLogin" onclick="switchAuthTab('login')" style="display:none;">← Volver</button>
         <button class="ob-btn-next" id="obAuthBtn" onclick="obDoAuth()">Crear cuenta y continuar →</button>
       </div>
-      <p style="text-align:center;font-size:12px;color:#aaa;margin-top:12px">
+      
+      <p style="text-align:center;font-size:12px;color:#aaa;margin-top:12px" id="skipAuthText">
         ¿Preferís no crear cuenta? <span style="color:var(--accent);cursor:pointer;font-weight:600" onclick="obGo(2)">Continuar sin cuenta →</span>
       </p>
     </div>
@@ -426,7 +437,7 @@
     <div class="ob-step" id="obs4">
       <div class="ob-step-label">Paso 4 de 4</div>
       <div class="ob-step-title">Subí tu plan de estudios 📄</div>
-      <div class="ob-step-sub"> (<strong>python servidor.py</strong> Aceptamos PDF o imagen.</div>
+      <div class="ob-step-sub"> (<strong>python servidor.py</strong> en la terminal). Aceptamos PDF o imagen.</div>
       <div class="ob-upload" id="obUploadZone">
         <input type="file" id="obFileInput" accept=".pdf,.png,.jpg,.jpeg" onchange="obHandleFile(this)">
         <div class="ob-upload-icon">📎</div>
@@ -633,15 +644,62 @@ function switchAuthTab(mode) {
   authMode = mode;
   document.getElementById('tabRegistro').classList.toggle('active', mode==='registro');
   document.getElementById('tabLogin').classList.toggle('active', mode==='login');
-  document.getElementById('obAuthBtn').textContent = mode==='registro' ? 'Crear cuenta y continuar →' : 'Iniciar sesión y continuar →';
+  
+  // Mostrar/Ocultar cosas según el modo
+  document.getElementById('passFieldContainer').style.display = 'block';
+  document.getElementById('authTabsContainer').style.display = 'flex';
+  document.getElementById('skipAuthText').style.display = 'block';
+  document.getElementById('btnBackToLogin').style.display = 'none';
+  
+  document.getElementById('authTitle').textContent = '¡Bienvenido/a! 👋';
+  document.getElementById('authSub').textContent = 'Creá tu cuenta para guardar tu progreso, o iniciá sesión si ya tenés una.';
+
+  if(mode === 'registro') {
+    document.getElementById('obAuthBtn').textContent = 'Crear cuenta y continuar →';
+    document.getElementById('btnForgotPass').style.display = 'none';
+  } else if (mode === 'login') {
+    document.getElementById('obAuthBtn').textContent = 'Iniciar sesión y continuar →';
+    document.getElementById('btnForgotPass').style.display = 'inline-block';
+  }
   document.getElementById('auth-error').style.display = 'none';
 }
+
+function mostrarRecuperarPass() {
+  authMode = 'recuperar';
+  document.getElementById('authTitle').textContent = 'Recuperar Contraseña 🔐';
+  document.getElementById('authSub').textContent = 'Ingresá tu email y te enviaremos un enlace para crear una nueva contraseña.';
   
-function obDoAuth() {
+  // Esconder lo que no sirve ahora
+  document.getElementById('passFieldContainer').style.display = 'none';
+  document.getElementById('authTabsContainer').style.display = 'none';
+  document.getElementById('skipAuthText').style.display = 'none';
+  
+  // Cambiar botones
+  document.getElementById('btnBackToLogin').style.display = 'block';
+  document.getElementById('obAuthBtn').textContent = 'Enviar enlace →';
   document.getElementById('auth-error').style.display = 'none';
+}
+
+async function obDoAuth() {
+  document.getElementById('auth-error').style.display = 'none';
+  const email = document.getElementById('ob-email').value.trim();
+  
+  if (authMode === 'recuperar') {
+    if(!email) { alert('Por favor, ingresá tu email.'); return; }
+    try {
+      // Magia de Firebase para mandar el mail
+      await window.sendPasswordResetEmail(window.auth, email);
+      alert('¡Listo! Revisá tu casilla de correo (y la carpeta de spam). Te enviamos un enlace para cambiar tu contraseña.');
+      switchAuthTab('login'); // Lo devolvemos al login
+    } catch(e) {
+      alert('Error al enviar el correo: ' + e.message);
+    }
+    return; // Frenamos acá para que no intente loguear
+  }
+
+  // Si no es recuperar, hacemos el login o registro normal
   if (authMode === 'registro') window.registrarse();
   else window.iniciarSesion();
-  // Firebase onAuthStateChanged se encarga del resto
 }
   
 function obGo(n) {
