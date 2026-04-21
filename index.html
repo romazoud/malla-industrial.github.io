@@ -277,7 +277,9 @@
     .profile-info-val { font-weight:600; }
     .profile-logout-btn { width:100%; padding:12px; border-radius:10px; border:2px solid var(--accent); background:transparent; color:var(--accent); font-family:'Poppins',sans-serif; font-weight:700; font-size:14px; cursor:pointer; transition:.2s; margin-top:12px; }
     .profile-logout-btn:hover { background:var(--accent); color:#fff; }
-  
+  .profile-danger-btn { width:100%; padding:12px; border-radius:10px; border:2px solid #ef4444; background:#fff1f2; color:#b91c1c; font-family:'Poppins',sans-serif; font-weight:700; font-size:14px; cursor:pointer; transition:.2s; margin-top:12px; }
+    .profile-danger-btn:hover { background:#ef4444; color:#fff; }
+
     /* MODALES */
     .modal-overlay { position:fixed; inset:0; background:rgba(69,21,27,.9); z-index:2000; display:none; justify-content:center; align-items:center; }
     .modal-overlay.open { display:flex; }
@@ -424,7 +426,7 @@
     <div class="ob-step" id="obs4">
       <div class="ob-step-label">Paso 4 de 4</div>
       <div class="ob-step-title">Subí tu plan de estudios 📄</div>
-      <div class="ob-step-sub"> (<strong>python servidor.py</strong> en la terminal). Aceptamos PDF o imagen.</div>
+      <div class="ob-step-sub"> (<strong>python servidor.py</strong> Aceptamos PDF o imagen.</div>
       <div class="ob-upload" id="obUploadZone">
         <input type="file" id="obFileInput" accept=".pdf,.png,.jpg,.jpeg" onchange="obHandleFile(this)">
         <div class="ob-upload-icon">📎</div>
@@ -575,12 +577,14 @@
     </div>
   
     <div id="view-profile" class="view-section">
-      <div class="profile-section">
+     <div class="profile-section">
         <h3>📋 Mi cuenta</h3>
         <div class="profile-info-row"><span class="profile-info-label">Email</span><span class="profile-info-val" id="userLabel">Sin cuenta</span></div>
         <div class="profile-info-row"><span class="profile-info-label">Carrera</span><span class="profile-info-val" id="profileCareer">—</span></div>
         <div class="profile-info-row"><span class="profile-info-label">Universidad</span><span class="profile-info-val" id="profileUni">—</span></div>
+        
         <button class="profile-logout-btn" onclick="logout()">Cerrar sesión</button>
+        <button class="profile-danger-btn" onclick="reiniciarCuenta()">🗑️ Borrar todo y empezar de cero</button>
       </div>
       <div class="profile-section">
         <h3>🎨 Cambiar tema de color</h3>
@@ -1085,6 +1089,24 @@ function renderStatsAndPlanner(){
     grid.appendChild(card);
   });
 }
+// ====== REINICIAR CUENTA ======
+window.reiniciarCuenta = async () => {
+  // 1. Pedimos confirmación para que no sea un accidente
+  const seguro = confirm("⚠️ ¿Estás seguro de que querés borrar TODA tu malla, notas, calendario y horarios? Esta acción NO se puede deshacer.");
+  
+  if (seguro) {
+    // 2. Borramos todo de la memoria local
+    ['materiasAprobadas','materiasNotas','materiasPlanificadas','materiasTabla','indCalendar','userConfig'].forEach(k => localStorage.removeItem(k));
+    
+    // 3. Sobreescribimos la base de datos en la nube con "nada" (vacío)
+    if (window.syncCloud) {
+      await window.syncCloud();
+    }
+    
+    // 4. Recargamos la página. Como no hay datos, la app te va a llevar al paso 1 del Onboarding automáticamente.
+    location.reload();
+  }
+};
   
 // ====== ARRANQUE ======
 window.addEventListener('load', () => {
