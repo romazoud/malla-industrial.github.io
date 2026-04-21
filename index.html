@@ -2,17 +2,18 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
- <title>Mi Malla Curricular</title>
-<link rel="icon" href="logo.png?v=2" type="image/png">
+  <title>Mi Malla Curricular</title>
+  
+  <link rel="icon" href="logo.png" type="image/png">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,700;1,400&family=Poppins:wght@400;600;700;900&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
- 
+  
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
     import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
     import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
- 
+  
     const firebaseConfig = {
       apiKey: "AIzaSyDFtB_22y_4lkVjjQXMyhd0pltKjOeYiv0",
       authDomain: "facu-app-5bef9.firebaseapp.com",
@@ -21,11 +22,11 @@
       messagingSenderId: "633251183436",
       appId: "1:633251183436:web:8a2b36bd8a215c4c5a2de9"
     };
- 
+  
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
     const db = getFirestore(app);
- 
+  
     window.iniciarSesion = async () => {
       const email = document.getElementById('ob-email').value.trim();
       const pass  = document.getElementById('ob-pass').value;
@@ -33,7 +34,7 @@
       try { await signInWithEmailAndPassword(auth, email, pass); }
       catch(e) { mostrarErrorAuth('Email o contraseña incorrectos.'); }
     };
- 
+  
     window.registrarse = async () => {
       const email = document.getElementById('ob-email').value.trim();
       const pass  = document.getElementById('ob-pass').value;
@@ -45,19 +46,19 @@
         else mostrarErrorAuth('Error: ' + e.message);
       }
     };
- 
+  
     function mostrarErrorAuth(msg) {
       const el = document.getElementById('auth-error');
       el.textContent = msg; el.style.display = 'block';
     }
- 
+  
     window.logout = async () => {
       await signOut(auth);
       ['materiasAprobadas','materiasNotas','materiasPlanificadas','materiasTabla','indCalendar','userConfig']
         .forEach(k => localStorage.removeItem(k));
       location.reload();
     };
- 
+  
     onAuthStateChanged(auth, async (user) => {
       const btnLogin  = document.getElementById('btnOpenLogin');
       const btnLogout = document.getElementById('btnLogout');
@@ -75,7 +76,7 @@
         else if (window.initApp) window.initApp();
       }
     });
- 
+  
     async function saveToCloud() {
       const user = auth.currentUser;
       if (!user) return;
@@ -89,7 +90,7 @@
       };
       await setDoc(doc(db, 'users', user.uid), data);
     }
- 
+  
     async function loadFromCloud(uid) {
       const snap = await getDoc(doc(db, 'users', uid));
       if (snap.exists()) {
@@ -103,16 +104,16 @@
       } else { await saveToCloud(); }
       if (window.initApp) window.initApp();
     }
- 
+  
     window.syncCloud = saveToCloud;
   </script>
- 
+  
   <style>
     :root { --accent:#c43670; --accent-dark:#45151b; --accent-light:#ffc3cc; --accent-bg:#c43670; }
     * { box-sizing:border-box; }
     body { font-family:'Poppins',sans-serif; background:var(--accent-bg); color:#faffc7; margin:0; padding:0; overflow-x:hidden; transition:background-color .5s; }
     h1,h2,h3 { font-family:'Lora',serif; color:var(--accent-light); margin:10px 0; font-weight:700; }
- 
+  
     /* ONBOARDING */
     #onboardingScreen { min-height:100vh; display:none; align-items:center; justify-content:center; padding:2rem 1rem; background:var(--accent-bg); position:relative; overflow:hidden; }
     #onboardingScreen.visible { display:flex; }
@@ -171,7 +172,7 @@
     .ob-summary-row:last-child { border-bottom:none; }
     .ob-summary-key { color:#888; }
     .ob-summary-val { font-weight:700; color:#1a1a1a; text-align:right; max-width:60%; }
- 
+  
     /* APP */
     #appContent { display:none; }
     header { display:flex; justify-content:space-between; align-items:center; background:var(--accent-dark); padding:15px 40px; box-shadow:0 4px 15px rgba(0,0,0,.4); margin-bottom:40px; flex-wrap:wrap; gap:20px; }
@@ -188,113 +189,26 @@
     .view-section.active { display:block; }
     @keyframes fadeIn { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
     .panel-box { background:#fff; color:var(--accent-dark); padding:30px; border-radius:20px; border:2px solid var(--accent-light); box-shadow:0 10px 30px rgba(0,0,0,.1); margin-bottom:30px; box-sizing:border-box; }
- 
-    /* MAPA con scroll horizontal */
-     #view-map { 
-      overflow-x: auto; 
-      padding-bottom: 40px; 
-      -webkit-overflow-scrolling: touch; /* Smooth scroll en iOS */
-    }
-    .mapa-scroll-wrapper {
-      min-width: 100%;
-      display: flex;
-      justify-content: center;
-    }
-    .year-row { 
-      display: flex; 
-      gap: 15px; 
-      justify-content: center; 
-      min-width: max-content; 
-      padding: 20px 10px;
-      flex-wrap: nowrap;
-    }
-    .year-column { 
-      display: flex; 
-      flex-direction: column; 
-      align-items: center; 
-      gap: 10px;
-      flex-shrink: 0; /* No se comprime */
-    }
-    .year-column h2 { 
-      border-bottom: 2px solid #ffc3cc; 
-      padding-bottom: 8px; 
-      font-size: 1.1rem; 
-      margin: 0 0 12px 0; 
-      text-align: center; 
-      min-width: 140px;
-      font-weight: 700;
-    }
-    .course { 
-      padding: 12px 10px; 
-      border-radius: 12px; 
-      border: 1px solid rgba(255, 195, 204, 0.3); 
-      min-width: 140px; 
-      max-width: 140px; 
-      height: 60px; /* Altura fija para uniformidad */
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      text-align: center; 
-      font-size: 0.8rem; 
-      font-weight: 600; 
-      position: relative; 
-      cursor: not-allowed; 
-      opacity: 0.5; 
-      transition: all 0.3s; 
-      color: #28301c; 
-      background-color: #ffffff; 
-      line-height: 1.2;
-      overflow: hidden;
-      white-space: normal;
-      box-sizing: border-box;
-    }
+  
+    /* MAPA */
+     #view-map { overflow-x: auto; padding-bottom: 40px; -webkit-overflow-scrolling: touch; }
+    .mapa-scroll-wrapper { width: 100%; }
+    .year-row { display: flex; gap:15px; justify-content: center; width: max-content; padding: 20px 10px; flex-wrap: nowrap; margin: 0 auto; }
+    .year-column { display: flex; flex-direction: column; align-items: center; gap: 10px; flex-shrink: 0; }
+    .year-column h2 { border-bottom: 2px solid #ffc3cc; padding-bottom: 8px; font-size: 1.1rem; margin: 0 0 12px 0; text-align: center; min-width: 140px; font-weight: 700; }
+    .course { padding: 12px 10px; border-radius: 12px; border: 1px solid rgba(255, 195, 204, 0.3); min-width: 140px; max-width: 140px; height: 60px; display: flex; align-items: center; justify-content: center; text-align: center; font-size: 0.8rem; font-weight: 600; position: relative; cursor: not-allowed; opacity: 0.5; transition: all 0.3s; color: #28301c; background-color: #ffffff; line-height: 1.2; overflow: hidden; white-space: normal; box-sizing: border-box; }
     
-    /* Colores por tipo - igual que antes */
     .course[data-type="calculo"], .course[data-id="400"], .course[data-id="401"], .course[data-id="402"], .course[data-id="406"], .course[data-id="407"], .course[data-id="408"], .course[data-id="494"], .course[data-id="711"], .course[data-id="458"] { border-left: 6px solid #ff85a8; }
     .course[data-type="logica"], .course[data-id="404"], .course[data-id="409"], .course[data-id="90002"] { border-left: 6px solid #8585d1; }
     .course[data-type="quimica"], .course[data-id="411"], .course[data-id="278"], .course[data-id="280"], .course[data-id="468"] { border-left: 6px solid #5dbda5; }
     .course[data-type="gestion"], .course[data-id="412"], .course[data-id="466"], .course[data-id="467"], .course[data-id="472"], .course[data-id="473"], .course[data-id="813"], .course[data-id="814"], .course[data-id="815"], .course[data-id="816"] { border-left: 6px solid #ff6666; }
     .course[data-type="ingenieria"], .course[data-id="405"], .course[data-id="800"], .course[data-id="410"], .course[data-id="457"], .course[data-id="281"], .course[data-id="803"], .course[data-id="283"], .course[data-id="284"], .course[data-id="279"], .course[data-id="287"], .course[data-id="291"], .course[data-id="469"], .course[data-id="470"], .course[data-id="474"], .course[data-id="475"], .course[data-id="817"], .course[data-id="478"], .course[data-id="479"], .course[data-id="480"], .course[data-id="830"], .course[data-id="297"], .course[data-id="477"], .course[data-id="801"] { border-left: 6px solid #d991dd; }
 
-    .course.enabled { 
-      cursor: pointer; 
-      opacity: 1; 
-      border-color: #ffc3cc; 
-    }
-    .course.enabled:hover { 
-      transform: translateY(-3px); 
-      background-color: #fff9fa; 
-      box-shadow: 0 4px 10px rgba(0,0,0,0.1); 
-    }
-    .course.completed { 
-      opacity: 1; 
-      border-color: var(--accent-light); 
-      background: var(--accent-light); 
-      color: var(--accent-dark); 
-      text-decoration: line-through; 
-    }
-    .course.completed::after { 
-      content: '★'; 
-      position: absolute; 
-      top: 5px; 
-      right: 5px; 
-      background: var(--accent-dark); 
-      color: var(--accent-light); 
-      border-radius: 50%; 
-      width: 20px; 
-      height: 20px; 
-      font-size: 12px; 
-      line-height: 20px; 
-      text-align: center; 
-    }
-    .electiva-counter { 
-      font-size: 10px; 
-      color: var(--accent-light); 
-      opacity: .85; 
-      margin-top: -8px; 
-      margin-bottom: 4px; 
-      font-weight: 600;
-    }
+    .course.enabled { cursor: pointer; opacity: 1; border-color: #ffc3cc; }
+    .course.enabled:hover { transform: translateY(-3px); background-color: #fff9fa; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+    .course.completed { opacity: 1; border-color: var(--accent-light); background: var(--accent-light); color: var(--accent-dark); text-decoration: line-through; }
+    .course.completed::after { content: '★'; position: absolute; top: 5px; right: 5px; background: var(--accent-dark); color: var(--accent-light); border-radius: 50%; width: 20px; height: 20px; font-size: 12px; line-height: 20px; text-align: center; }
+    .electiva-counter { font-size: 10px; color: var(--accent-light); opacity: .85; margin-top: -8px; margin-bottom: 4px; font-weight: 600; }
 
     /* CALENDARIO */
     #view-calendar { max-width:1100px; margin:0 auto 50px; }
@@ -310,18 +224,18 @@
     .cal-day.empty { background:transparent; border:none; cursor:default; }
     .cal-date-num { font-weight:700; color:var(--accent-dark); margin-bottom:4px; text-align:right; font-size:.85rem; }
     .cal-event-pill { font-size:.72rem; padding:3px 5px; border-radius:4px; margin-bottom:3px; color:#fff; font-weight:600; overflow:hidden; white-space:nowrap; text-overflow:ellipsis; }
- 
-    /* HORARIO */
+  
+    /* HORARIO (Diseño por Columnas) */
     #view-schedule { max-width:1100px; margin:0 auto; padding-bottom:50px; }
-    .table-responsive-wrapper { width:100%; background:#fff; border-radius:20px; padding:20px; box-shadow:0 10px 30px rgba(0,0,0,.2); box-sizing:border-box; overflow-x:auto; }
-    .schedule-table { width:100%; border-collapse:collapse; color:var(--accent-dark); min-width:650px; }
-    .schedule-table th,.schedule-table td { border:1px solid var(--accent-light); padding:0; text-align:center; height:50px; }
-    .schedule-table th { background:var(--accent-light); padding:10px; font-weight:700; color:var(--accent-dark); font-family:'Lora',serif; }
-    .hour-col { background:#fff9fa; font-weight:700; width:80px; font-size:.82rem; }
-    .schedule-input { width:100%; height:100%; border:none; outline:none; background:transparent; padding:4px; text-align:center; color:var(--accent-dark); resize:none; font-size:.8rem; font-weight:600; font-family:'Poppins',sans-serif; box-sizing:border-box; }
-    .schedule-input:focus { background:#fff9fa; }
-    .occupied-cell { background-color:var(--accent-bg) !important; color:#faffc7 !important; }
- 
+    .schedule-grid { display: flex; gap: 15px; overflow-x: auto; padding-bottom: 10px; }
+    .day-column { flex: 1; min-width: 150px; display: flex; flex-direction: column; border-radius: 12px; border: 2px solid var(--accent-light); overflow: hidden; background: #fff; }
+    .day-header { background: var(--accent-light); color: var(--accent-dark); text-align: center; padding: 12px; font-weight: 700; font-family: 'Lora', serif; font-size: 1.1rem; }
+    .hour-cell { display: flex; border-top: 1px solid var(--accent-light); height: 50px; }
+    .hour-label { background: #fff9fa; color: var(--accent-dark); font-weight: 700; font-size: 0.75rem; width: 50px; display: flex; align-items: center; justify-content: center; border-right: 1px solid var(--accent-light); flex-shrink: 0; }
+    .hour-cell textarea { flex: 1; border: none; outline: none; background: transparent; padding: 5px; text-align: center; color: var(--accent-dark); resize: none; font-size: 0.8rem; font-weight: 600; font-family: 'Poppins', sans-serif; box-sizing: border-box; }
+    .hour-cell textarea:focus { background: #fff9fa; }
+    .hour-cell textarea.occupied-cell { background-color: var(--accent-bg) !important; color: #faffc7 !important; }
+  
     /* NOTAS */
     #view-grades { max-width:800px; margin:0 auto; }
     .average-card { background:var(--accent-light); color:var(--accent-dark); padding:30px; border-radius:15px; text-align:center; margin-bottom:30px; }
@@ -329,7 +243,7 @@
     .average-card .big-number { font-size:3.5rem; font-weight:900; margin:10px 0; font-family:'Poppins',sans-serif; }
     .grade-row { display:flex; justify-content:space-between; align-items:center; padding:15px; border-bottom:1px dashed rgba(255,195,204,.3); }
     .grade-input { width:80px; padding:10px; border:1px solid var(--accent-light); border-radius:8px; text-align:center; font-weight:bold; color:#28301c; font-size:1rem; outline:none; background:#fff9fa; font-family:'Poppins',sans-serif; }
- 
+  
     /* PROGRESO */
     #view-stats { max-width:900px; margin:0 auto; padding-bottom:50px; }
     .stats-header { display:flex; gap:30px; flex-wrap:wrap; justify-content:center; margin-bottom:40px; }
@@ -346,7 +260,7 @@
     .plan-card:hover { background:rgba(255,195,204,.3); }
     .plan-card.planned { background:var(--accent-light); border-style:solid; border-color:var(--accent-light); }
     .plan-card.planned::after { content:'♡'; position:absolute; top:-12px; right:-8px; font-size:1.5rem; color:var(--accent-dark); }
- 
+  
     /* PERFIL */
     #view-profile { max-width:680px; margin:0 auto; padding-bottom:50px; }
     .profile-section { background:#fff; color:var(--accent-dark); border-radius:20px; border:2px solid var(--accent-light); padding:25px 30px; margin-bottom:25px; }
@@ -363,7 +277,7 @@
     .profile-info-val { font-weight:600; }
     .profile-logout-btn { width:100%; padding:12px; border-radius:10px; border:2px solid var(--accent); background:transparent; color:var(--accent); font-family:'Poppins',sans-serif; font-weight:700; font-size:14px; cursor:pointer; transition:.2s; margin-top:12px; }
     .profile-logout-btn:hover { background:var(--accent); color:#fff; }
- 
+  
     /* MODALES */
     .modal-overlay { position:fixed; inset:0; background:rgba(69,21,27,.9); z-index:2000; display:none; justify-content:center; align-items:center; }
     .modal-overlay.open { display:flex; }
@@ -374,140 +288,53 @@
     .btn-add:hover { opacity:.8; }
     .btn-close-modal { display:block; width:100%; margin-top:10px; padding:10px; border-radius:10px; border:2px solid #ddd; background:transparent; color:#666; font-family:'Poppins',sans-serif; font-weight:600; cursor:pointer; }
     .btn-goog { display:block; width:100%; padding:11px; margin-top:8px; border-radius:10px; border:none; background:#4285F4; color:#fff; font-family:'Poppins',sans-serif; font-weight:700; font-size:14px; cursor:pointer; }
- 
-    /* RESPONSIVE */
-    @media(max-width:768px) {
-      .main-content { padding:0 12px; }
-      header { flex-direction:column; text-align:center; padding:15px; gap:12px; margin-bottom:20px; }
-      .tabs-container { justify-content:center; }
-      .tab-btn { font-size:.78rem; padding:6px 9px; }
-      .year-column { width:148px; }
-      .theme-grid,.profile-grid { grid-template-columns:repeat(2,1fr); }
-      .stats-header { flex-direction:column; align-items:center; gap:20px; }
-      .cal-day { min-height:65px; }
-      @media (max-width: 1200px) {
-      .year-row { gap: 12px; padding: 15px 8px; }
-      .year-column h2 { font-size: 1rem; min-width: 130px; }
-      .course { min-width: 130px; max-width: 130px; font-size: 0.75rem; height: 55px; padding: 10px 8px; }
-    }
-
-    @media (max-width: 992px) {
-      .year-row { gap: 10px; padding: 12px 6px; }
-      .year-column h2 { font-size: 0.95rem; min-width: 120px; }
-      .course { min-width: 120px; max-width: 120px; font-size: 0.72rem; height: 52px; padding: 9px 7px; }
-    }
-
+  
+    /* =========================================
+       DISEÑO DE 1 SOLA COLUMNA PARA CELULARES
+       ========================================= */
     @media (max-width: 768px) {
-      #view-map { padding-bottom: 30px; }
+      .main-content { padding: 0 15px; }
+      header { flex-direction: column; text-align: center; padding: 15px; gap: 12px; margin-bottom: 20px; }
+      .tabs-container { justify-content: center; }
+      .tab-btn { font-size: 0.78rem; padding: 6px 9px; }
+      
+      /* --- MALLA VERTICAL --- */
+      #view-map { padding-bottom: 20px; }
       .year-row { 
-        gap: 8px; 
-        padding: 15px 5px;
-        /* En móviles pequeños, permitir wrap para evitar scroll excesivo */
-        flex-wrap: wrap;
-        justify-content: center;
+        flex-direction: column !important; /* Apila los años */
+        align-items: center; 
+        gap: 20px; 
+        padding: 10px 0; 
+        margin: 0;
       }
-      .year-column { 
-        min-width: 110px;
-        max-width: 110px;
+      .year-column { min-width: 100%; max-width: 350px; } 
+      .year-column h2 { font-size: 1.2rem; min-width: 100%; margin-bottom: 12px; }
+      .course { min-width: 100%; max-width: 100%; height: auto; min-height: 55px; font-size: 0.85rem; }
+      #view-map::after { display: none !important; }
+  
+      /* --- HORARIO VERTICAL --- */
+      .schedule-grid { 
+        flex-direction: column !important; /* Apila los días */
+        overflow-x: hidden; 
+        gap: 20px; 
       }
-      .year-column h2 { 
-        font-size: 0.85rem; 
-        min-width: 110px;
-        margin-bottom: 8px;
-        padding-bottom: 6px;
-      }
-      .course { 
-        min-width: 105px; 
-        max-width: 105px; 
-        height: 48px;
-        font-size: 0.68rem; 
-        padding: 8px 6px; 
-      }
-      .electiva-counter { font-size: 9px; }
-    }
-
-    @media (max-width: 480px) {
-      .year-row { gap: 6px; padding: 12px 3px; }
-      .year-column { min-width: 95px; max-width: 95px; }
-      .year-column h2 { 
-        font-size: 0.8rem; 
-        min-width: 95px;
-        padding-bottom: 4px;
-        margin-bottom: 6px;
-      }
-      .course { 
-        min-width: 90px; 
-        max-width: 90px; 
-        height: 44px;
-        font-size: 0.65rem; 
-        padding: 7px 5px; 
-      }
-      .course.completed::after { 
-        width: 18px; 
-        height: 18px; 
-        font-size: 11px; 
-        line-height: 18px;
-        top: -6px;
-        right: -6px;
-      }
-    }
-
-    @media (max-width: 360px) {
-      .year-row { gap: 5px; padding: 10px 2px; }
-      .year-column { min-width: 85px; max-width: 85px; gap: 6px; }
-      .year-column h2 { font-size: 0.75rem; min-width: 85px; }
-      .course { 
-        min-width: 80px; 
-        max-width: 80px; 
-        height: 40px;
-        font-size: 0.62rem; 
-        padding: 6px 4px; 
-      }
-    }
-
-    /* Indicador de scroll horizontal */
-    #view-map::after {
-      content: '↔ Deslizá para ver toda la malla';
-      position: absolute;
-      bottom: 10px;
-      left: 50%;
-      transform: translateX(-50%);
-      background: rgba(69,21,27,0.9);
-      color: #ffc3cc;
-      padding: 6px 12px;
-      border-radius: 20px;
-      font-size: 0.75rem;
-      font-weight: 600;
-      opacity: 0;
-      transition: opacity 0.3s;
-      pointer-events: none;
-      z-index: 10;
-    }
-
-    #view-map.scroll-hint::after {
-      opacity: 1;
-    }
-
-    @media (min-width: 769px) {
-      #view-map::after { display: none; }
-    }
-
-    /* Smooth scroll en contenedores */
-    .mapa-scroll-wrapper {
-      scroll-behavior: smooth;
-    }
-
+      .day-column { min-width: 100%; }
+      
+      /* Ajustes extras para que todo encaje lindo */
+      .theme-grid, .profile-grid { grid-template-columns: repeat(2, 1fr); }
+      .stats-header { flex-direction: column; align-items: center; gap: 20px; }
+      .cal-day { min-height: 65px; }
+      .average-card { padding: 20px; }
+      .modal-box { padding: 20px; }
     }
   </style>
 </head>
 <body>
- 
-<!-- ===== ONBOARDING ===== -->
+  
 <div id="onboardingScreen">
   <div class="ob-card">
     <div class="ob-progress"><div class="ob-progress-fill" id="obProgress" style="width:25%"></div></div>
- 
-    <!-- PASO 1: LOGIN / REGISTRO -->
+  
     <div class="ob-step active" id="obs1">
       <div class="ob-step-label">Paso 1 de 4</div>
       <div class="ob-step-title">¡Bienvenido/a! 👋</div>
@@ -532,8 +359,7 @@
         ¿Preferís no crear cuenta? <span style="color:var(--accent);cursor:pointer;font-weight:600" onclick="obGo(2)">Continuar sin cuenta →</span>
       </p>
     </div>
- 
-    <!-- PASO 2: DATOS DE CARRERA -->
+  
     <div class="ob-step" id="obs2">
       <div class="ob-step-label">Paso 2 de 4</div>
       <div class="ob-step-title">Tu carrera 🎓</div>
@@ -558,8 +384,7 @@
         <button class="ob-btn-next" onclick="obGoCarrera()">Continuar →</button>
       </div>
     </div>
- 
-    <!-- PASO 3: TEMA -->
+  
     <div class="ob-step" id="obs3">
       <div class="ob-step-label">Paso 3 de 4</div>
       <div class="ob-step-title">Elegí tu tema 🎨</div>
@@ -595,8 +420,7 @@
         <button class="ob-btn-next" onclick="obGo(4)">Continuar →</button>
       </div>
     </div>
- 
-    <!-- PASO 4: SUBIR PLAN -->
+  
     <div class="ob-step" id="obs4">
       <div class="ob-step-label">Paso 4 de 4</div>
       <div class="ob-step-title">Subí tu plan de estudios 📄</div>
@@ -628,8 +452,7 @@
     </div>
   </div>
 </div>
- 
-<!-- ===== MODALES ===== -->
+  
 <div id="scheduleModal" class="modal-overlay">
   <div class="modal-box">
     <h2 style="color:var(--accent-dark);margin-top:0">📝 Agendar Materia</h2>
@@ -648,7 +471,7 @@
     <button class="btn-close-modal" onclick="closeModal('scheduleModal')">Cancelar</button>
   </div>
 </div>
- 
+  
 <div id="calModal" class="modal-overlay">
   <div class="modal-box">
     <h2 style="color:var(--accent-dark);margin-top:0">📅 Agregar Actividad</h2>
@@ -668,8 +491,7 @@
     <button class="btn-close-modal" onclick="closeModal('calModal')">Cancelar</button>
   </div>
 </div>
- 
-<!-- ===== APP ===== -->
+  
 <div id="appContent">
 <header>
     <div class="logo-container" style="display: flex; align-items: center; gap: 15px;">
@@ -691,15 +513,15 @@
       <button class="tab-btn btn-auth" id="btnOpenLogin" style="display:none" onclick="switchTab('profile',event)">👤 Cuenta</button>
     </div>
   </header>
- 
+  
   <main class="main-content">
- 
+  
     <div id="view-map" class="view-section active">
       <div class="mapa-scroll-wrapper">
         <div class="year-row" id="mallaContainer"></div>
       </div>
     </div>
- 
+  
     <div id="view-calendar" class="view-section">
       <div class="cal-header">
         <h3>Mis Fechas Importantes</h3>
@@ -714,20 +536,15 @@
         <div id="calendarGrid" class="cal-grid"></div>
       </div>
     </div>
- 
+  
     <div id="view-schedule" class="view-section">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:10px">
         <h3 style="margin:0;font-size:1.4rem">Mi Semana</h3>
         <button class="btn-add" onclick="fillScheduleModal();openModal('scheduleModal')">➕ Asignar Materia</button>
       </div>
-      <div class="table-responsive-wrapper">
-        <table class="schedule-table">
-          <thead><tr><th class="hour-col">Hora</th><th>Lunes</th><th>Martes</th><th>Miércoles</th><th>Jueves</th><th>Viernes</th><th>Sábado</th></tr></thead>
-          <tbody id="scheduleBody"></tbody>
-        </table>
-      </div>
+      <div id="scheduleWrapper"></div>
     </div>
- 
+  
     <div id="view-grades" class="view-section panel-box">
       <div class="average-card">
         <h2 style="margin-top:0">Promedio General</h2>
@@ -736,7 +553,7 @@
       <p style="text-align:center;opacity:.7;font-size:.9rem;margin-bottom:20px">* Ingresá tus notas para calcular el promedio.</p>
       <div id="gradesContainer"></div>
     </div>
- 
+  
     <div id="view-stats" class="view-section">
       <div class="stats-header">
         <div class="progress-circle-container">
@@ -756,7 +573,7 @@
         <div class="available-courses-grid" id="plannerGrid"></div>
       </div>
     </div>
- 
+  
     <div id="view-profile" class="view-section">
       <div class="profile-section">
         <h3>📋 Mi cuenta</h3>
@@ -791,23 +608,23 @@
         <button class="profile-save-btn" onclick="saveProfileTheme()">💾 Guardar tema</button>
       </div>
     </div>
- 
+  
   </main>
 </div>
- 
+  
 <script>
 // ====== ESTADO ======
 let obState = { career:'',uni:'',years:'',theme:'Rosa',accent:'#c43670',dark:'#45151b',light:'#ffc3cc',bg:'#c43670',materias:[] };
 let profileSelectedTheme = null;
 let tableData={}, gradesData={}, calendarData={}, plannedData={};
 let authMode = 'registro';
- 
+  
 // ====== ONBOARDING ======
 function showOnboarding() {
   document.getElementById('onboardingScreen').classList.add('visible');
   document.getElementById('appContent').style.display = 'none';
 }
- 
+  
 function switchAuthTab(mode) {
   authMode = mode;
   document.getElementById('tabRegistro').classList.toggle('active', mode==='registro');
@@ -815,21 +632,21 @@ function switchAuthTab(mode) {
   document.getElementById('obAuthBtn').textContent = mode==='registro' ? 'Crear cuenta y continuar →' : 'Iniciar sesión y continuar →';
   document.getElementById('auth-error').style.display = 'none';
 }
- 
+  
 function obDoAuth() {
   document.getElementById('auth-error').style.display = 'none';
   if (authMode === 'registro') window.registrarse();
   else window.iniciarSesion();
   // Firebase onAuthStateChanged se encarga del resto
 }
- 
+  
 function obGo(n) {
   document.querySelectorAll('.ob-step').forEach(s => s.classList.remove('active'));
   document.getElementById('obs' + n).classList.add('active');
   const pct = [25,50,75,100][n-1];
   document.getElementById('obProgress').style.width = pct + '%';
 }
- 
+  
 function obGoCarrera() {
   obState.career = document.getElementById('ob-career').value.trim();
   obState.uni    = document.getElementById('ob-uni').value.trim();
@@ -837,7 +654,7 @@ function obGoCarrera() {
   if (!obState.career || !obState.uni || !obState.years) { alert('Completá todos los campos para continuar.'); return; }
   obGo(3);
 }
- 
+  
 function obSelectTheme(el) {
   document.querySelectorAll('.theme-card').forEach(c => c.classList.remove('selected'));
   el.classList.add('selected');
@@ -847,7 +664,7 @@ function obSelectTheme(el) {
   document.getElementById('obProgress').style.background = obState.accent;
   document.querySelectorAll('.ob-btn-next').forEach(b => b.style.background = obState.accent);
 }
- 
+  
 async function obHandleFile(input) {
   const f = input.files[0];
   if (!f) return;
@@ -865,7 +682,7 @@ async function obHandleFile(input) {
   try {
     const formData = new FormData();
     formData.append('archivo', f);
-    const response = await fetch('https://api-malla.onrender.com/analizar-pdf', { method:'POST', body:formData });
+    const response = await fetch('http://127.0.0.1:5000/analizar-pdf', { method:'POST', body:formData });
     if (!response.ok) throw new Error('El servidor no respondió. ¿Está corriendo "python servidor.py"?');
     const data = await response.json();
     if (data.error) throw new Error(data.error);
@@ -890,7 +707,7 @@ async function obHandleFile(input) {
     document.getElementById('obBtn4').disabled = true;
   }
 }
- 
+  
 function obRemoveFile() {
   obState.file=null; obState.materias=[];
   document.getElementById('obFileInput').value = '';
@@ -901,7 +718,7 @@ function obRemoveFile() {
   document.getElementById('obAiResult').classList.remove('show');
   document.getElementById('obBtn4').disabled = true;
 }
- 
+  
 function obFinish() {
   const config = {
     career:obState.career, uni:obState.uni, years:obState.years,
@@ -922,7 +739,7 @@ function obFinish() {
   window.initApp();
   confetti({ particleCount:150, spread:80, origin:{y:.5}, colors:[obState.accent,obState.light,'#ffffff'] });
 }
- 
+  
 // ====== TEMA ======
 function aplicarTema(t) {
   if (!t||!t.accent) return;
@@ -950,7 +767,7 @@ function saveProfileTheme() {
   if (window.syncCloud) window.syncCloud();
   alert('¡Tema guardado! 🎨');
 }
- 
+  
 // ====== MALLA ======
 function construirMalla(anios) {
   const container = document.getElementById('mallaContainer');
@@ -975,7 +792,7 @@ function construirMalla(anios) {
   });
   asignarEventosMaterias();
 }
- 
+  
 // ====== INITAPP ======
 window.initApp = function() {
   const cfg = JSON.parse(localStorage.getItem('userConfig')||'{}');
@@ -1007,10 +824,10 @@ window.initApp = function() {
   renderGrades();
   renderStatsAndPlanner();
 };
- 
+  
 // ====== MATERIAS ======
 function getCourses() { return document.querySelectorAll('.course'); }
- 
+  
 function asignarEventosMaterias() {
   getCourses().forEach(c => {
     const fresh = c.cloneNode(true);
@@ -1033,19 +850,19 @@ function asignarEventosMaterias() {
     });
   });
 }
- 
+  
 function saveProgress() {
   const saved = {};
   getCourses().forEach(c => saved[c.dataset.id] = c.classList.contains('completed'));
   localStorage.setItem('materiasAprobadas', JSON.stringify(saved));
   if (window.syncCloud) window.syncCloud();
 }
- 
+  
 function loadProgress() {
   const saved = JSON.parse(localStorage.getItem('materiasAprobadas')||'{}');
   getCourses().forEach(c => { saved[c.dataset.id] ? c.classList.add('completed') : c.classList.remove('completed'); });
 }
- 
+  
 function updateStates() {
   const completed = new Set();
   getCourses().forEach(c => { if (c.classList.contains('completed')) completed.add(c.dataset.id); });
@@ -1057,7 +874,7 @@ function updateStates() {
   });
   renderStatsAndPlanner();
 }
- 
+  
 window.switchTab = (name, event) => {
   document.querySelectorAll('.view-section').forEach(s=>s.classList.remove('active'));
   document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
@@ -1065,33 +882,45 @@ window.switchTab = (name, event) => {
   if (el) el.classList.add('active');
   if (event&&event.currentTarget) event.currentTarget.classList.add('active');
 };
- 
+  
 // ====== HORARIO ======
 const horas=["08:00","09:00","10:00","11:00","12:00","13:00","14:00","15:00","16:00","17:00","18:00","19:00","20:00","21:00","22:00","23:00"];
 const dias=["Lunes","Martes","Miercoles","Jueves","Viernes","Sabado"];
- 
+  
 function buildSchedule() {
-  const body = document.getElementById('scheduleBody');
-  body.innerHTML = '';
-  horas.forEach(h => {
-    const row = document.createElement('tr');
-    row.innerHTML = `<td class="hour-col">${h}</td>`;
-    dias.forEach(d => {
+  const wrapper = document.getElementById('scheduleWrapper');
+  if (!wrapper) return;
+  
+  let html = '<div class="schedule-grid">';
+  dias.forEach(d => {
+    html += `<div class="day-column">
+               <div class="day-header">${d}</div>`;
+    
+    horas.forEach(h => {
       const id = `${d.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'')}-${h}`;
-      const val = tableData[id]||'';
-      row.innerHTML += `<td><textarea class="schedule-input${val.trim()?' occupied-cell':''}" data-id="${id}" oninput="saveTableCell(this)">${val}</textarea></td>`;
+      const val = tableData[id] || '';
+      const occupied = val.trim() ? ' occupied-cell' : '';
+      
+      html += `<div class="hour-cell">
+                 <div class="hour-label">${h}</div>
+                 <textarea class="schedule-input${occupied}" data-id="${id}" oninput="saveTableCell(this)">${val}</textarea>
+               </div>`;
     });
-    body.appendChild(row);
+    
+    html += `</div>`;
   });
+  html += '</div>';
+  
+  wrapper.innerHTML = html;
 }
- 
+  
 window.saveTableCell = (el) => {
   tableData[el.dataset.id]=el.value;
   localStorage.setItem('materiasTabla',JSON.stringify(tableData));
   el.value.trim() ? el.classList.add('occupied-cell') : el.classList.remove('occupied-cell');
   if (window.syncCloud) window.syncCloud();
 };
- 
+  
 function initScheduleModal() {
   const ss=document.getElementById('schStart'), se=document.getElementById('schEnd');
   if (!ss||!se) return;
@@ -1101,7 +930,7 @@ function initScheduleModal() {
     se.innerHTML+=`<option value="${i+1}">${parseInt(h)+1}:00</option>`;
   });
 }
- 
+  
 function fillScheduleModal() {
   const sel=document.getElementById('schSubject');
   sel.innerHTML='';
@@ -1109,7 +938,7 @@ function fillScheduleModal() {
   if (!enabled.length) sel.innerHTML='<option>No hay materias disponibles</option>';
   else enabled.forEach(c=>sel.innerHTML+=`<option>${c.textContent}</option>`);
 }
- 
+  
 window.saveToSchedule = () => {
   const subject=document.getElementById('schSubject').value;
   const day=document.getElementById('schDay').value;
@@ -1122,22 +951,22 @@ window.saveToSchedule = () => {
   if (window.syncCloud) window.syncCloud();
   buildSchedule(); closeModal('scheduleModal');
 };
- 
+  
 // ====== MODALES ======
 function openModal(id)  { document.getElementById(id).classList.add('open'); }
 function closeModal(id) { document.getElementById(id).classList.remove('open'); }
- 
+  
 // ====== CALENDARIO ======
 const monthNames=["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"];
 let currentMonth=new Date().getMonth(), currentYear=new Date().getFullYear();
- 
+  
 window.changeMonth=(offset)=>{
   currentMonth+=offset;
   if (currentMonth>11){currentMonth=0;currentYear++;}
   if (currentMonth<0){currentMonth=11;currentYear--;}
   renderCalendar();
 };
- 
+  
 function renderCalendar() {
   const grid=document.getElementById('calendarGrid');
   if (!grid) return;
@@ -1155,7 +984,7 @@ function renderCalendar() {
     grid.innerHTML+=`<div class="cal-day" onclick="openCalModal('${key}',${d})"><div class="cal-date-num">${d}</div>${ev}</div>`;
   }
 }
- 
+  
 window.openCalModal=(key,day)=>{
   document.getElementById('calDateKey').value=key;
   document.getElementById('calModalDateDisplay').textContent=`${day} de ${monthNames[currentMonth]} de ${currentYear}`;
@@ -1163,7 +992,7 @@ window.openCalModal=(key,day)=>{
   document.getElementById('calTime').value='';
   openModal('calModal');
 };
- 
+  
 window.saveCalEvent=(openGoogle)=>{
   const key=document.getElementById('calDateKey').value;
   const title=document.getElementById('calTitle').value;
@@ -1182,7 +1011,7 @@ window.saveCalEvent=(openGoogle)=>{
     window.open(`https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(title)}&dates=${y}${fm}${fd}/${y}${fm}${fd}&details=${encodeURIComponent('Horario: '+time)}`,'_blank');
   }
 };
- 
+  
 window.deleteCalEvent=(key,idx,e)=>{
   e.stopPropagation();
   if(confirm('¿Borrar esta actividad?')){
@@ -1193,7 +1022,7 @@ window.deleteCalEvent=(key,idx,e)=>{
     renderCalendar();
   }
 };
- 
+  
 // ====== NOTAS ======
 function renderGrades(){
   const container=document.getElementById('gradesContainer');
@@ -1209,7 +1038,7 @@ function renderGrades(){
   });
   calculateAverage();
 }
- 
+  
 window.updateGrade=(id,value)=>{
   const n=parseFloat(value);
   if(!isNaN(n)){if(n>10)value='10';if(n<0)value='0';}
@@ -1218,12 +1047,12 @@ window.updateGrade=(id,value)=>{
   if(window.syncCloud) window.syncCloud();
   calculateAverage();
 };
- 
+  
 function calculateAverage(){
   const v=Object.values(gradesData).map(x=>parseFloat(x)).filter(x=>!isNaN(x));
   document.getElementById('averageDisplay').textContent=v.length===0?'0.00':(v.reduce((a,b)=>a+b,0)/v.length).toFixed(2);
 }
- 
+  
 // ====== PROGRESO ======
 function renderStatsAndPlanner(){
   const total=getCourses().length;
@@ -1256,7 +1085,7 @@ function renderStatsAndPlanner(){
     grid.appendChild(card);
   });
 }
- 
+  
 // ====== ARRANQUE ======
 window.addEventListener('load', () => {
   const cfg = JSON.parse(localStorage.getItem('userConfig')||'{}');
