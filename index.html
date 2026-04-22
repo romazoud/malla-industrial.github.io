@@ -30,20 +30,40 @@
     window.iniciarSesion = async () => {
       const email = document.getElementById('ob-email').value.trim();
       const pass  = document.getElementById('ob-pass').value;
-      if (!email || !pass) { mostrarErrorAuth('Completá email y contraseña.'); return; }
-      try { await signInWithEmailAndPassword(auth, email, pass); }
-      catch(e) { mostrarErrorAuth('Email o contraseña incorrectos.'); }
+      if (!email || !pass) { mostrarErrorAuth('Completá email y contraseña.'); return false; }
+      try { 
+        await signInWithEmailAndPassword(auth, email, pass); 
+        return true;
+      }
+      catch(e) { 
+        mostrarErrorAuth('Email o contraseña incorrectos.'); 
+        return false;
+      }
     };
   
     window.registrarse = async () => {
       const email = document.getElementById('ob-email').value.trim();
       const pass  = document.getElementById('ob-pass').value;
-      if (!email || !pass) { mostrarErrorAuth('Completá email y contraseña.'); return; }
-      if (pass.length < 6) { mostrarErrorAuth('La contraseña debe tener al menos 6 caracteres.'); return; }
-      try { await createUserWithEmailAndPassword(auth, email, pass); }
+      if (!email || !pass) { mostrarErrorAuth('Completá email y contraseña.'); return false; }
+      if (pass.length < 6) { mostrarErrorAuth('La contraseña debe tener al menos 6 caracteres.'); return false; }
+      try { 
+        await createUserWithEmailAndPassword(auth, email, pass); 
+        return true;
+      }
       catch(e) {
         if (e.code === 'auth/email-already-in-use') mostrarErrorAuth('Ese email ya está registrado. Iniciá sesión.');
         else mostrarErrorAuth('Error: ' + e.message);
+        return false;
+      }
+    };
+
+    window.recuperarContrasena = async (email) => {
+      try {
+        await sendPasswordResetEmail(auth, email);
+        alert('¡Listo! Revisá tu casilla de correo (y la carpeta de spam). Te enviamos un enlace para cambiar tu contraseña.');
+        if (window.switchAuthTab) window.switchAuthTab('login');
+      } catch(e) {
+        mostrarErrorAuth('Error al enviar el correo. Verificá que el email esté bien escrito.');
       }
     };
   
@@ -437,7 +457,7 @@
     <div class="ob-step" id="obs4">
       <div class="ob-step-label">Paso 4 de 4</div>
       <div class="ob-step-title">Subí tu plan de estudios 📄</div>
-      <div class="ob-step-sub"> (<strong>python servidor.py</strong> en la terminal). Aceptamos PDF o imagen.</div>
+      <div class="ob-step-sub"> (<strong></strong>  Aceptamos PDF o imagen.</div>
       <div class="ob-upload" id="obUploadZone">
         <input type="file" id="obFileInput" accept=".pdf,.png,.jpg,.jpeg" onchange="obHandleFile(this)">
         <div class="ob-upload-icon">📎</div>
@@ -683,23 +703,44 @@ function mostrarRecuperarPass() {
 async function obDoAuth() {
   document.getElementById('auth-error').style.display = 'none';
   const email = document.getElementById('ob-email').value.trim();
+  const btn = document.getElementById('obAuthBtn');
+  const textoOriginal = btn.textContent;
   
-  if (authMode === 'recuperar') {
-    if(!email) { alert('Por favor, ingresá tu email.'); return; }
-    try {
-      // Magia de Firebase para mandar el mail
-      await window.sendPasswordResetEmail(window.auth, email);
-      alert('¡Listo! Revisá tu casilla de correo (y la carpeta de spam). Te enviamos un enlace para cambiar tu contraseña.');
-      switchAuthTab('login'); // Lo devolvemos al login
-    } catch(e) {
-      alert('Error al enviar el correo: ' + e.message);
-    }
-    return; // Frenamos acá para que no intente loguear
+  // Si Firebase todavía no terminó de cargar
+  if (!window.iniciarSesion) {
+    alert("Aguardá un segundito que está conectando de forma segura...");
+    return;
   }
 
-  // Si no es recuperar, hacemos el login o registro normal
-  if (authMode === 'registro') window.registrarse();
-  else window.iniciarSesion();
+  if (authMode === 'recuperar') {
+    if(!email) { alert('Por favor, ingresá tu email.'); return; }
+    if (window.recuperarContrasena) {
+        btn.textContent = "Enviando enlace...";
+        btn.disabled = true;
+        btn.style.opacity = '0.7';
+        await window.recuperarContrasena(email);
+        btn.textContent = textoOriginal;
+        btn.disabled = false;
+        btn.style.opacity = '1';
+    }
+    return; 
+  }
+
+  // Animación de cargando
+  btn.textContent = "Cargando...";
+  btn.disabled = true;
+  btn.style.opacity = '0.7';
+
+  let exito = false;
+  if (authMode === 'registro') exito = await window.registrarse();
+  else exito = await window.iniciarSesion();
+
+  // Si falló la contraseña, devolvemos el botón a la normalidad
+  if (!exito) {
+    btn.textContent = textoOriginal;
+    btn.disabled = false;
+    btn.style.opacity = '1';
+  }
 }
   
 function obGo(n) {
@@ -745,7 +786,7 @@ async function obHandleFile(input) {
     const formData = new FormData();
     formData.append('archivo', f);
     const response = await fetch('https://api-malla.onrender.com/analizar-pdf', { method:'POST', body:formData });
-    if (!response.ok) throw new Error('El servidor no respondió. ¿Está corriendo "python servidor.py"?');
+    if (!response.ok) throw new Error('El servidor no respondió. Intentá de nuevo.');
     const data = await response.json();
     if (data.error) throw new Error(data.error);
     const match = data.resultado.match(/\{[\s\S]*\}/);
