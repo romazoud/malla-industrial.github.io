@@ -1,561 +1,737 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8"/>
   <title>Mi Malla Curricular</title>
-  
   <link rel="icon" href="logo.png?v=2" type="image/png">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,700;1,400&family=Poppins:wght@400;600;700;900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,700;1,400&family=Poppins:wght@400;500;600;700;900&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
-  
+
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-   import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+    import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut, sendPasswordResetEmail, GoogleAuthProvider, signInWithPopup, sendEmailVerification } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
     import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-  
     const firebaseConfig = {
-      apiKey: "AIzaSyDFtB_22y_4lkVjjQXMyhd0pltKjOeYiv0",
-      authDomain: "facu-app-5bef9.firebaseapp.com",
-      projectId: "facu-app-5bef9",
-      storageBucket: "facu-app-5bef9.firebasestorage.app",
-      messagingSenderId: "633251183436",
-      appId: "1:633251183436:web:8a2b36bd8a215c4c5a2de9"
+      apiKey:"AIzaSyDFtB_22y_4lkVjjQXMyhd0pltKjOeYiv0",
+      authDomain:"facu-app-5bef9.firebaseapp.com",
+      projectId:"facu-app-5bef9",
+      storageBucket:"facu-app-5bef9.firebasestorage.app",
+      messagingSenderId:"633251183436",
+      appId:"1:633251183436:web:8a2b36bd8a215c4c5a2de9"
     };
-  
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
-    const db = getFirestore(app);
-  
+    const db   = getFirestore(app);
     window.iniciarSesion = async () => {
       const email = document.getElementById('ob-email').value.trim();
-      const pass  = document.getElementById('ob-pass').value;
-      if (!email || !pass) { mostrarErrorAuth('Completá email y contraseña.'); return false; }
-      try { 
-        await signInWithEmailAndPassword(auth, email, pass); 
+      const pass = document.getElementById('ob-pass').value;
+      if(!email || !pass) { mostrarErrorAuth('Completá email y contraseña.'); return false; }
+      try {
+        const userCredential = await signInWithEmailAndPassword(auth, email, pass);
+        if (!userCredential.user.emailVerified) {
+          mostrarErrorAuth('Tenés que verificar tu correo primero. Revisá tu bandeja de entrada.');
+          await signOut(auth);
+          return false;
+        }
         return true;
-      }
-      catch(e) { 
-        mostrarErrorAuth('Email o contraseña incorrectos.'); 
+      } catch(e) {
+        mostrarErrorAuth('Email o contraseña incorrectos.');
         return false;
       }
     };
-  
     window.registrarse = async () => {
       const email = document.getElementById('ob-email').value.trim();
-      const pass  = document.getElementById('ob-pass').value;
-      if (!email || !pass) { mostrarErrorAuth('Completá email y contraseña.'); return false; }
-      if (pass.length < 6) { mostrarErrorAuth('La contraseña debe tener al menos 6 caracteres.'); return false; }
-      try { 
-        await createUserWithEmailAndPassword(auth, email, pass); 
-        return true;
-      }
-      catch(e) {
-        if (e.code === 'auth/email-already-in-use') mostrarErrorAuth('Ese email ya está registrado. Iniciá sesión.');
+      const pass = document.getElementById('ob-pass').value;
+      if(!email || !pass) { mostrarErrorAuth('Completá email y contraseña.'); return false; }
+      if(pass.length < 6) { mostrarErrorAuth('La contraseña debe tener al menos 6 caracteres.'); return false; }
+      try {
+        const userCredential = await createUserWithEmailAndPassword(auth, email, pass);
+        await sendEmailVerification(userCredential.user);
+        alert("¡Cuenta creada! Te enviamos un link de verificación a tu correo. Revisá tu bandeja de entrada (o spam) para verificar tu cuenta antes de ingresar.");
+        await signOut(auth);
+        if(window.switchAuthTab) window.switchAuthTab('login');
+        return false;
+      } catch(e) {
+        if(e.code === 'auth/email-already-in-use') mostrarErrorAuth('Ese email ya está registrado.');
         else mostrarErrorAuth('Error: ' + e.message);
         return false;
       }
     };
-
-    window.recuperarContrasena = async (email) => {
-      try {
-        await sendPasswordResetEmail(auth, email);
-        alert('¡Listo! Revisá tu casilla de correo (y la carpeta de spam). Te enviamos un enlace para cambiar tu contraseña.');
-        if (window.switchAuthTab) window.switchAuthTab('login');
-      } catch(e) {
-        mostrarErrorAuth('Error al enviar el correo. Verificá que el email esté bien escrito.');
+    window.recuperarContrasena = async(email)=>{
+      try{await sendPasswordResetEmail(auth,email);alert('Revisá tu casilla de correo.');if(window.switchAuthTab)window.switchAuthTab('login');}
+      catch(e){mostrarErrorAuth('Error al enviar el correo.');}
+    };
+    window.loginConGoogle = async()=>{
+      try{
+        const provider = new GoogleAuthProvider();
+        await signInWithPopup(auth, provider);
+      } catch(e){
+        if(e.code !== 'auth/popup-closed-by-user'){
+          const el=document.getElementById('auth-error');
+          el.textContent='Error al iniciar con Google: ' + e.message;
+          el.style.display='block';
+        }
       }
     };
-  
-    function mostrarErrorAuth(msg) {
-      const el = document.getElementById('auth-error');
-      el.textContent = msg; el.style.display = 'block';
-    }
-  
-    window.logout = async () => {
+    function mostrarErrorAuth(msg){const el=document.getElementById('auth-error');el.textContent=msg;el.style.display='block';}
+    window.logout = async()=>{
       await signOut(auth);
-      ['materiasAprobadas','materiasNotas','materiasPlanificadas','materiasTabla','indCalendar','userConfig']
-        .forEach(k => localStorage.removeItem(k));
+      ['materiasAprobadas','materiasNotas','materiasPlanificadas','materiasTabla','indCalendar','userConfig','apuntes','pomodoroStats','horarioExtra'].forEach(k=>localStorage.removeItem(k));
       location.reload();
     };
-  
-    onAuthStateChanged(auth, async (user) => {
-      const btnLogin  = document.getElementById('btnOpenLogin');
-      const btnLogout = document.getElementById('btnLogout');
-      const userLabel = document.getElementById('userLabel');
-      if (user) {
-        if (btnLogin)  btnLogin.style.display  = 'none';
-        if (btnLogout) btnLogout.style.display = 'inline-block';
-        if (userLabel) userLabel.textContent   = user.email;
+    onAuthStateChanged(auth, async(user)=>{
+      const btnLogin=document.getElementById('btnOpenLogin'), btnLogout=document.getElementById('btnLogout'), userLabel=document.getElementById('userLabel');
+      if(user){
+        if(btnLogin)btnLogin.style.display='none';
+        if(btnLogout)btnLogout.style.display='inline-block';
+        if(userLabel)userLabel.textContent=user.email;
         await loadFromCloud(user.uid);
       } else {
-        if (btnLogin)  btnLogin.style.display  = 'inline-block';
-        if (btnLogout) btnLogout.style.display = 'none';
-        const cfg = JSON.parse(localStorage.getItem('userConfig') || '{}');
-        if (!cfg.setup) showOnboarding();
-        else if (window.initApp) window.initApp();
+        if(btnLogin)btnLogin.style.display='inline-block';
+        if(btnLogout)btnLogout.style.display='none';
+        const cfg=JSON.parse(localStorage.getItem('userConfig')||'{}');
+        if(!cfg.setup)showOnboarding();
+        else if(window.initApp)window.initApp();
       }
     });
-  
-    async function saveToCloud() {
-      const user = auth.currentUser;
-      if (!user) return;
-      const data = {
-        materiasAprobadas:    JSON.parse(localStorage.getItem('materiasAprobadas')    || '{}'),
-        materiasNotas:        JSON.parse(localStorage.getItem('materiasNotas')        || '{}'),
-        materiasPlanificadas: JSON.parse(localStorage.getItem('materiasPlanificadas') || '{}'),
-        materiasTabla:        JSON.parse(localStorage.getItem('materiasTabla')        || '{}'),
-        indCalendar:          JSON.parse(localStorage.getItem('indCalendar')          || '{}'),
-        userConfig:           JSON.parse(localStorage.getItem('userConfig')           || '{}')
+    async function saveToCloud(){
+      const user=auth.currentUser; if(!user)return;
+      const data={
+        materiasAprobadas:JSON.parse(localStorage.getItem('materiasAprobadas')||'{}'),
+        materiasNotas:JSON.parse(localStorage.getItem('materiasNotas')||'{}'),
+        materiasPlanificadas:JSON.parse(localStorage.getItem('materiasPlanificadas')||'{}'),
+        materiasTabla:JSON.parse(localStorage.getItem('materiasTabla')||'{}'),
+        indCalendar:JSON.parse(localStorage.getItem('indCalendar')||'{}'),
+        userConfig:JSON.parse(localStorage.getItem('userConfig')||'{}'),
+        apuntes:JSON.parse(localStorage.getItem('apuntes')||'{}'),
+        pomodoroStats:JSON.parse(localStorage.getItem('pomodoroStats')||'{}'),
+        horarioExtra:JSON.parse(localStorage.getItem('horarioExtra')||'{}')
       };
-      await setDoc(doc(db, 'users', user.uid), data);
+      await setDoc(doc(db,'users',user.uid),data);
     }
-  
-    async function loadFromCloud(uid) {
-      const snap = await getDoc(doc(db, 'users', uid));
-      if (snap.exists()) {
-        const d = snap.data();
-        localStorage.setItem('materiasAprobadas',    JSON.stringify(d.materiasAprobadas    || {}));
-        localStorage.setItem('materiasNotas',        JSON.stringify(d.materiasNotas        || {}));
-        localStorage.setItem('materiasPlanificadas', JSON.stringify(d.materiasPlanificadas || {}));
-        localStorage.setItem('materiasTabla',        JSON.stringify(d.materiasTabla        || {}));
-        localStorage.setItem('indCalendar',          JSON.stringify(d.indCalendar          || {}));
-        localStorage.setItem('userConfig',           JSON.stringify(d.userConfig           || {}));
-      } else { await saveToCloud(); }
-      if (window.initApp) window.initApp();
+    async function loadFromCloud(uid){
+      const snap=await getDoc(doc(db,'users',uid));
+      if(snap.exists()){
+        const d=snap.data();
+        localStorage.setItem('materiasAprobadas',JSON.stringify(d.materiasAprobadas||{}));
+        localStorage.setItem('materiasNotas',JSON.stringify(d.materiasNotas||{}));
+        localStorage.setItem('materiasPlanificadas',JSON.stringify(d.materiasPlanificadas||{}));
+        localStorage.setItem('materiasTabla',JSON.stringify(d.materiasTabla||{}));
+        localStorage.setItem('indCalendar',JSON.stringify(d.indCalendar||{}));
+        localStorage.setItem('userConfig',JSON.stringify(d.userConfig||{}));
+        localStorage.setItem('apuntes',JSON.stringify(d.apuntes||{}));
+        localStorage.setItem('pomodoroStats',JSON.stringify(d.pomodoroStats||{}));
+        localStorage.setItem('horarioExtra',JSON.stringify(d.horarioExtra||{}));
+      } else {await saveToCloud();}
+      if(window.initApp)window.initApp();
     }
-  
-    window.syncCloud = saveToCloud;
+    window.syncCloud=saveToCloud;
   </script>
-  
+
   <style>
-    :root { --accent:#c43670; --accent-dark:#45151b; --accent-light:#ffc3cc; --accent-bg:#c43670; }
-    * { box-sizing:border-box; }
-    body { font-family:'Poppins',sans-serif; background:var(--accent-bg); color:#faffc7; margin:0; padding:0; overflow-x:hidden; transition:background-color .5s; }
-    h1,h2,h3 { font-family:'Lora',serif; color:var(--accent-light); margin:10px 0; font-weight:700; }
-  
-    /* ONBOARDING */
-  
-    #onboardingScreen { min-height:100vh; display:none; align-items:center; justify-content:center; padding:2rem 1rem; background:var(--accent-bg); position:relative; overflow:hidden; }
-    #onboardingScreen.visible { display:flex; }
-    #onboardingScreen::before { content:''; position:absolute; width:600px; height:600px; border-radius:50%; background:rgba(255,255,255,.04); top:-200px; right:-200px; pointer-events:none; }
-    .ob-card { background:#fff; border-radius:24px; padding:2.5rem 2rem; width:100%; max-width:540px; position:relative; z-index:1; box-shadow:0 30px 80px rgba(0,0,0,.25); animation:slideUp .5s ease; }
-    @keyframes slideUp { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
-    .ob-progress { height:4px; background:#f0f0f0; border-radius:2px; margin-bottom:2rem; overflow:hidden; }
-    .ob-progress-fill { height:100%; border-radius:2px; background:var(--accent); transition:width .4s ease; }
-    .ob-step { display:none; }
-    .ob-step.active { display:block; animation:fadeUp .3s ease; }
-    @keyframes fadeUp { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
-    .ob-step-label { font-size:11px; color:var(--accent); font-weight:700; letter-spacing:1.5px; text-transform:uppercase; margin-bottom:.4rem; }
-    .ob-step-title { font-size:22px; font-weight:700; color:#1a1a1a; margin-bottom:.3rem; font-family:'Lora',serif; }
-    .ob-step-sub { font-size:13px; color:#666; margin-bottom:1.5rem; line-height:1.6; }
-    .ob-label { display:block; font-size:12px; font-weight:600; color:#444; margin-bottom:6px; text-transform:uppercase; letter-spacing:.5px; }
-    .ob-field { margin-bottom:1.1rem; }
-    .ob-input { width:100%; padding:11px 14px; border-radius:10px; border:1.5px solid #e5e5e5; font-family:'Poppins',sans-serif; font-size:14px; color:#1a1a1a; background:#fafafa; outline:none; transition:border-color .2s; }
-    .ob-input:focus { border-color:var(--accent); background:#fff; }
-    .auth-tabs { display:flex; margin-bottom:1.2rem; border:1.5px solid #e5e5e5; border-radius:10px; overflow:hidden; }
-    .auth-tab { flex:1; padding:10px; background:transparent; border:none; font-family:'Poppins',sans-serif; font-size:13px; font-weight:600; color:#888; cursor:pointer; transition:.2s; }
-    .auth-tab.active { background:var(--accent); color:#fff; }
-    #auth-error { display:none; background:#fff1f2; border:1.5px solid #fda4af; border-radius:8px; padding:10px 14px; font-size:12px; color:#9f1239; margin-bottom:1rem; }
-    .theme-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-bottom:1.5rem; }
-    .theme-card { border:2px solid #e5e5e5; border-radius:12px; padding:12px 8px; cursor:pointer; transition:all .2s; text-align:center; background:#fff; }
-    .theme-card:hover { transform:translateY(-2px); border-color:#ccc; }
-    .theme-card.selected { border-color:var(--accent); box-shadow:0 0 0 3px rgba(196,54,112,.15); }
-    .theme-swatch { height:40px; border-radius:8px; margin-bottom:8px; }
-    .theme-name { font-size:12px; font-weight:700; color:#1a1a1a; }
-    .theme-desc { font-size:10px; color:#888; margin-top:2px; }
-    .ob-upload { border:2px dashed #ddd; border-radius:14px; padding:1.8rem 1rem; text-align:center; cursor:pointer; transition:all .2s; background:#fafafa; position:relative; margin-bottom:1rem; }
-    .ob-upload:hover { border-color:var(--accent); background:#fff5f8; }
-    .ob-upload input[type=file] { position:absolute; inset:0; opacity:0; cursor:pointer; width:100%; height:100%; }
-    .ob-upload-icon { font-size:28px; margin-bottom:.4rem; }
-    .ob-upload-title { font-size:14px; font-weight:600; color:#333; margin-bottom:3px; }
-    .ob-upload-sub { font-size:12px; color:#888; }
-    .ob-file-preview { display:none; align-items:center; gap:10px; background:#f0fff4; border:1.5px solid #86efac; border-radius:10px; padding:10px 14px; margin-bottom:1rem; }
-    .ob-file-preview.show { display:flex; }
-    .ob-file-name { font-size:13px; font-weight:600; color:#166534; flex:1; }
-    .ob-file-remove { cursor:pointer; color:#999; font-size:16px; }
-    .ob-ai-analyzing { display:none; text-align:center; padding:1.5rem; background:#fdf2f8; border-radius:14px; margin-bottom:1rem; border:1.5px solid #fce7f3; }
-    .ob-ai-analyzing.show { display:block; }
-    .ob-spinner { width:36px; height:36px; border:3px solid #fce7f3; border-top-color:var(--accent); border-radius:50%; animation:spin .8s linear infinite; margin:0 auto 1rem; }
-    @keyframes spin { to{transform:rotate(360deg)} }
-    .ob-ai-text { font-size:13px; color:#666; }
-    .ob-ai-error { display:none; background:#fff1f2; border:1.5px solid #fda4af; border-radius:10px; padding:12px 16px; font-size:13px; color:#9f1239; margin-bottom:1rem; }
-    .ob-ai-error.show { display:block; }
-    .ob-ai-result { display:none; background:#f0fdf4; border:1.5px solid #86efac; border-radius:10px; padding:12px 16px; font-size:13px; color:#166534; margin-bottom:1rem; }
-    .ob-ai-result.show { display:flex; gap:10px; align-items:flex-start; }
-    .ob-nav { display:flex; gap:10px; margin-top:1.5rem; }
-    .ob-btn-back { padding:11px 20px; border-radius:10px; border:1.5px solid #e5e5e5; background:transparent; color:#666; cursor:pointer; font-size:14px; font-family:'Poppins',sans-serif; font-weight:600; transition:all .2s; }
-    .ob-btn-back:hover { background:#f5f5f5; }
-    .ob-btn-next { flex:1; padding:12px 24px; border-radius:10px; border:none; background:var(--accent); color:#fff; cursor:pointer; font-size:14px; font-family:'Poppins',sans-serif; font-weight:700; transition:all .2s; }
-    .ob-btn-next:hover { opacity:.88; transform:translateY(-1px); }
-    .ob-btn-next:disabled { opacity:.4; cursor:not-allowed; transform:none; }
-    .ob-summary-row { display:flex; justify-content:space-between; align-items:center; padding:10px 0; border-bottom:1px solid #f0f0f0; font-size:13px; }
-    .ob-summary-row:last-child { border-bottom:none; }
-    .ob-summary-key { color:#888; }
-    .ob-summary-val { font-weight:700; color:#1a1a1a; text-align:right; max-width:60%; }
-  
-    /* APP */
-    #appContent { display:none; }
-    header { display:flex; justify-content:space-between; align-items:center; background:var(--accent-dark); padding:15px 40px; box-shadow:0 4px 15px rgba(0,0,0,.4); margin-bottom:40px; flex-wrap:wrap; gap:20px; }
-    .logo-container h1 { font-size:1.8rem; margin:0; font-weight:900; }
-    .logo-container h2 { font-size:.95rem; margin:0; opacity:.8; font-weight:400; text-transform:uppercase; }
-    .tabs-container { display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
-    .tab-btn { padding:8px 16px; border:none; border-radius:20px; font-size:.9rem; font-weight:600; cursor:pointer; transition:all .3s; background:transparent; color:var(--accent-light); opacity:.7; font-family:'Poppins',sans-serif; }
-    .tab-btn:hover { opacity:1; background:rgba(255,195,204,.1); }
-    .tab-btn.active { opacity:1; background:var(--accent-light); color:var(--accent-dark); font-weight:700; }
-    .btn-auth { border:2px solid var(--accent-light); opacity:1; }
-    .btn-logout { background:rgba(255,255,255,.1); display:none; }
-    .main-content { padding:0 40px; box-sizing:border-box; }
-    .view-section { display:none; animation:fadeIn .4s ease; width:100%; box-sizing:border-box; }
-    .view-section.active { display:block; }
-    @keyframes fadeIn { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
-    .panel-box { background:#fff; color:var(--accent-dark); padding:30px; border-radius:20px; border:2px solid var(--accent-light); box-shadow:0 10px 30px rgba(0,0,0,.1); margin-bottom:30px; box-sizing:border-box; }
-  
-    /* MAPA */
-     #view-map { overflow-x: auto; padding-bottom: 40px; -webkit-overflow-scrolling: touch; }
-    .mapa-scroll-wrapper { width: 100%; }
-    .year-row { display: flex; gap:15px; justify-content: center; width: max-content; padding: 20px 10px; flex-wrap: nowrap; margin: 0 auto; }
-    .year-column { display: flex; flex-direction: column; align-items: center; gap: 10px; flex-shrink: 0; }
-    .year-column h2 { border-bottom: 2px solid #ffc3cc; padding-bottom: 8px; font-size: 1.1rem; margin: 0 0 12px 0; text-align: center; min-width: 140px; font-weight: 700; }
-    .course { padding: 12px 10px; border-radius: 12px; border: 1px solid rgba(255, 195, 204, 0.3); min-width: 140px; max-width: 140px; height: 60px; display: flex; align-items: center; justify-content: center; text-align: center; font-size: 0.8rem; font-weight: 600; position: relative; cursor: not-allowed; opacity: 0.5; transition: all 0.3s; color: #28301c; background-color: #ffffff; line-height: 1.2; overflow: hidden; white-space: normal; box-sizing: border-box; }
+    :root{
+      /* === Tema por Defecto === */
+      --accent:#A33E79; 
+      --accent-dark:#450C3F; 
+      --accent-light:#D9EFBD; 
+      --accent-bg:#f9f9fc; /* Fondo más neutro para mejor lectura */
+      --text-main: #222222; /* Color de texto base más oscuro */
+      --text-muted: #555555;
+    }
+    *{box-sizing:border-box;}
+    body{font-family:'Poppins',sans-serif;background:var(--accent-bg);color:var(--text-main);margin:0;padding:0;overflow-x:hidden;transition:background-color .5s;}
+    h1,h2,h3{font-family:'Lora',serif;margin:10px 0;font-weight:700;}
+
+    /* ===== ONBOARDING ===== */
+    #onboardingScreen{min-height:100vh;display:none;align-items:center;justify-content:center;padding:2rem 1rem;background:var(--accent-bg);position:relative;overflow:hidden;}
+    #onboardingScreen.visible{display:flex;}
+    .ob-card{background:#fff;border-radius:24px;padding:2.5rem 2rem;width:100%;max-width:540px;position:relative;z-index:1;box-shadow:0 30px 80px rgba(0,0,0,.15);animation:slideUp .5s ease;}
+    @keyframes slideUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+    .ob-progress{height:4px;background:#f0f0f0;border-radius:2px;margin-bottom:2rem;overflow:hidden;}
+    .ob-progress-fill{height:100%;border-radius:2px;background:var(--accent);transition:width .4s ease;}
+    .ob-step{display:none;} .ob-step.active{display:block;animation:fadeUp .3s ease;}
+    @keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+    .ob-step-label{font-size:11px;color:var(--accent);font-weight:700;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:.4rem;}
+    .ob-step-title{font-size:24px;font-weight:700;color:#1a1a1a;margin-bottom:.5rem;font-family:'Lora',serif;}
+    .ob-step-sub{font-size:14px;color:var(--text-muted);margin-bottom:1.5rem;line-height:1.6;}
+    .ob-label{display:block;font-size:12px;font-weight:600;color:#444;margin-bottom:6px;text-transform:uppercase;letter-spacing:.5px;}
+    .ob-field{margin-bottom:1.1rem;}
+    .ob-input{width:100%;padding:11px 14px;border-radius:10px;border:1.5px solid #e5e5e5;font-family:'Poppins',sans-serif;font-size:14px;color:#1a1a1a;background:#fafafa;outline:none;transition:border-color .2s;}
+    .ob-input:focus{border-color:var(--accent);background:#fff;}
+    .auth-tabs{display:flex;margin-bottom:1.2rem;border:1.5px solid #e5e5e5;border-radius:10px;overflow:hidden;}
+    .auth-tab{flex:1;padding:10px;background:transparent;border:none;font-family:'Poppins',sans-serif;font-size:13px;font-weight:600;color:#888;cursor:pointer;transition:.2s;}
+    .auth-tab.active{background:var(--accent);color:#fff;}
+    #auth-error{display:none;background:#fff1f2;border:1.5px solid #fda4af;border-radius:8px;padding:10px 14px;font-size:12px;color:#9f1239;margin-bottom:1rem;}
+    .theme-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:1.5rem;}
+    .theme-card{border:2px solid #e5e5e5;border-radius:12px;padding:12px 8px;cursor:pointer;transition:all .2s;text-align:center;background:#fff;}
+    .theme-card:hover{transform:translateY(-2px);border-color:#ccc;}
+    .theme-card.selected{border-color:var(--accent);box-shadow:0 0 0 3px rgba(var(--accent-rgb),0.15);}
+    .theme-swatch{height:40px;border-radius:8px;margin-bottom:8px;}
+    .theme-name{font-size:12px;font-weight:700;color:#1a1a1a;} .theme-desc{font-size:10px;color:#888;margin-top:2px;}
+    .ob-upload{border:2px dashed #ddd;border-radius:14px;padding:1.8rem 1rem;text-align:center;cursor:pointer;transition:all .2s;background:#fafafa;position:relative;margin-bottom:1rem;}
+    .ob-upload:hover{border-color:var(--accent);background:#fff5f8;}
+    .ob-upload input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;}
+    .ob-upload-icon{font-size:28px;margin-bottom:.4rem;}
+    .ob-upload-title{font-size:14px;font-weight:600;color:#333;margin-bottom:3px;}
+    .ob-upload-sub{font-size:12px;color:#888;}
+    .ob-file-preview{display:none;align-items:center;gap:10px;background:#f0fff4;border:1.5px solid #86efac;border-radius:10px;padding:10px 14px;margin-bottom:1rem;}
+    .ob-file-preview.show{display:flex;}
+    .ob-file-name{font-size:13px;font-weight:600;color:#166534;flex:1;}
+    .ob-file-remove{cursor:pointer;color:#999;font-size:16px;}
+    .ob-ai-analyzing{display:none;text-align:center;padding:1.5rem;background:#fdf2f8;border-radius:14px;margin-bottom:1rem;border:1.5px solid #fce7f3;}
+    .ob-ai-analyzing.show{display:block;}
+    .ob-spinner{width:36px;height:36px;border:3px solid #fce7f3;border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 1rem;}
+    @keyframes spin{to{transform:rotate(360deg)}}
+    .ob-ai-text{font-size:13px;color:#666;}
+    .ob-ai-error{display:none;background:#fff1f2;border:1.5px solid #fda4af;border-radius:10px;padding:12px 16px;font-size:13px;color:#9f1239;margin-bottom:1rem;}
+    .ob-ai-error.show{display:block;}
+    .ob-ai-result{display:none;background:#f0fdf4;border:1.5px solid #86efac;border-radius:10px;padding:12px 16px;font-size:13px;color:#166534;margin-bottom:1rem;}
+    .ob-ai-result.show{display:flex;gap:10px;align-items:flex-start;}
+    .ob-nav{display:flex;gap:10px;margin-top:1.5rem;}
+    .ob-btn-back{padding:11px 20px;border-radius:10px;border:1.5px solid #e5e5e5;background:transparent;color:#666;cursor:pointer;font-size:14px;font-family:'Poppins',sans-serif;font-weight:600;transition:all .2s;}
+    .ob-btn-back:hover{background:#f5f5f5;}
+    .ob-btn-next{flex:1;padding:12px 24px;border-radius:10px;border:none;background:var(--accent);color:#fff;cursor:pointer;font-size:14px;font-family:'Poppins',sans-serif;font-weight:700;transition:all .2s;}
+    .ob-btn-next:hover{opacity:.88;transform:translateY(-1px);}
+    .ob-btn-next:disabled{opacity:.4;cursor:not-allowed;transform:none;}
+
+    /* ===== HEADER ===== */
+    #appContent{display:none;}
+    header{
+      display:flex;justify-content:space-between;align-items:center;
+      background:var(--accent-dark);padding:14px 30px;
+      box-shadow:0 4px 20px rgba(0,0,0,.15);margin-bottom:32px;
+      flex-wrap:wrap;gap:10px;
+    }
+    .logo-area{display:flex;align-items:center;gap:12px;}
+    .logo-area img{height:38px;width:auto;}
+    .logo-area .career-name{font-family:'Lora',serif;font-size:1.1rem;font-weight:700;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:280px;}
+    .logo-area .uni-name{font-size:.75rem;color:rgba(255,255,255,.7);font-weight:400;white-space:nowrap;}
+    .tabs-container{display:flex;align-items:center;gap:6px;flex-wrap:wrap;}
+    .tab-btn{padding:8px 14px;border:none;border-radius:18px;font-size:.85rem;font-weight:500;cursor:pointer;transition:all .25s;background:transparent;color:rgba(255,255,255,.7);font-family:'Poppins',sans-serif;}
+    .tab-btn:hover{opacity:1;background:rgba(255,255,255,.1);}
+    .tab-btn.active{background:var(--accent);color:#fff;font-weight:600;box-shadow:0 2px 8px rgba(0,0,0,0.2);}
+    .btn-auth{border:1.5px solid rgba(255,255,255,.3);opacity:1;color:#fff;}
+    .btn-logout{background:rgba(255,255,255,.08);display:none;}
     
-    .course[data-type="calculo"], .course[data-id="400"], .course[data-id="401"], .course[data-id="402"], .course[data-id="406"], .course[data-id="407"], .course[data-id="408"], .course[data-id="494"], .course[data-id="711"], .course[data-id="458"] { border-left: 6px solid #ff85a8; }
-    .course[data-type="logica"], .course[data-id="404"], .course[data-id="409"], .course[data-id="90002"] { border-left: 6px solid #8585d1; }
-    .course[data-type="quimica"], .course[data-id="411"], .course[data-id="278"], .course[data-id="280"], .course[data-id="468"] { border-left: 6px solid #5dbda5; }
-    .course[data-type="gestion"], .course[data-id="412"], .course[data-id="466"], .course[data-id="467"], .course[data-id="472"], .course[data-id="473"], .course[data-id="813"], .course[data-id="814"], .course[data-id="815"], .course[data-id="816"] { border-left: 6px solid #ff6666; }
-    .course[data-type="ingenieria"], .course[data-id="405"], .course[data-id="800"], .course[data-id="410"], .course[data-id="457"], .course[data-id="281"], .course[data-id="803"], .course[data-id="283"], .course[data-id="284"], .course[data-id="279"], .course[data-id="287"], .course[data-id="291"], .course[data-id="469"], .course[data-id="470"], .course[data-id="474"], .course[data-id="475"], .course[data-id="817"], .course[data-id="478"], .course[data-id="479"], .course[data-id="480"], .course[data-id="830"], .course[data-id="297"], .course[data-id="477"], .course[data-id="801"] { border-left: 6px solid #d991dd; }
+    .main-content{padding:0 32px 60px;box-sizing:border-box;}
+    .view-section{display:none;animation:fadeIn .35s ease;width:100%;box-sizing:border-box;}
+    .view-section.active{display:block;}
+    @keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+    
+    .panel-box{background:#fff;color:var(--text-main);padding:28px;border-radius:18px;border:1px solid #eaeaea;box-shadow:0 8px 24px rgba(0,0,0,.04);margin-bottom:28px;box-sizing:border-box;}
+    
+    /* CORRECCIÓN DE COLORES EN TÍTULOS (Ahora legibles) */
+    .section-header{margin-bottom:24px;}
+    .section-header h2{font-size:1.7rem;margin:0 0 5px;color:var(--accent-dark);}
+    .section-header p{margin:0;color:var(--text-muted);font-size:.9rem;font-family:'Poppins',sans-serif;font-weight: 500;}
 
-    .course.enabled { cursor: pointer; opacity: 1; border-color: #ffc3cc; }
-    .course.enabled:hover { transform: translateY(-3px); background-color: #fff9fa; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
-    .course.completed { opacity: 1; border-color: var(--accent-light); background: var(--accent-light); color: var(--accent-dark); text-decoration: line-through; }
-    .course.completed::after { content: '★'; position: absolute; top: 5px; right: 5px; background: var(--accent-dark); color: var(--accent-light); border-radius: 50%; width: 20px; height: 20px; font-size: 12px; line-height: 20px; text-align: center; }
-    .electiva-counter { font-size: 10px; color: var(--accent-light); opacity: .85; margin-top: -8px; margin-bottom: 4px; font-weight: 600; }
+    /* ===== MALLA ===== */
+    #view-map{overflow-x:auto;padding-bottom:40px;-webkit-overflow-scrolling:touch;}
+    .mapa-scroll-wrapper{width:100%;}
+    .year-row{display:flex;gap:20px;justify-content:center;width:max-content;padding:20px 20px;flex-wrap:nowrap;margin:0 auto;}
+    .year-column{display:flex;flex-direction:column;align-items:center;gap:10px;flex-shrink:0;}
+    .year-column h2{border-bottom:3px solid var(--accent);padding-bottom:8px;font-size:1.1rem;margin:0 0 10px;text-align:center;min-width:160px;font-weight:700;color:var(--accent-dark);}
+    .course{
+      padding:11px 10px;border-radius:12px;
+      min-width:160px;max-width:160px;height:64px;
+      display:flex;align-items:center;justify-content:space-between;
+      text-align:left;font-size:0.78rem;font-weight:600;position:relative;
+      cursor:not-allowed;transition:all 0.3s;line-height:1.2;overflow:hidden;
+      white-space:normal;box-sizing:border-box;gap:6px;
+      background:#e8e8e8;color:#888;
+      border:1.5px solid #ccc;opacity:.7;
+    }
+    .course-name{flex:1;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;}
+    
+    /* ESTADOS DE LAS MATERIAS */
+    .course.enabled{
+      cursor:pointer;opacity:1;
+      background:#fff;
+      color:var(--text-main);
+      border-color:var(--accent); /* Resalta el borde con el color principal */
+      box-shadow:0 2px 8px rgba(0,0,0,.05);
+    }
+    .course.enabled:hover{transform:translateY(-3px);box-shadow:0 6px 16px rgba(0,0,0,.1);}
+    
+    .course.completed{
+      opacity:1;cursor:pointer;
+      background:var(--accent); /* Fondo con color principal para las aprobadas */
+      color:#fff;
+      border-color:var(--accent-dark);
+      border-width:2px;
+      box-shadow:0 4px 12px rgba(0,0,0,.15);
+    }
+    .course.completed .course-name{text-decoration:line-through;opacity:.9;}
+    .course.completed::after{content:'★';position:absolute;top:4px;right:28px;background:var(--accent-dark);color:#fff;border-radius:50%;width:18px;height:18px;font-size:10px;line-height:18px;text-align:center;}
+    
+    .course-grade-badge{flex-shrink:0;width:26px;height:26px;border-radius:50%;font-size:.65rem;font-weight:700;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .2s;position:relative;}
+    .course:not(.completed) .course-grade-badge{display:none;}
+    .course.completed .course-grade-badge.no-grade{background:rgba(255,255,255,.2);color:#fff; border: 1px dashed rgba(255,255,255,0.6);}
+    .course.completed .course-grade-badge.has-grade{background:#fff;color:var(--accent-dark);}
+    .course.completed .course-grade-badge:hover{transform:scale(1.15);}
+    
+    .electiva-counter{font-size:10px;color:var(--accent-dark);opacity:.85;margin-top:-6px;margin-bottom:4px;font-weight:600;}
+    .map-hint{display:inline-block;font-size:.85rem;background:#fff;color:var(--text-muted);padding:8px 18px;border-radius:8px;margin-bottom:16px; border: 1px solid #ddd; box-shadow: 0 2px 6px rgba(0,0,0,0.05);}
 
-    /* CALENDARIO */
-    #view-calendar { max-width:1100px; margin:0 auto 50px; }
-    .cal-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; background:#fff; padding:15px 25px; border-radius:15px; border:2px solid var(--accent-light); flex-wrap:wrap; gap:10px; }
-    .cal-header h3 { color:var(--accent-dark); margin:0; }
-    .cal-nav { display:flex; align-items:center; gap:15px; }
-    .cal-nav-btn { background:var(--accent-light); color:var(--accent-dark); border:none; padding:8px 15px; border-radius:8px; font-weight:bold; cursor:pointer; font-size:1.1rem; }
-    .cal-month-display { font-size:1.1rem; font-weight:700; color:var(--accent-dark); min-width:150px; text-align:center; }
-    .calendar-container { background:#fff; border-radius:20px; padding:20px; border:2px solid var(--accent-light); box-sizing:border-box; }
-    .cal-weekdays { display:grid; grid-template-columns:repeat(7,1fr); gap:5px; margin-bottom:10px; text-align:center; font-weight:700; color:var(--accent-dark); font-size:.85rem; }
-    .cal-grid { display:grid; grid-template-columns:repeat(7,1fr); gap:5px; }
-    .cal-day { min-height:90px; border:1px solid var(--accent-light); border-radius:10px; padding:5px; background:#fff9fa; cursor:pointer; transition:.2s; display:flex; flex-direction:column; }
-    .cal-day.empty { background:transparent; border:none; cursor:default; }
-    .cal-date-num { font-weight:700; color:var(--accent-dark); margin-bottom:4px; text-align:right; font-size:.85rem; }
-    .cal-event-pill { font-size:.72rem; padding:3px 5px; border-radius:4px; margin-bottom:3px; color:#fff; font-weight:600; overflow:hidden; white-space:nowrap; text-overflow:ellipsis; }
-  
-    /* HORARIO (Diseño por Columnas) */
-    #view-schedule { max-width:1100px; margin:0 auto; padding-bottom:50px; }
-    .schedule-grid { display: flex; gap: 15px; overflow-x: auto; padding-bottom: 10px; }
-    .day-column { flex: 1; min-width: 150px; display: flex; flex-direction: column; border-radius: 12px; border: 2px solid var(--accent-light); overflow: hidden; background: #fff; }
-    .day-header { background: var(--accent-light); color: var(--accent-dark); text-align: center; padding: 12px; font-weight: 700; font-family: 'Lora', serif; font-size: 1.1rem; }
-    .hour-cell { display: flex; border-top: 1px solid var(--accent-light); height: 50px; }
-    .hour-label { background: #fff9fa; color: var(--accent-dark); font-weight: 700; font-size: 0.75rem; width: 50px; display: flex; align-items: center; justify-content: center; border-right: 1px solid var(--accent-light); flex-shrink: 0; }
-    .hour-cell textarea { flex: 1; border: none; outline: none; background: transparent; padding: 5px; text-align: center; color: var(--accent-dark); resize: none; font-size: 0.8rem; font-weight: 600; font-family: 'Poppins', sans-serif; box-sizing: border-box; }
-    .hour-cell textarea:focus { background: #fff9fa; }
-    .hour-cell textarea.occupied-cell { background-color: var(--accent-bg) !important; color: #faffc7 !important; }
-  
-    /* NOTAS */
-    #view-grades { max-width:800px; margin:0 auto; }
-    .average-card { background:var(--accent-light); color:var(--accent-dark); padding:30px; border-radius:15px; text-align:center; margin-bottom:30px; }
-    .average-card h2 { color:var(--accent-dark); margin-top:0; }
-    .average-card .big-number { font-size:3.5rem; font-weight:900; margin:10px 0; font-family:'Poppins',sans-serif; }
-    .grade-row { display:flex; justify-content:space-between; align-items:center; padding:15px; border-bottom:1px dashed rgba(255,195,204,.3); }
-    .grade-input { width:80px; padding:10px; border:1px solid var(--accent-light); border-radius:8px; text-align:center; font-weight:bold; color:#28301c; font-size:1rem; outline:none; background:#fff9fa; font-family:'Poppins',sans-serif; }
-  
-    /* PROGRESO */
-    #view-stats { max-width:900px; margin:0 auto; padding-bottom:50px; }
-    .stats-header { display:flex; gap:30px; flex-wrap:wrap; justify-content:center; margin-bottom:40px; }
-    .progress-circle-container { position:relative; width:180px; height:180px; background:#fff; border-radius:50%; display:flex; justify-content:center; align-items:center; box-shadow:0 5px 15px rgba(0,0,0,.1); }
-    .progress-circle-bg { width:100%; height:100%; border-radius:50%; display:flex; justify-content:center; align-items:center; transition:background 1s ease; }
-    .progress-circle-inner { width:80%; height:80%; background:#fff; border-radius:50%; display:flex; flex-direction:column; justify-content:center; align-items:center; color:#28301c; }
-    .pc-percentage { font-size:2rem; font-weight:700; }
-    .pc-label { font-size:.8rem; letter-spacing:1px; opacity:.8; }
-    .stat-card { background:var(--accent-light); color:var(--accent-dark); padding:20px; border-radius:15px; width:150px; text-align:center; border:2px solid var(--accent-light); display:flex; flex-direction:column; justify-content:center; box-shadow:0 5px 15px rgba(0,0,0,.1); }
-    .stat-val { font-size:2.5rem; font-weight:700; }
-    .stat-desc { font-size:.9rem; opacity:.9; }
-    .available-courses-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(200px,1fr)); gap:15px; }
-    .plan-card { padding:15px; border:1px dashed var(--accent-dark); border-radius:12px; color:var(--accent-dark); font-weight:600; font-size:.9rem; cursor:pointer; transition:all .2s; background:transparent; position:relative; user-select:none; text-align:center; }
-    .plan-card:hover { background:rgba(255,195,204,.3); }
-    .plan-card.planned { background:var(--accent-light); border-style:solid; border-color:var(--accent-light); }
-    .plan-card.planned::after { content:'♡'; position:absolute; top:-12px; right:-8px; font-size:1.5rem; color:var(--accent-dark); }
-  
-    /* PERFIL */
-    #view-profile { max-width:680px; margin:0 auto; padding-bottom:50px; }
-    .profile-section { background:#fff; color:var(--accent-dark); border-radius:20px; border:2px solid var(--accent-light); padding:25px 30px; margin-bottom:25px; }
-    .profile-section h3 { margin-top:0; font-size:1.1rem; }
-    .profile-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin-top:16px; }
-    .profile-theme-card { border:2px solid #e5e5e5; border-radius:12px; padding:12px 8px; cursor:pointer; transition:all .2s; text-align:center; background:#fff; }
-    .profile-theme-card:hover { transform:translateY(-2px); }
-    .profile-theme-card.selected { border-color:var(--accent); box-shadow:0 0 0 3px rgba(196,54,112,.15); }
-    .profile-save-btn { margin-top:16px; width:100%; padding:12px; border-radius:10px; border:none; background:var(--accent); color:#fff; font-family:'Poppins',sans-serif; font-weight:700; font-size:15px; cursor:pointer; transition:.2s; }
-    .profile-save-btn:hover { opacity:.88; }
-    .profile-info-row { display:flex; justify-content:space-between; align-items:center; padding:10px 0; border-bottom:1px solid #f0f0f0; font-size:14px; }
-    .profile-info-row:last-child { border-bottom:none; }
-    .profile-info-label { color:#888; font-size:13px; }
-    .profile-info-val { font-weight:600; }
-    .profile-logout-btn { width:100%; padding:12px; border-radius:10px; border:2px solid var(--accent); background:transparent; color:var(--accent); font-family:'Poppins',sans-serif; font-weight:700; font-size:14px; cursor:pointer; transition:.2s; margin-top:12px; }
-    .profile-logout-btn:hover { background:var(--accent); color:#fff; }
-  .profile-danger-btn { width:100%; padding:12px; border-radius:10px; border:2px solid #ef4444; background:#fff1f2; color:#b91c1c; font-family:'Poppins',sans-serif; font-weight:700; font-size:14px; cursor:pointer; transition:.2s; margin-top:12px; }
-    .profile-danger-btn:hover { background:#ef4444; color:#fff; }
+    /* ===== CALENDARIO ===== */
+    #view-calendar{max-width:1100px;margin:0 auto 50px;}
+    .cal-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;background:#fff;padding:15px 25px;border-radius:15px;border:1px solid #eaeaea;box-shadow: 0 4px 12px rgba(0,0,0,0.03);flex-wrap:wrap;gap:10px;}
+    .cal-header h3{color:var(--accent-dark);margin:0;}
+    .cal-nav{display:flex;align-items:center;gap:15px;}
+    .cal-nav-btn{background:var(--accent);color:#fff;border:none;padding:8px 15px;border-radius:8px;font-weight:bold;cursor:pointer;font-size:1.1rem;}
+    .cal-month-display{font-size:1.1rem;font-weight:700;color:var(--text-main);min-width:150px;text-align:center;}
+    .calendar-container{background:#fff;border-radius:20px;padding:20px;border:1px solid #eaeaea;box-shadow: 0 4px 15px rgba(0,0,0,0.04);}
+    .cal-weekdays{display:grid;grid-template-columns:repeat(7,1fr);gap:5px;margin-bottom:10px;text-align:center;font-weight:700;color:var(--text-muted);font-size:.85rem;}
+    .cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:5px;}
+    .cal-day{min-height:90px;border:1px solid #eee;border-radius:10px;padding:5px;background:#fafafa;cursor:pointer;transition:.2s;display:flex;flex-direction:column;}
+    .cal-day.empty{background:transparent;border:none;cursor:default;}
+    .cal-day.today{background:#fff;border:2px solid var(--accent);box-shadow:0 0 0 2px rgba(0,0,0,.05);}
+    .cal-date-num{font-weight:700;color:var(--text-muted);margin-bottom:4px;text-align:right;font-size:.85rem;}
+    .cal-day.today .cal-date-num{color:var(--accent);font-size:.95rem;}
+    .cal-event-pill{font-size:.72rem;padding:4px 6px;border-radius:4px;margin-bottom:3px;color:#fff;font-weight:600;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;}
 
-    /* MODALES */
-    .modal-overlay { position:fixed; inset:0; background:rgba(69,21,27,.9); z-index:2000; display:none; justify-content:center; align-items:center; }
-    .modal-overlay.open { display:flex; }
-    .modal-box { background:#fff; color:var(--accent-dark); padding:30px; border-radius:20px; max-width:90%; width:400px; text-align:center; border:4px solid var(--accent-light); box-sizing:border-box; }
-    .modal-box label { display:block; text-align:left; font-size:12px; font-weight:600; color:#555; margin-bottom:5px; text-transform:uppercase; }
-    .modal-box select,.modal-box input[type=text] { width:100%; padding:11px 12px; margin-bottom:15px; border-radius:8px; border:2px solid var(--accent-light); font-family:'Poppins',sans-serif; background:#fff9fa; color:var(--accent-dark); font-weight:600; outline:none; box-sizing:border-box; font-size:14px; }
-    .btn-add { background:var(--accent-light); color:var(--accent-dark); border:none; padding:12px 25px; border-radius:10px; font-weight:700; font-family:'Poppins',sans-serif; cursor:pointer; transition:.3s; }
-    .btn-add:hover { opacity:.8; }
-    .btn-close-modal { display:block; width:100%; margin-top:10px; padding:10px; border-radius:10px; border:2px solid #ddd; background:transparent; color:#666; font-family:'Poppins',sans-serif; font-weight:600; cursor:pointer; }
-    .btn-goog { display:block; width:100%; padding:11px; margin-top:8px; border-radius:10px; border:none; background:#4285F4; color:#fff; font-family:'Poppins',sans-serif; font-weight:700; font-size:14px; cursor:pointer; }
-  
-    /* =========================================
-       DISEÑO DE 1 SOLA COLUMNA PARA CELULARES
-       ========================================= */
-    @media (max-width: 768px) {
-      .main-content { padding: 0 15px; }
-      header { flex-direction: column; text-align: center; padding: 15px; gap: 12px; margin-bottom: 20px; }
-      .tabs-container { justify-content: center; }
-      .tab-btn { font-size: 0.78rem; padding: 6px 9px; }
-      
-      /* --- MALLA VERTICAL --- */
-      #view-map { padding-bottom: 20px; }
-      .year-row { 
-        flex-direction: column !important; /* Apila los años */
-        align-items: center; 
-        gap: 20px; 
-        padding: 10px 0; 
-        margin: 0;
-      }
-      .year-column { min-width: 100%; max-width: 350px; } 
-      .year-column h2 { font-size: 1.2rem; min-width: 100%; margin-bottom: 12px; }
-      .course { min-width: 100%; max-width: 100%; height: auto; min-height: 55px; font-size: 0.85rem; }
-      #view-map::after { display: none !important; }
-  
-      /* --- HORARIO VERTICAL --- */
-      .schedule-grid { 
-        flex-direction: column !important; /* Apila los días */
-        overflow-x: hidden; 
-        gap: 20px; 
-      }
-      .day-column { min-width: 100%; }
-      
-      /* Ajustes extras para que todo encaje lindo */
-      .theme-grid, .profile-grid { grid-template-columns: repeat(2, 1fr); }
-      .stats-header { flex-direction: column; align-items: center; gap: 20px; }
-      .cal-day { min-height: 65px; }
-      .average-card { padding: 20px; }
-      .modal-box { padding: 20px; }
+    /* ===== HORARIO ===== */
+    #view-schedule{max-width:1100px;margin:0 auto;padding-bottom:50px;}
+    .schedule-grid{display:flex;gap:15px;overflow-x:auto;padding-bottom:10px;}
+    .day-column{flex:1;min-width:150px;display:flex;flex-direction:column;border-radius:12px;border:1px solid #eaeaea;overflow:hidden;background:#fff; box-shadow: 0 4px 10px rgba(0,0,0,0.03);}
+    .day-header{background:var(--accent-dark);color:#fff;text-align:center;padding:12px;font-weight:700;font-family:'Lora',serif;font-size:1rem;}
+    .hour-cell{display:flex;border-top:1px solid #eee;min-height:50px;}
+    .hour-label{background:#f9f9f9;color:var(--text-muted);font-weight:700;font-size:.75rem;width:50px;display:flex;align-items:center;justify-content:center;border-right:1px solid #eee;flex-shrink:0;}
+    .hour-cell textarea{flex:1;border:none;outline:none;background:transparent;padding:6px;text-align:center;color:var(--text-main);resize:none;font-size:.8rem;font-weight:600;font-family:'Poppins',sans-serif;box-sizing:border-box;}
+    .hour-cell textarea:focus{background:#fff9fa;}
+    .hour-cell textarea.occupied-cell{background-color:var(--accent) !important;color:#fff !important;}
+
+    /* ===== PRÓXIMA CLASE ===== */
+    .next-class-card{background:var(--accent-dark);border-radius:16px;padding:20px 24px;border:none;display:flex;align-items:center;gap:18px; box-shadow: 0 6px 15px rgba(0,0,0,0.1);}
+    .next-class-icon{font-size:2rem;flex-shrink:0;}
+    .next-class-info .label{font-size:.7rem;text-transform:uppercase;letter-spacing:1px;color:rgba(255,255,255,.6);margin-bottom:3px;}
+    .next-class-info .subject{font-size:1.05rem;font-weight:700;color:#fff;}
+    .next-class-info .detail{font-size:.8rem;color:rgba(255,255,255,.8);margin-top:3px;}
+
+    /* ===== PROGRESO ===== */
+    #view-stats{max-width:960px;margin:0 auto;padding-bottom:50px;}
+    .stats-header{display:flex;gap:24px;flex-wrap:wrap;justify-content:center;margin-bottom:32px;}
+    .progress-circle-container{position:relative;width:160px;height:160px;background:#fff;border-radius:50%;display:flex;justify-content:center;align-items:center;box-shadow:0 5px 15px rgba(0,0,0,.08);}
+    .progress-circle-bg{width:100%;height:100%;border-radius:50%;display:flex;justify-content:center;align-items:center;transition:background 1s ease;}
+    .progress-circle-inner{width:78%;height:78%;background:#fff;border-radius:50%;display:flex;flex-direction:column;justify-content:center;align-items:center;color:var(--text-main);}
+    .pc-percentage{font-size:1.8rem;font-weight:700;color:var(--accent-dark);}
+    .pc-label{font-size:.72rem;letter-spacing:1px;opacity:.7;}
+    .stat-card{background:#fff;color:var(--text-main);padding:18px;border-radius:14px;min-width:120px;text-align:center;display:flex;flex-direction:column;justify-content:center;box-shadow:0 5px 15px rgba(0,0,0,.05); border: 1px solid #eaeaea;}
+    .stat-card.dark{background:var(--accent-dark);color:#fff;}
+    .stat-card:not(.dark) .stat-val { color: var(--accent); }
+    .stat-val{font-size:2.2rem;font-weight:700;}
+    .stat-desc{font-size:.82rem;opacity:.85;}
+
+    .grades-in-stats{width:100%;}
+    .completed-row{display:flex;align-items:center;gap:12px;padding:11px 16px;border-bottom:1px solid #eee;transition:background .15s;}
+    .completed-row:hover{background:#fafafa;}
+    .completed-row:last-child{border-bottom:none;}
+    .cr-name{flex:1;font-size:.88rem;font-weight:600;color:var(--text-main);}
+    .cr-input{width:72px;padding:7px 10px;border:1.5px solid #ddd;border-radius:8px;text-align:center;font-weight:700;color:var(--accent-dark);font-size:.95rem;outline:none;background:#fff;font-family:'Poppins',sans-serif;}
+    .cr-input:focus{border-color:var(--accent);}
+
+    .study-stats-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px;margin-top:4px;}
+    .study-stat-pill{background:#fff;border:1px solid #eaeaea;border-radius:12px;padding:14px;text-align:center; box-shadow: 0 2px 8px rgba(0,0,0,0.03);}
+    .study-stat-pill .sp-name{font-size:.75rem;font-weight:600;color:var(--text-muted);margin-bottom:4px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;}
+    .study-stat-pill .sp-time{font-size:1.2rem;font-weight:700;color:var(--accent-dark);}
+
+    /* ===== POMODORO ===== */
+    #view-pomodoro{max-width:600px;margin:0 auto;padding-bottom:60px;}
+    .pom-circle{width:220px;height:220px;border-radius:50%;background:var(--accent-dark);border:8px solid #fff;display:flex;flex-direction:column;align-items:center;justify-content:center;margin:0 auto 28px;box-shadow:0 10px 40px rgba(0,0,0,.15);}
+    .pom-time{font-size:3.5rem;font-weight:900;color:#fff;font-family:'Poppins',sans-serif;line-height:1;}
+    .pom-mode{font-size:.75rem;color:rgba(255,255,255,.7);text-transform:uppercase;letter-spacing:1.5px;margin-top:6px;}
+    .pom-controls{display:flex;gap:12px;justify-content:center;margin-bottom:24px;}
+    .pom-btn{padding:12px 28px;border-radius:12px;border:none;font-family:'Poppins',sans-serif;font-weight:700;font-size:.95rem;cursor:pointer;transition:all .2s;}
+    .pom-btn.primary{background:var(--accent);color:#fff;box-shadow: 0 4px 12px rgba(0,0,0,0.15);}
+    .pom-btn.primary:hover{opacity:.9; transform: translateY(-2px);}
+    .pom-btn.secondary{background:#fff;color:var(--text-muted);border:1px solid #ddd;}
+    .pom-btn.secondary:hover{background:#f5f5f5;}
+    .pom-subject-select{width:100%;padding:14px 16px;border-radius:10px;border:2px solid #ddd;font-family:'Poppins',sans-serif;font-size:.9rem;color:var(--text-main);background:#fff;outline:none;margin-bottom:16px;}
+    .pom-subject-select:focus { border-color: var(--accent); }
+    .pom-session-log{margin-top:16px;}
+    .pom-log-item{display:flex;justify-content:space-between;align-items:center;padding:10px 14px;border-radius:8px;background:#f5f5f5;margin-bottom:8px;font-size:.85rem;color:var(--text-main); border:1px solid #eaeaea;}
+
+    /* ===== APUNTES ===== */
+    #view-notes{max-width:1000px;margin:0 auto;padding-bottom:60px;}
+    
+    /* Buscador Apuntes */
+    .notes-search-bar { width: 100%; max-width: 400px; padding: 12px 16px; border-radius: 10px; border: 2px solid #eaeaea; margin-top: 15px; outline: none; font-family: 'Poppins', sans-serif; font-size: 0.9rem; transition: border-color 0.2s;}
+    .notes-search-bar:focus { border-color: var(--accent); }
+
+    .notes-subjects-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:16px;margin-top:20px;}
+    .notes-subject-card{background:#fff;border-radius:14px;padding:20px;cursor:pointer;transition:all .22s;box-shadow:0 4px 15px rgba(0,0,0,.04);border:2px solid transparent;position:relative;overflow:hidden;}
+    .notes-subject-card:hover{transform:translateY(-3px);box-shadow:0 8px 24px rgba(0,0,0,.08);border-color:var(--accent);}
+    .notes-subject-card.has-notes{border-left:5px solid var(--accent);}
+    .nsc-icon{font-size:1.8rem;margin-bottom:10px;}
+    .nsc-name{font-size:.95rem;font-weight:700;color:var(--accent-dark);line-height:1.3;margin-bottom:6px;}
+    .nsc-count{font-size:.75rem;color:var(--text-muted);font-weight:500;}
+    .nsc-count b{color:var(--accent); font-weight: 700;}
+    .notes-detail{background:#fff;border-radius:18px;overflow:hidden;box-shadow:0 6px 24px rgba(0,0,0,.06); border:1px solid #eaeaea;}
+    .notes-detail-header{background:var(--accent-dark);padding:20px 24px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;}
+    .ndh-back{background:rgba(255,255,255,.15);border:none;color:#fff;border-radius:8px;padding:8px 14px;cursor:pointer;font-size:.85rem;font-weight:700;font-family:'Poppins',sans-serif;transition:.18s;flex-shrink:0;}
+    .ndh-back:hover{background:rgba(255,255,255,.25);}
+    .ndh-title{font-size:1.2rem;font-weight:700;color:#fff;font-family:'Lora',serif;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+    .ndh-links{display:flex;gap:8px;flex-wrap:wrap;}
+    .ndh-link-btn{padding:8px 14px;border-radius:8px;border:1px solid rgba(255,255,255,.3);background:transparent;color:#fff;font-size:.8rem;font-weight:600;font-family:'Poppins',sans-serif;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;gap:6px;transition:.18s;}
+    .ndh-link-btn:hover{background:rgba(255,255,255,.15);}
+    .ndh-add-link-row{padding:14px 24px;background:#fafafa;display:none;flex-wrap:wrap;gap:10px;align-items:center;border-bottom:1px solid #eaeaea;}
+    .ndh-add-link-row.show{display:flex;}
+    .ndh-add-link-row input,.ndh-add-link-row select{padding:9px 12px;border-radius:8px;border:1px solid #ccc;outline:none;font-family:'Poppins',sans-serif;font-size:.85rem;color:var(--text-main);background:#fff;flex:1;min-width:140px;}
+    .ndh-add-link-row .nc-add-btn{flex-shrink:0;}
+    .notes-category{border-bottom:1px solid #eaeaea;}
+    .notes-category:last-child{border-bottom:none;}
+    .nc-header{display:flex;align-items:center;justify-content:space-between;padding:16px 24px;cursor:pointer;transition:background .15s;user-select:none;}
+    .nc-header:hover{background:#f9f9f9;}
+    .nc-title{font-size:.85rem;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--accent-dark);display:flex;align-items:center;gap:10px;}
+    .nc-title-icon{font-size:1.1rem;}
+    .nc-count-badge{background:var(--accent);color:#fff;border-radius:20px;padding:2px 10px;font-size:.7rem;font-weight:700;}
+    .nc-chevron{font-size:.8rem;color:#888;transition:transform .2s;}
+    .nc-chevron.open{transform:rotate(180deg);}
+    .nc-body{padding:4px 24px 20px;}
+    .nc-empty{font-size:.85rem;color:#aaa;font-style:italic;padding:8px 0;}
+    .note-item{display:flex;align-items:center;gap:12px;padding:12px 16px;border-radius:10px;border:1px solid #eaeaea;margin-bottom:8px;background:#fff;transition:all .15s;}
+    .note-item:hover{border-color:var(--accent); box-shadow: 0 2px 8px rgba(0,0,0,0.05);}
+    .note-item-icon{font-size:1.3rem;flex-shrink:0;}
+    .note-item-info{flex:1;min-width:0;}
+    .note-item-name{font-size:.9rem;font-weight:600;color:var(--text-main);overflow:hidden;white-space:nowrap;text-overflow:ellipsis;}
+    .note-item-url{font-size:.75rem;color:var(--text-muted);overflow:hidden;white-space:nowrap;text-overflow:ellipsis;margin-top:2px;}
+    .note-item-actions{display:flex;gap:8px;flex-shrink:0;}
+    .note-open-btn{padding:6px 12px;border-radius:6px;border:none;background:var(--accent);color:#fff;font-size:.75rem;font-weight:600;cursor:pointer;font-family:'Poppins',sans-serif;transition:.15s;text-decoration:none;display:inline-block;}
+    .note-open-btn:hover{opacity:.9;}
+    .note-item-del{cursor:pointer;color:#bbb;font-size:1.1rem;padding:2px 6px;transition:.15s;}
+    .note-item-del:hover{color:#ef4444;}
+    .nc-add-form{background:#fafafa;border-radius:10px;border:1px dashed #ccc;padding:16px;margin-top:12px;}
+    .nc-add-form input{width:100%;padding:10px 12px;margin-bottom:10px;border-radius:8px;border:1px solid #ddd;font-family:'Poppins',sans-serif;font-size:.85rem;color:var(--text-main);background:#fff;outline:none;box-sizing:border-box;}
+    .nc-add-form input:focus{border-color:var(--accent);}
+    .nc-add-btn{padding:10px 18px;border-radius:8px;border:none;background:var(--accent-dark);color:#fff;font-family:'Poppins',sans-serif;font-weight:600;font-size:.85rem;cursor:pointer;transition:.18s;}
+    .nc-add-btn:hover{background:var(--accent);}
+
+    /* ===== DASHBOARD ===== */
+    #view-home{padding-bottom:50px;}
+    .dash-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:24px;}
+    .dash-progress-card{background:var(--accent-dark);border-radius:18px;padding:28px;display:flex;align-items:center;gap:24px;border:none;grid-column:1/-1; box-shadow: 0 8px 25px rgba(0,0,0,0.15);}
+    .progress-ring-wrap{position:relative;width:110px;height:110px;flex-shrink:0;}
+    .progress-ring-wrap svg{transform:rotate(-90deg);}
+    .progress-ring-bg{fill:none;stroke:rgba(255,255,255,.1);stroke-width:8;}
+    .progress-ring-fill{fill:none;stroke:#fff;stroke-width:8;stroke-linecap:round;transition:stroke-dashoffset 1s ease;}
+    .ring-label{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+    .ring-pct{font-size:1.5rem;font-weight:900;color:#fff;line-height:1;}
+    .ring-sub{font-size:.65rem;color:rgba(255,255,255,.7);letter-spacing:.5px;text-transform:uppercase;margin-top:2px;}
+    .dash-progress-info h3{margin:0 0 6px;font-size:1.2rem;color:#fff;}
+    .dash-progress-info p{margin:0 0 14px;opacity:.8;font-size:.85rem;font-family:'Poppins',sans-serif;color:#fff;}
+    .dash-mini-stats{display:flex;gap:18px;}
+    .dash-mini-stat .val{font-size:1.4rem;font-weight:700;color:#fff;display:block;}
+    .dash-mini-stat .lbl{font-size:.65rem;opacity:.7;text-transform:uppercase;letter-spacing:.5px;color:#fff;}
+    .dash-card{background:#fff;border-radius:18px;padding:24px;border:1px solid #eaeaea;color:var(--text-main); box-shadow: 0 4px 15px rgba(0,0,0,0.03);}
+    .dash-card h4{margin:0 0 16px;font-size:.9rem;color:var(--accent-dark); font-family:'Poppins',sans-serif;font-weight:700;}
+    .dash-available{grid-column:1/-1;}
+    .avail-chips{display:flex;flex-wrap:wrap;gap:10px;}
+    .avail-chip{padding:6px 14px;border-radius:20px;background:#f5f5f5;color:var(--text-muted);font-size:.8rem;font-weight:500;border:1px solid #ddd;}
+    .upcoming-item{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid #f0f0f0;}
+    .upcoming-item:last-child{border-bottom:none;}
+    .upcoming-days{font-size:.75rem;font-weight:700;color:var(--accent);min-width:60px; background: rgba(0,0,0,0.05); padding: 4px 8px; border-radius: 6px; text-align: center;}
+    .upcoming-title{font-size:.85rem;font-weight:600;flex:1;}
+
+    /* ===== PERFIL ===== */
+    #view-profile{max-width:680px;margin:0 auto;padding-bottom:50px;}
+    .profile-section{background:#fff;color:var(--text-main);border-radius:18px;border:1px solid #eaeaea; box-shadow: 0 4px 15px rgba(0,0,0,0.03); padding:26px 30px;margin-bottom:24px;}
+    .profile-section h3{margin-top:0;font-size:1.1rem;color:var(--accent-dark); border-bottom: 2px solid #f0f0f0; padding-bottom: 10px; margin-bottom: 15px;}
+    .profile-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:15px;margin-top:16px;}
+    .profile-theme-card{border:2px solid #eaeaea;border-radius:12px;padding:14px 10px;cursor:pointer;transition:all .2s;text-align:center;background:#fff;}
+    .profile-theme-card:hover{transform:translateY(-3px); box-shadow: 0 4px 10px rgba(0,0,0,0.05);}
+    .profile-theme-card.selected{border-color:var(--accent);box-shadow:0 0 0 3px rgba(var(--accent-rgb),0.15);}
+    .profile-save-btn{margin-top:20px;width:100%;padding:13px;border-radius:10px;border:none;background:var(--accent);color:#fff;font-family:'Poppins',sans-serif;font-weight:600;font-size:14px;cursor:pointer;transition:.2s;}
+    .profile-save-btn:hover{opacity:.9; transform: translateY(-2px);}
+    .profile-info-row{display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid #f0f0f0;font-size:14px;}
+    .profile-info-row:last-child{border-bottom:none;}
+    .profile-info-label{color:var(--text-muted);font-size:13px;}
+    .profile-info-val{font-weight:600;font-size:14px; color: var(--accent-dark);}
+    .profile-logout-btn{width:100%;padding:12px;border-radius:10px;border:2px solid var(--text-muted);background:transparent;color:var(--text-muted);font-family:'Poppins',sans-serif;font-weight:600;font-size:13px;cursor:pointer;transition:.2s;margin-top:15px;}
+    .profile-logout-btn:hover{background:var(--text-muted);color:#fff;}
+    .profile-danger-btn{width:100%;padding:12px;border-radius:10px;border:2px solid #ef4444;background:#fff1f2;color:#b91c1c;font-family:'Poppins',sans-serif;font-weight:600;font-size:13px;cursor:pointer;transition:.2s;margin-top:10px;}
+    .profile-danger-btn:hover{background:#ef4444;color:#fff;}
+
+    /* ===== MODALES ===== */
+    .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:2000;display:none;justify-content:center;align-items:center; backdrop-filter: blur(3px);}
+    .modal-overlay.open{display:flex;}
+    .modal-box{background:#fff;color:var(--text-main);padding:30px;border-radius:20px;max-width:90%;width:420px;text-align:center;box-shadow: 0 10px 40px rgba(0,0,0,0.2);box-sizing:border-box;}
+    .modal-box label{display:block;text-align:left;font-size:12px;font-weight:600;color:var(--text-muted);margin-bottom:6px;text-transform:uppercase;}
+    .modal-box select,.modal-box input[type=text],.modal-box input[type=number]{width:100%;padding:12px 14px;margin-bottom:16px;border-radius:8px;border:1px solid #ccc;font-family:'Poppins',sans-serif;background:#fafafa;color:var(--text-main);font-weight:500;outline:none;box-sizing:border-box;font-size:14px;}
+    .modal-box select:focus, .modal-box input:focus { border-color: var(--accent); }
+    .btn-add{background:var(--accent);color:#fff;border:none;padding:12px 24px;border-radius:10px;font-weight:600;font-family:'Poppins',sans-serif;cursor:pointer;transition:.2s;}
+    .btn-add:hover{opacity:.9; transform: translateY(-2px);}
+    .btn-close-modal{display:block;width:100%;margin-top:10px;padding:10px;border-radius:10px;border:1px solid #ddd;background:#f9f9f9;color:var(--text-muted);font-family:'Poppins',sans-serif;font-weight:500;cursor:pointer; transition: 0.2s;}
+    .btn-close-modal:hover { background: #eee; }
+    .btn-goog{display:block;width:100%;padding:12px;margin-top:8px;border-radius:10px;border:none;background:#4285F4;color:#fff;font-family:'Poppins',sans-serif;font-weight:600;font-size:13px;cursor:pointer;}
+    .btn-goog:hover { background: #3367d6; }
+    .grade-star-btn{padding:10px 4px;border-radius:8px;border:1px solid #ccc;background:#fafafa;color:var(--text-muted);font-weight:600;font-size:.9rem;cursor:pointer;transition:all .2s;font-family:'Poppins',sans-serif;flex:1;}
+    .grade-star-btn:hover,.grade-star-btn.selected{background:var(--accent);color:#fff;border-color:var(--accent-dark);}
+    #scheduleExtraModal .modal-box{text-align:left;}
+
+    /* ===== RESPONSIVE ===== */
+    @media(max-width:768px){
+      .main-content{padding:0 16px 50px;}
+      header{padding:12px 16px;gap:10px;margin-bottom:20px;}
+      .logo-area .career-name{max-width:160px;font-size:.95rem;}
+      .tabs-container{justify-content:center;}
+      .tab-btn{font-size:.75rem;padding:6px 10px;}
+      .dash-grid{grid-template-columns:1fr;}
+      .dash-progress-card{grid-column:1;flex-direction:column;text-align:center;}
+      .dash-mini-stats{justify-content:center;}
+      #view-map{padding-bottom:16px;}
+      .year-row{flex-direction:column !important;align-items:center;gap:20px;padding:8px 0;margin:0;}
+      .year-column{min-width:100%;max-width:360px;}
+      .year-column h2{min-width:100%;}
+      .course{min-width:100%;max-width:100%;height:auto;min-height:56px;}
+      .schedule-grid{flex-direction:column !important;overflow-x:hidden;gap:16px;}
+      .day-column{min-width:100%;}
+      .theme-grid,.profile-grid{grid-template-columns:repeat(2,1fr);}
+      .stats-header{flex-direction:column;align-items:center;gap:16px;}
+      .pom-circle{width:180px;height:180px;}
+      .pom-time{font-size:2.8rem;}
     }
   </style>
 </head>
 <body>
-  
+
 <div id="onboardingScreen">
   <div class="ob-card">
     <div class="ob-progress"><div class="ob-progress-fill" id="obProgress" style="width:25%"></div></div>
-  
-   <div class="ob-step active" id="obs1">
+    <div class="ob-step active" id="obs1">
       <div class="ob-step-label">Paso 1 de 4</div>
       <div class="ob-step-title" id="authTitle">¡Bienvenido/a! 👋</div>
-      <div class="ob-step-sub" id="authSub">Creá tu cuenta para guardar tu progreso, o iniciá sesión si ya tenés una.</div>
-      
+      <div class="ob-step-sub" id="authSub">Creá tu cuenta para guardar tu progreso en la nube, o iniciá sesión si ya tenés una.</div>
       <div class="auth-tabs" id="authTabsContainer">
         <button class="auth-tab active" id="tabRegistro" onclick="switchAuthTab('registro')">Crear cuenta</button>
         <button class="auth-tab" id="tabLogin" onclick="switchAuthTab('login')">Ya tengo cuenta</button>
       </div>
-      
       <div id="auth-error"></div>
-      
-      <div class="ob-field">
-        <label class="ob-label">Email</label>
-        <input class="ob-input" type="email" id="ob-email" placeholder="tu@email.com">
-      </div>
-      
-      <div class="ob-field" id="passFieldContainer">
-        <label class="ob-label">Contraseña</label>
-        <input class="ob-input" type="password" id="ob-pass" placeholder="Mínimo 6 caracteres">
-      
-      </div>
-      
+      <div class="ob-field"><label class="ob-label">Email</label><input class="ob-input" type="email" id="ob-email" placeholder="tu@email.com"></div>
+      <div class="ob-field" id="passFieldContainer"><label class="ob-label">Contraseña</label><input class="ob-input" type="password" id="ob-pass" placeholder="Mínimo 6 caracteres"></div>
       <div class="ob-nav">
-        <button class="ob-btn-back" id="btnBackToLogin" onclick="switchAuthTab('login')" style="display:none;">← Volver</button>
+        <button class="ob-btn-back" id="btnBackToLogin" onclick="switchAuthTab('login')" style="display:none">← Volver</button>
         <button class="ob-btn-next" id="obAuthBtn" onclick="obDoAuth()">Crear cuenta y continuar →</button>
       </div>
-      
-      <p style="text-align:center;font-size:12px;color:#aaa;margin-top:12px" id="skipAuthText">
+      <div style="display:flex;align-items:center;gap:10px;margin:18px 0 14px">
+        <div style="flex:1;height:1px;background:#eee"></div>
+        <span style="font-size:12px;color:#bbb;white-space:nowrap">o continuá con</span>
+        <div style="flex:1;height:1px;background:#eee"></div>
+      </div>
+      <button onclick="loginConGoogle()" style="width:100%;padding:12px 16px;border-radius:10px;border:1px solid #ddd;background:#fff;color:#333;font-family:'Poppins',sans-serif;font-weight:600;font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;transition:all .2s;box-shadow:0 2px 6px rgba(0,0,0,.05);" onmouseover="this.style.boxShadow='0 4px 12px rgba(0,0,0,.1)'" onmouseout="this.style.boxShadow='0 2px 6px rgba(0,0,0,.05)'">
+        <svg width="18" height="18" viewBox="0 0 18 18" xmlns="http://www.w3.org/2000/svg"><path d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908c1.702-1.567 2.684-3.874 2.684-6.615z" fill="#4285F4"/><path d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 0 0 9 18z" fill="#34A853"/><path d="M3.964 10.71A5.41 5.41 0 0 1 3.682 9c0-.593.102-1.17.282-1.71V4.958H.957A8.996 8.996 0 0 0 0 9c0 1.452.348 2.827.957 4.042l3.007-2.332z" fill="#FBBC05"/><path d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 0 0 .957 4.958L3.964 7.29C4.672 5.163 6.656 3.58 9 3.58z" fill="#EA4335"/></svg>
+        Continuar con Google
+      </button>
+      <p style="text-align:center;font-size:12px;color:#888;margin-top:16px;margin-bottom:0" id="skipAuthText">
         ¿Preferís no crear cuenta? <span style="color:var(--accent);cursor:pointer;font-weight:600" onclick="obGo(2)">Continuar sin cuenta →</span>
       </p>
+      <p style="text-align:center;margin-top:10px;margin-bottom:0;display:none" id="btnForgotPass">
+        <span style="font-size:12px;color:var(--accent);cursor:pointer;font-weight:500;" onclick="mostrarRecuperarPass()">¿Olvidaste tu contraseña?</span>
+      </p>
     </div>
-  
     <div class="ob-step" id="obs2">
       <div class="ob-step-label">Paso 2 de 4</div>
       <div class="ob-step-title">Tu carrera 🎓</div>
-      <div class="ob-step-sub">Estos datos aparecen en el encabezado de tu malla.</div>
-      <div class="ob-field">
-        <label class="ob-label">Nombre de tu carrera</label>
-        <input class="ob-input" type="text" id="ob-career" placeholder="Ej: Ingeniería en Sistemas">
+      <div class="ob-step-sub">Estos datos aparecen en el encabezado. Los podés cambiar después desde Perfil.</div>
+      <div class="ob-field"><label class="ob-label">Nombre de tu carrera</label><input class="ob-input" type="text" id="ob-career" placeholder="Ej: Ingeniería en Sistemas"></div>
+      <div class="ob-field"><label class="ob-label">Universidad o institución</label><input class="ob-input" type="text" id="ob-uni" placeholder="Ej: Universidad de Buenos Aires"></div>
+      <div class="ob-field"><label class="ob-label">Duración de la carrera</label>
+        <select class="ob-input" id="ob-years"><option value="">Seleccioná...</option><option>3 años</option><option>4 años</option><option>5 años</option><option>6 años</option></select>
       </div>
-      <div class="ob-field">
-        <label class="ob-label">Universidad o institución</label>
-        <input class="ob-input" type="text" id="ob-uni" placeholder="Ej: Universidad de Buenos Aires">
-      </div>
-      <div class="ob-field">
-        <label class="ob-label">Duración de la carrera</label>
-        <select class="ob-input" id="ob-years">
-          <option value="">Seleccioná...</option>
-          <option>3 años</option><option>4 años</option><option>5 años</option><option>6 años</option>
-        </select>
-      </div>
-      <div class="ob-nav">
-        <button class="ob-btn-back" onclick="obGo(1)">← Atrás</button>
-        <button class="ob-btn-next" onclick="obGoCarrera()">Continuar →</button>
-      </div>
+      <div class="ob-nav"><button class="ob-btn-back" onclick="obGo(1)">← Atrás</button><button class="ob-btn-next" onclick="obGoCarrera()">Continuar →</button></div>
     </div>
-  
     <div class="ob-step" id="obs3">
       <div class="ob-step-label">Paso 3 de 4</div>
       <div class="ob-step-title">Elegí tu tema 🎨</div>
-      <div class="ob-step-sub">El color de toda tu malla. Lo podés cambiar después desde Perfil.</div>
+      <div class="ob-step-sub">El color principal de toda tu malla. Lo podés cambiar después desde Perfil.</div>
       <div class="theme-grid">
-        <div class="theme-card selected" data-accent="#c43670" data-dark="#45151b" data-light="#ffc3cc" data-bg="#c43670" data-label="Rosa" onclick="obSelectTheme(this)">
-          <div class="theme-swatch" style="background:linear-gradient(135deg,#c43670,#ffc3cc)"></div>
-          <div class="theme-name">Rosa</div><div class="theme-desc">El original</div>
-        </div>
-        <div class="theme-card" data-accent="#185FA5" data-dark="#0C447C" data-light="#85B7EB" data-bg="#185FA5" data-label="Azul" onclick="obSelectTheme(this)">
-          <div class="theme-swatch" style="background:linear-gradient(135deg,#185FA5,#85B7EB)"></div>
-          <div class="theme-name">Azul</div><div class="theme-desc">Clásico</div>
-        </div>
-        <div class="theme-card" data-accent="#3B6D11" data-dark="#173404" data-light="#97C459" data-bg="#3B6D11" data-label="Verde" onclick="obSelectTheme(this)">
-          <div class="theme-swatch" style="background:linear-gradient(135deg,#3B6D11,#97C459)"></div>
-          <div class="theme-name">Verde</div><div class="theme-desc">Fresco</div>
-        </div>
-        <div class="theme-card" data-accent="#534AB7" data-dark="#26215C" data-light="#AFA9EC" data-bg="#534AB7" data-label="Púrpura" onclick="obSelectTheme(this)">
-          <div class="theme-swatch" style="background:linear-gradient(135deg,#50166b,#580b55)"></div>
-          <div class="theme-name">Púrpura</div><div class="theme-desc">Digital</div>
-        </div>
-        <div class="theme-card" data-accent="#D85A30" data-dark="#4A1B0C" data-light="#F0997B" data-bg="#D85A30" data-label="Coral" onclick="obSelectTheme(this)">
-          <div class="theme-swatch" style="background:linear-gradient(135deg,#D85A30,#F0997B)"></div>
-          <div class="theme-name">Coral</div><div class="theme-desc">Energético</div>
-        </div>
-        <div class="theme-card" data-accent="#444441" data-dark="#2C2C2A" data-light="#B4B2A9" data-bg="#444441" data-label="Gris" onclick="obSelectTheme(this)">
-          <div class="theme-swatch" style="background:linear-gradient(135deg,#444441,#B4B2A9)"></div>
-          <div class="theme-name">Gris</div><div class="theme-desc">Elegante</div>
-        </div>
+        <div class="theme-card selected" data-accent="#A33E79" data-dark="#450C3F" data-light="#D9EFBD" data-bg="#f9f9fc" data-label="Púrpura" onclick="obSelectTheme(this)"><div class="theme-swatch" style="background:linear-gradient(135deg,#A33E79,#450C3F)"></div><div class="theme-name">Púrpura</div></div>
+        <div class="theme-card" data-accent="#1B2CC1" data-dark="#091540" data-light="#7692FF" data-bg="#f9f9fc" data-label="Azul" onclick="obSelectTheme(this)"><div class="theme-swatch" style="background:linear-gradient(135deg,#1B2CC1,#091540)"></div><div class="theme-name">Azul</div></div>
+        <div class="theme-card" data-accent="#47622A" data-dark="#243313" data-light="#9FB878" data-bg="#f9f9fc" data-label="Verde" onclick="obSelectTheme(this)"><div class="theme-swatch" style="background:linear-gradient(135deg,#47622A,#243313)"></div><div class="theme-name">Verde</div></div>
+        <div class="theme-card" data-accent="#D56989" data-dark="#A33E79" data-light="#EA9CAF" data-bg="#f9f9fc" data-label="Rosa" onclick="obSelectTheme(this)"><div class="theme-swatch" style="background:linear-gradient(135deg,#D56989,#A33E79)"></div><div class="theme-name">Rosa</div></div>
+        <div class="theme-card" data-accent="#B31B1B" data-dark="#660f0f" data-light="#E57373" data-bg="#f9f9fc" data-label="Rojo" onclick="obSelectTheme(this)"><div class="theme-swatch" style="background:linear-gradient(135deg,#B31B1B,#660f0f)"></div><div class="theme-name">Rojo</div></div>
+        <div class="theme-card" data-accent="#565656" data-dark="#2B2B2B" data-light="#B3B3B3" data-bg="#f9f9fc" data-label="Gris" onclick="obSelectTheme(this)"><div class="theme-swatch" style="background:linear-gradient(135deg,#565656,#2B2B2B)"></div><div class="theme-name">Gris</div></div>
       </div>
-      <div class="ob-nav">
-        <button class="ob-btn-back" onclick="obGo(2)">← Atrás</button>
-        <button class="ob-btn-next" onclick="obGo(4)">Continuar →</button>
-      </div>
+      <div class="ob-nav"><button class="ob-btn-back" onclick="obGo(2)">← Atrás</button><button class="ob-btn-next" onclick="obGo(4)">Continuar →</button></div>
     </div>
-  
     <div class="ob-step" id="obs4">
       <div class="ob-step-label">Paso 4 de 4</div>
       <div class="ob-step-title">Subí tu plan de estudios 📄</div>
-      <div class="ob-step-sub"> (<strong></strong>  Aceptamos PDF o imagen.</div>
+      <div class="ob-step-sub">Subí el PDF o imagen de tu plan. La IA va a leer las materias y armar tu malla. <strong>No incluyas optativas.</strong></div>
       <div class="ob-upload" id="obUploadZone">
         <input type="file" id="obFileInput" accept=".pdf,.png,.jpg,.jpeg" onchange="obHandleFile(this)">
         <div class="ob-upload-icon">📎</div>
         <div class="ob-upload-title">Tocá acá o arrastrá tu archivo</div>
         <div class="ob-upload-sub">PDF o imagen · Máx. 10 MB</div>
       </div>
-      <div class="ob-file-preview" id="obFilePreview">
-        <span id="obFileIcon">📄</span>
-        <span class="ob-file-name" id="obFileName"></span>
-        <span class="ob-file-remove" onclick="obRemoveFile()">✕</span>
-      </div>
-      <div class="ob-ai-analyzing" id="obAnalyzing">
-        <div class="ob-spinner"></div>
-        <div class="ob-ai-text">Enviando al servidor local... esto tarda unos segundos.</div>
-      </div>
+      <div class="ob-file-preview" id="obFilePreview"><span id="obFileIcon">📄</span><span class="ob-file-name" id="obFileName"></span><span class="ob-file-remove" onclick="obRemoveFile()">✕</span></div>
+      <div class="ob-ai-analyzing" id="obAnalyzing"><div class="ob-spinner"></div><div class="ob-ai-text">Analizando con IA... ☕ esto tarda unos segundos.</div></div>
       <div class="ob-ai-error" id="obAiError"></div>
-      <div class="ob-ai-result" id="obAiResult">
-        <span style="font-size:20px">✅</span>
-        <div id="obAiResultText"></div>
-      </div>
-      <div class="ob-nav">
-        <button class="ob-btn-back" onclick="obGo(3)">← Atrás</button>
-        <button class="ob-btn-next" id="obBtn4" onclick="obFinish()" disabled>✦ Crear mi malla</button>
-      </div>
+      <div class="ob-ai-result" id="obAiResult"><span style="font-size:20px">✅</span><div id="obAiResultText"></div></div>
+      <div class="ob-nav"><button class="ob-btn-back" onclick="obGo(3)">← Atrás</button><button class="ob-btn-next" id="obBtn4" onclick="obFinish()" disabled>✦ Crear mi malla</button></div>
     </div>
   </div>
 </div>
-  
+
 <div id="scheduleModal" class="modal-overlay">
   <div class="modal-box">
     <h2 style="color:var(--accent-dark);margin-top:0">📝 Agendar Materia</h2>
     <label>Materia:</label><select id="schSubject"></select>
     <label>Día:</label>
-    <select id="schDay">
-      <option value="lunes">Lunes</option><option value="martes">Martes</option>
-      <option value="miercoles">Miércoles</option><option value="jueves">Jueves</option>
-      <option value="viernes">Viernes</option><option value="sabado">Sábado</option>
-    </select>
+    <select id="schDay"><option value="lunes">Lunes</option><option value="martes">Martes</option><option value="miercoles">Miércoles</option><option value="jueves">Jueves</option><option value="viernes">Viernes</option><option value="sabado">Sábado</option></select>
     <div style="display:flex;gap:10px">
       <div style="flex:1"><label>Inicio:</label><select id="schStart"></select></div>
       <div style="flex:1"><label>Fin:</label><select id="schEnd"></select></div>
     </div>
-    <button class="btn-add" style="width:100%;padding:14px;font-size:1rem;margin-top:10px" onclick="saveToSchedule()">✔️ Asignar</button>
+    <div style="border-top:1px dashed #ccc;margin:15px 0 15px;padding-top:15px">
+      <div style="font-size:.75rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px">Info de la clase (opcional)</div>
+      <label>Modalidad:</label>
+      <select id="schModalidad"><option value="presencial">🏫 Presencial</option><option value="virtual">💻 Virtual</option></select>
+      <label>Link / Campus virtual:</label>
+      <input type="text" id="schLink" placeholder="https://...">
+      <label>Salón / Sede:</label>
+      <input type="text" id="schSalon" placeholder="Ej: Aula 12 - Sede Centro">
+    </div>
+    <button class="btn-add" style="width:100%;" onclick="saveToSchedule()">✔️ Asignar</button>
     <button class="btn-close-modal" onclick="closeModal('scheduleModal')">Cancelar</button>
   </div>
 </div>
-  
+
 <div id="calModal" class="modal-overlay">
   <div class="modal-box">
     <h2 style="color:var(--accent-dark);margin-top:0">📅 Agregar Actividad</h2>
-    <p id="calModalDateDisplay" style="font-size:.9rem;font-weight:bold;color:var(--accent-dark);text-align:left"></p>
+    <p id="calModalDateDisplay" style="font-size:.9rem;font-weight:600;color:var(--text-main);text-align:left"></p>
     <input type="hidden" id="calDateKey">
-    <label>¿Qué tenés que hacer?</label>
-    <input type="text" id="calTitle" placeholder="Ej: Estudiar Física" autocomplete="off">
-    <label>Horario (opcional):</label>
-    <input type="text" id="calTime" placeholder="Ej: 14:00 o Todo el día" autocomplete="off">
-    <label>Color:</label>
-    <select id="calColor">
-      <option value="#c43670">Rosa</option><option value="#45151b">Bordó</option>
-      <option value="#185FA5">Azul</option><option value="#3B6D11">Verde</option>
-    </select>
-    <button class="btn-add" style="width:100%;padding:14px;margin-top:10px" onclick="saveCalEvent(false)">✔️ Guardar</button>
+    <label>¿Qué tenés que hacer?</label><input type="text" id="calTitle" placeholder="Ej: Estudiar Física" autocomplete="off">
+    <label>Horario (opcional):</label><input type="text" id="calTime" placeholder="Ej: 14:00 o Todo el día" autocomplete="off">
+    <label>Color de etiqueta:</label>
+    <select id="calColor"><option value="#A33E79">Púrpura</option><option value="#1B2CC1">Azul</option><option value="#47622A">Verde</option><option value="#D56989">Rosa</option><option value="#B31B1B">Rojo</option><option value="#565656">Gris</option></select>
+    <button class="btn-add" style="width:100%;margin-top:10px" onclick="saveCalEvent(false)">✔️ Guardar</button>
     <button class="btn-goog" onclick="saveCalEvent(true)">☁️ Guardar y abrir Google Calendar</button>
     <button class="btn-close-modal" onclick="closeModal('calModal')">Cancelar</button>
   </div>
 </div>
-  
+
+<div id="gradeModal" class="modal-overlay">
+  <div class="modal-box" style="text-align:left">
+    <h3 style="margin-top:0;color:var(--accent-dark);font-size:1.3rem" id="gradeModalName">Materia</h3>
+    <p style="font-size:.85rem;color:var(--text-muted);margin:0 0 15px">Ingresá tu nota final (1 a 10).</p>
+    <label>Nota obtenida:</label>
+    <input type="number" id="gradeInput" min="1" max="10" step="0.1" placeholder="Ej: 7 o 8.5" style="font-size:1.4rem;text-align:center;font-weight:700;color:var(--accent-dark)">
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px">
+      <button class="grade-star-btn" onclick="setQuickGrade(4,this)">4</button>
+      <button class="grade-star-btn" onclick="setQuickGrade(5,this)">5</button>
+      <button class="grade-star-btn" onclick="setQuickGrade(6,this)">6</button>
+      <button class="grade-star-btn" onclick="setQuickGrade(7,this)">7</button>
+      <button class="grade-star-btn" onclick="setQuickGrade(8,this)">8</button>
+      <button class="grade-star-btn" onclick="setQuickGrade(9,this)">9</button>
+      <button class="grade-star-btn" onclick="setQuickGrade(10,this)">10</button>
+    </div>
+    <button class="btn-add" style="width:100%;" onclick="saveGradeFromModal()">✔️ Guardar nota</button>
+    <button class="btn-close-modal" onclick="closeModal('gradeModal')">Cancelar</button>
+  </div>
+</div>
+
+<div id="scheduleExtraModal" class="modal-overlay">
+  <div class="modal-box" style="text-align:left">
+    <h3 style="margin-top:0;color:var(--accent-dark);font-size:1.2rem" id="extraModalTitle">Detalles de la clase</h3>
+    <p style="font-size:.85rem;color:var(--text-muted);margin:0 0 16px">Opcional: guardá el link o el salón para esta materia.</p>
+    <label>Modalidad:</label>
+    <select id="extraModalidad">
+      <option value="presencial">🏫 Presencial</option>
+      <option value="virtual">💻 Virtual</option>
+    </select>
+    <label id="extraLinkLabel">Link / Campus virtual:</label>
+    <input type="text" id="extraLink" placeholder="https://...">
+    <label id="extraSalonLabel">Salón / Sede (presencial):</label>
+    <input type="text" id="extraSalon" placeholder="Ej: Aula 12 - Sede Centro">
+    <button class="btn-add" style="width:100%;" onclick="saveExtraInfo()">✔️ Guardar</button>
+    <button class="btn-close-modal" onclick="closeModal('scheduleExtraModal')">Cancelar</button>
+  </div>
+</div>
+
 <div id="appContent">
-<header>
-    <div class="logo-container" style="display: flex; align-items: center; gap: 15px;">
-      <img src="logonombre.png" alt="Organiza tu Facu" style="height: 60px; width: auto;">
-      
+  <header>
+    <div class="logo-area">
+      <img src="logonombre.png" alt="Logo" onerror="this.style.display='none'">
       <div>
-        <h1 id="headerCareer">Mi Carrera</h1>
-        <h2 id="headerUni">Mi Universidad</h2>
+        <div class="career-name" id="headerCareer">Mi Carrera</div>
+        <div class="uni-name" id="headerUni">Mi Universidad</div>
       </div>
     </div>
     <div class="tabs-container">
-      <button class="tab-btn active" onclick="switchTab('map',event)">🗺️ Plan</button>
+      <button class="tab-btn active" onclick="switchTab('home',event)">🏠 Inicio</button>
+      <button class="tab-btn" onclick="switchTab('map',event)">🗺️ Plan</button>
       <button class="tab-btn" onclick="switchTab('calendar',event)">🗓️ Calendario</button>
       <button class="tab-btn" onclick="switchTab('schedule',event)">📅 Horario</button>
-      <button class="tab-btn" onclick="switchTab('grades',event)">📝 Notas</button>
       <button class="tab-btn" onclick="switchTab('stats',event)">📊 Progreso</button>
+      <button class="tab-btn" onclick="switchTab('pomodoro',event)">⏱️ Estudiar</button>
+      <button class="tab-btn" onclick="switchTab('notes',event)">📂 Apuntes</button>
       <button class="tab-btn" onclick="switchTab('profile',event)">👤 Perfil</button>
-      <button class="tab-btn btn-auth btn-logout" id="btnLogout" onclick="logout()">Cerrar sesión</button>
+      <button class="tab-btn btn-auth btn-logout" id="btnLogout" onclick="logout()">Salir</button>
       <button class="tab-btn btn-auth" id="btnOpenLogin" style="display:none" onclick="switchTab('profile',event)">👤 Cuenta</button>
     </div>
   </header>
-  
+
   <main class="main-content">
-  
-    <div id="view-map" class="view-section active">
-      <div class="mapa-scroll-wrapper">
-        <div class="year-row" id="mallaContainer"></div>
+
+    <div id="view-home" class="view-section active">
+      <div class="section-header">
+        <h2>¡Hola! 👋</h2>
+        <p>Tu resumen del día. Todo lo importante de un vistazo.</p>
+      </div>
+      <div class="dash-grid">
+        <div class="dash-progress-card">
+          <div class="progress-ring-wrap">
+            <svg width="110" height="110" viewBox="0 0 100 100">
+              <circle class="progress-ring-bg" cx="50" cy="50" r="42"/>
+              <circle class="progress-ring-fill" id="dashRingFill" cx="50" cy="50" r="42" stroke-dasharray="264" stroke-dashoffset="264"/>
+            </svg>
+            <div class="ring-label"><span class="ring-pct" id="dashPct">0%</span><span class="ring-sub">Avance</span></div>
+          </div>
+          <div class="dash-progress-info">
+            <h3 id="dashGreeting">Tu progreso</h3>
+            <p id="dashProgressText">Cargando...</p>
+            <div class="dash-mini-stats">
+              <div class="dash-mini-stat"><span class="val" id="dashDone">0</span><span class="lbl">Aprobadas</span></div>
+              <div class="dash-mini-stat"><span class="val" id="dashPending">0</span><span class="lbl">Pendientes</span></div>
+              <div class="dash-mini-stat"><span class="val" id="dashAvgHome">—</span><span class="lbl">Promedio</span></div>
+            </div>
+          </div>
+        </div>
+        <div class="dash-card" id="nextClassCard">
+          <h4>📚 Tu próxima clase</h4>
+          <div id="nextClassContent"><span style="opacity:.6;font-size:.85rem">Cargando horario...</span></div>
+        </div>
+        <div class="dash-card" id="upcomingCard">
+          <h4>🗓️ Próximos 7 días</h4>
+          <div id="upcomingContent"><span style="opacity:.6;font-size:.85rem">Sin eventos próximos.</span></div>
+        </div>
+        <div class="dash-card dash-available">
+          <h4>✅ Podés cursar ahora</h4>
+          <div class="avail-chips" id="dashAvailChips"><span style="opacity:.6;font-size:.85rem;font-style:italic">Cargando...</span></div>
+        </div>
       </div>
     </div>
-  
+
+    <div id="view-map" class="view-section">
+      <div class="section-header">
+        <h2>🗺️ Plan de estudios</h2>
+        <p>Tocá una materia para marcarla como aprobada. En las aprobadas, tocá el círculo numérico para cargar tu nota.</p>
+      </div>
+      <div style="text-align:center;margin-bottom:18px">
+        <span class="map-hint">Gris = Bloqueada &nbsp;&middot;&nbsp; Blanca = Disponible &nbsp;&middot;&nbsp; Color = Aprobada</span>
+      </div>
+      <div class="mapa-scroll-wrapper"><div class="year-row" id="mallaContainer"></div></div>
+    </div>
+
     <div id="view-calendar" class="view-section">
+      <div class="section-header">
+        <h2>🗓️ Calendario</h2>
+        <p>Anotá exámenes, parciales y entregas. Tocá cualquier día para agregar un evento.</p>
+      </div>
       <div class="cal-header">
-        <h3>Mis Fechas Importantes</h3>
+        <h3>Mis fechas importantes</h3>
         <div class="cal-nav">
           <button class="cal-nav-btn" onclick="changeMonth(-1)">❮</button>
           <div id="monthYearDisplay" class="cal-month-display"></div>
@@ -567,25 +743,23 @@
         <div id="calendarGrid" class="cal-grid"></div>
       </div>
     </div>
-  
+
     <div id="view-schedule" class="view-section">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:10px">
-        <h3 style="margin:0;font-size:1.4rem">Mi Semana</h3>
-        <button class="btn-add" onclick="fillScheduleModal();openModal('scheduleModal')">➕ Asignar Materia</button>
+      <div class="section-header">
+        <h2>📅 Mi horario semanal</h2>
+        <p>Escribí en las celdas o usá el botón para asignar una materia a un horario. Tocá el ✏️ para agregar info de la clase.</p>
+      </div>
+      <div style="display:flex;justify-content:flex-end;margin-bottom:16px;gap:10px;flex-wrap:wrap">
+        <button class="btn-add" onclick="fillScheduleModal();openModal('scheduleModal')">➕ Asignar materia</button>
       </div>
       <div id="scheduleWrapper"></div>
     </div>
-  
-    <div id="view-grades" class="view-section panel-box">
-      <div class="average-card">
-        <h2 style="margin-top:0">Promedio General</h2>
-        <div class="big-number" id="averageDisplay">0.00</div>
-      </div>
-      <p style="text-align:center;opacity:.7;font-size:.9rem;margin-bottom:20px">* Ingresá tus notas para calcular el promedio.</p>
-      <div id="gradesContainer"></div>
-    </div>
-  
+
     <div id="view-stats" class="view-section">
+      <div class="section-header">
+        <h2>📊 Mi progreso</h2>
+        <p>Tu avance, notas y tiempo de estudio todo en un solo lugar.</p>
+      </div>
       <div class="stats-header">
         <div class="progress-circle-container">
           <div class="progress-circle-bg" id="progressCircle">
@@ -597,619 +771,1000 @@
         </div>
         <div class="stat-card"><span class="stat-val" id="statsCompleted">0</span><span class="stat-desc">Aprobadas</span></div>
         <div class="stat-card"><span class="stat-val" id="statsRemaining">0</span><span class="stat-desc">Pendientes</span></div>
+        <div class="stat-card dark"><span class="stat-val" id="statsAvg">—</span><span class="stat-desc">Promedio</span></div>
+        <div class="stat-card dark"><span class="stat-val" id="statsTotalStudy">0h</span><span class="stat-desc">Estudiadas</span></div>
+      </div>
+      <div class="panel-box" style="margin-bottom:24px">
+        <h3 style="margin-top:0;">📝 Notas por materia</h3>
+        <p style="font-size:.85rem;color:var(--text-muted);margin:0 0 16px">Modificá las notas directamente acá o desde el Plan de estudios.</p>
+        <div id="gradesInStats"></div>
       </div>
       <div class="panel-box">
-        <h3>📅 Planificador de Cursada</h3>
-        <p style="opacity:.8;margin-bottom:20px;font-size:.9rem">Tocá las materias que querés cursar este cuatrimestre.</p>
-        <div class="available-courses-grid" id="plannerGrid"></div>
+        <h3 style="margin-top:0;">⏱️ Tiempo de estudio por materia</h3>
+        <p style="font-size:.85rem;color:var(--text-muted);margin:0 0 16px">Horas registradas usando el temporizador Pomodoro.</p>
+        <div class="study-stats-grid" id="studyStatsGrid"></div>
       </div>
     </div>
-  
+
+    <div id="view-pomodoro" class="view-section">
+      <div class="section-header">
+        <h2>⏱️ Modo estudio</h2>
+        <p>25 minutos de estudio, 5 de descanso. Elegí la materia y dale play. El tiempo queda guardado en tu Progreso.</p>
+      </div>
+      <label style="display:block;font-size:.8rem;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--text-main);margin-bottom:8px;text-align:center">¿Qué vas a estudiar ahora?</label>
+      <select class="pom-subject-select" id="pomSubject"><option value="">— Elegí una materia —</option></select>
+      <div style="display:flex;gap:15px;justify-content:center;margin-bottom:24px;flex-wrap:wrap">
+        <div style="background:#fff;border-radius:12px;padding:12px 16px;text-align:center;border:1px solid #ddd;box-shadow: 0 2px 6px rgba(0,0,0,0.03)">
+          <label style="display:block;font-size:.7rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:.8px;margin-bottom:6px">Estudio (min)</label>
+          <input type="number" id="pomWorkMin" value="25" min="1" max="90" onchange="pomApplyConfig()" style="width:65px;padding:8px 10px;border-radius:8px;border:1.5px solid #ccc;background:#fafafa;color:var(--text-main);font-family:'Poppins',sans-serif;font-weight:700;font-size:1.1rem;text-align:center;outline:none;">
+        </div>
+        <div style="background:#fff;border-radius:12px;padding:12px 16px;text-align:center;border:1px solid #ddd;box-shadow: 0 2px 6px rgba(0,0,0,0.03)">
+          <label style="display:block;font-size:.7rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:.8px;margin-bottom:6px">Descanso (min)</label>
+          <input type="number" id="pomBreakMin" value="5" min="1" max="30" onchange="pomApplyConfig()" style="width:65px;padding:8px 10px;border-radius:8px;border:1.5px solid #ccc;background:#fafafa;color:var(--text-main);font-family:'Poppins',sans-serif;font-weight:700;font-size:1.1rem;text-align:center;outline:none;">
+        </div>
+      </div>
+      <div class="pom-circle">
+        <div class="pom-time" id="pomDisplay">25:00</div>
+        <div class="pom-mode" id="pomMode">ESTUDIO</div>
+      </div>
+      <div class="pom-controls">
+        <button class="pom-btn primary" id="pomPlayBtn" onclick="pomToggle()">▶ Iniciar Sesión</button>
+        <button class="pom-btn secondary" onclick="pomReset()">↺ Reiniciar</button>
+      </div>
+      <div style="text-align:center;margin-bottom:24px">
+        <span style="font-size:.85rem;font-weight:600;color:var(--text-muted)" id="pomSessionCount">Sesiones completadas: 0</span>
+      </div>
+      <div class="panel-box">
+        <h3 style="margin-top:0;">Registro del día</h3>
+        <div id="pomLog"><span style="opacity:.6;font-size:.85rem">Todavía no completaste ninguna sesión de estudio hoy.</span></div>
+      </div>
+    </div>
+
+    <div id="view-notes" class="view-section">
+      <div class="section-header">
+        <h2>Mis apuntes</h2>
+        <p>Seleccioná una materia para ver y cargar tus recursos. Organizados por tipo para que siempre sepas dónde buscar.</p>
+        
+        <input type="text" id="notesSearchInput" class="notes-search-bar" placeholder="Buscar materia por nombre..." oninput="filterNotes()">
+      </div>
+      
+      <div id="notesGrid" class="notes-subjects-grid"></div>
+      <div id="notesDetail" style="display:none"></div>
+    </div>
+
     <div id="view-profile" class="view-section">
-     <div class="profile-section">
+      <div class="section-header"><h2>👤 Perfil</h2><p>Administrá tu cuenta y cambiá el tema de la aplicación.</p></div>
+      <div class="profile-section">
         <h3>📋 Mi cuenta</h3>
-        <div class="profile-info-row"><span class="profile-info-label">Email</span><span class="profile-info-val" id="userLabel">Sin cuenta</span></div>
+        <div class="profile-info-row"><span class="profile-info-label">Email registrado</span><span class="profile-info-val" id="userLabel">Sin cuenta</span></div>
         <div class="profile-info-row"><span class="profile-info-label">Carrera</span><span class="profile-info-val" id="profileCareer">—</span></div>
         <div class="profile-info-row"><span class="profile-info-label">Universidad</span><span class="profile-info-val" id="profileUni">—</span></div>
-        
-        <button class="profile-logout-btn" onclick="logout()">Cerrar sesión</button>
-        <button class="profile-danger-btn" onclick="reiniciarCuenta()">🗑️ Borrar todo y empezar de cero</button>
+        <button class="profile-logout-btn" onclick="logout()">Cerrar sesión en este dispositivo</button>
+        <button class="profile-danger-btn" onclick="reiniciarCuenta()">🗑️ Borrar todos mis datos y empezar de cero</button>
       </div>
       <div class="profile-section">
-        <h3>🎨 Cambiar tema de color</h3>
-        <p style="font-size:13px;color:#888;margin:0 0 4px">El cambio se aplica al instante.</p>
+        <h3>🎨 Cambiar el tema principal</h3>
+        <p style="font-size:13px;color:var(--text-muted);margin:0 0 8px">Elegí el color que más te guste para destacar. Se guarda y aplica automáticamente.</p>
         <div class="profile-grid" id="profileThemeGrid">
-          <div class="profile-theme-card" data-accent="#c43670" data-dark="#45151b" data-light="#ffc3cc" data-bg="#c43670" data-label="Rosa" onclick="profileSelectTheme(this)">
-            <div class="theme-swatch" style="background:linear-gradient(135deg,#c43670,#ffc3cc)"></div><div class="theme-name">Rosa</div>
-          </div>
-          <div class="profile-theme-card" data-accent="#185FA5" data-dark="#0C447C" data-light="#85B7EB" data-bg="#185FA5" data-label="Azul" onclick="profileSelectTheme(this)">
-            <div class="theme-swatch" style="background:linear-gradient(135deg,#185FA5,#85B7EB)"></div><div class="theme-name">Azul</div>
-          </div>
-          <div class="profile-theme-card" data-accent="#3B6D11" data-dark="#173404" data-light="#97C459" data-bg="#3B6D11" data-label="Verde" onclick="profileSelectTheme(this)">
-            <div class="theme-swatch" style="background:linear-gradient(135deg,#3B6D11,#97C459)"></div><div class="theme-name">Verde</div>
-          </div>
-          <div class="profile-theme-card" data-accent="#534AB7" data-dark="#26215C" data-light="#AFA9EC" data-bg="#534AB7" data-label="Púrpura" onclick="profileSelectTheme(this)">
-            <div class="theme-swatch" style="background:linear-gradient(135deg,#534AB7,#AFA9EC)"></div><div class="theme-name">Púrpura</div>
-          </div>
-          <div class="profile-theme-card" data-accent="#D85A30" data-dark="#4A1B0C" data-light="#F0997B" data-bg="#D85A30" data-label="Coral" onclick="profileSelectTheme(this)">
-            <div class="theme-swatch" style="background:linear-gradient(135deg,#D85A30,#F0997B)"></div><div class="theme-name">Coral</div>
-          </div>
-          <div class="profile-theme-card" data-accent="#444441" data-dark="#2C2C2A" data-light="#B4B2A9" data-bg="#444441" data-label="Gris" onclick="profileSelectTheme(this)">
-            <div class="theme-swatch" style="background:linear-gradient(135deg,#444441,#B4B2A9)"></div><div class="theme-name">Gris</div>
-          </div>
+          <div class="profile-theme-card" data-accent="#A33E79" data-dark="#450C3F" data-light="#D9EFBD" data-bg="#f9f9fc" data-label="Púrpura" onclick="profileSelectTheme(this)"><div class="theme-swatch" style="background:linear-gradient(135deg,#A33E79,#450C3F)"></div><div class="theme-name">Púrpura</div></div>
+          <div class="profile-theme-card" data-accent="#1B2CC1" data-dark="#091540" data-light="#7692FF" data-bg="#f9f9fc" data-label="Azul" onclick="profileSelectTheme(this)"><div class="theme-swatch" style="background:linear-gradient(135deg,#1B2CC1,#091540)"></div><div class="theme-name">Azul</div></div>
+          <div class="profile-theme-card" data-accent="#47622A" data-dark="#243313" data-light="#9FB878" data-bg="#f9f9fc" data-label="Verde" onclick="profileSelectTheme(this)"><div class="theme-swatch" style="background:linear-gradient(135deg,#47622A,#243313)"></div><div class="theme-name">Verde</div></div>
+          <div class="profile-theme-card" data-accent="#D56989" data-dark="#A33E79" data-light="#EA9CAF" data-bg="#f9f9fc" data-label="Rosa" onclick="profileSelectTheme(this)"><div class="theme-swatch" style="background:linear-gradient(135deg,#D56989,#A33E79)"></div><div class="theme-name">Rosa</div></div>
+          <div class="profile-theme-card" data-accent="#B31B1B" data-dark="#660f0f" data-light="#E57373" data-bg="#f9f9fc" data-label="Rojo" onclick="profileSelectTheme(this)"><div class="theme-swatch" style="background:linear-gradient(135deg,#B31B1B,#660f0f)"></div><div class="theme-name">Rojo</div></div>
+          <div class="profile-theme-card" data-accent="#565656" data-dark="#2B2B2B" data-light="#B3B3B3" data-bg="#f9f9fc" data-label="Gris" onclick="profileSelectTheme(this)"><div class="theme-swatch" style="background:linear-gradient(135deg,#565656,#2B2B2B)"></div><div class="theme-name">Gris</div></div>
         </div>
-        <button class="profile-save-btn" onclick="saveProfileTheme()">💾 Guardar tema</button>
+        <button class="profile-save-btn" onclick="saveProfileTheme()">💾 Confirmar y guardar tema</button>
       </div>
     </div>
-  
+
   </main>
 </div>
-  
+
 <script>
-// ====== ESTADO ======
-let obState = { career:'',uni:'',years:'',theme:'Rosa',accent:'#c43670',dark:'#45151b',light:'#ffc3cc',bg:'#c43670',materias:[] };
-let profileSelectedTheme = null;
-let tableData={}, gradesData={}, calendarData={}, plannedData={};
-let authMode = 'registro';
-  
-// ====== ONBOARDING ======
-function showOnboarding() {
-  document.getElementById('onboardingScreen').classList.add('visible');
-  document.getElementById('appContent').style.display = 'none';
-}
-  
-function switchAuthTab(mode) {
-  authMode = mode;
-  document.getElementById('tabRegistro').classList.toggle('active', mode==='registro');
-  document.getElementById('tabLogin').classList.toggle('active', mode==='login');
-  
-  // Mostrar/Ocultar cosas según el modo
-  document.getElementById('passFieldContainer').style.display = 'block';
-  document.getElementById('authTabsContainer').style.display = 'flex';
-  document.getElementById('skipAuthText').style.display = 'block';
-  document.getElementById('btnBackToLogin').style.display = 'none';
-  
-  document.getElementById('authTitle').textContent = '¡Bienvenido/a! 👋';
-  document.getElementById('authSub').textContent = 'Creá tu cuenta para guardar tu progreso, o iniciá sesión si ya tenés una.';
+// ==================== ESTADO ====================
+let obState={career:'',uni:'',years:'',theme:'Púrpura',accent:'#A33E79',dark:'#450C3F',light:'#D9EFBD',bg:'#f9f9fc',materias:[]};
+let profileSelectedTheme=null;
+let tableData={},gradesData={},calendarData={},apuntesData={},pomodoroStats={},horarioExtraData={};
+let authMode='registro';
+let _gradeModalCourseId=null;
 
-  if(mode === 'registro') {
-    document.getElementById('obAuthBtn').textContent = 'Crear cuenta y continuar →';
-    document.getElementById('btnForgotPass').style.display = 'none';
-  } else if (mode === 'login') {
-    document.getElementById('obAuthBtn').textContent = 'Iniciar sesión y continuar →';
-    document.getElementById('btnForgotPass').style.display = 'inline-block';
+// ==================== ONBOARDING ====================
+function showOnboarding(){document.getElementById('onboardingScreen').classList.add('visible');document.getElementById('appContent').style.display='none';}
+
+function switchAuthTab(mode){
+  authMode=mode;
+  document.getElementById('tabRegistro').classList.toggle('active',mode==='registro');
+  document.getElementById('tabLogin').classList.toggle('active',mode==='login');
+  document.getElementById('passFieldContainer').style.display='block';
+  document.getElementById('authTabsContainer').style.display='flex';
+  document.getElementById('skipAuthText').style.display='block';
+  document.getElementById('btnBackToLogin').style.display='none';
+  document.getElementById('authTitle').textContent='¡Bienvenido/a! 👋';
+  document.getElementById('authSub').textContent='Creá tu cuenta para guardar tu progreso en la nube, o iniciá sesión si ya tenés una.';
+  document.getElementById('obAuthBtn').textContent=mode==='registro'?'Crear cuenta y continuar →':'Iniciar sesión y continuar →';
+  const fp=document.getElementById('btnForgotPass');
+  if(fp)fp.style.display=mode==='login'?'block':'none';
+  document.getElementById('auth-error').style.display='none';
+}
+
+function mostrarRecuperarPass(){
+  authMode='recuperar';
+  document.getElementById('authTitle').textContent='Recuperar contraseña 🔐';
+  document.getElementById('authSub').textContent='Ingresá tu email y te enviamos un enlace para cambiar tu contraseña.';
+  document.getElementById('passFieldContainer').style.display='none';
+  document.getElementById('authTabsContainer').style.display='none';
+  document.getElementById('skipAuthText').style.display='none';
+  document.getElementById('btnBackToLogin').style.display='block';
+  document.getElementById('obAuthBtn').textContent='Enviar enlace →';
+  document.getElementById('auth-error').style.display='none';
+}
+
+async function obDoAuth(){
+  document.getElementById('auth-error').style.display='none';
+  const email=document.getElementById('ob-email').value.trim();
+  const btn=document.getElementById('obAuthBtn'),orig=btn.textContent;
+  if(!window.iniciarSesion){alert('Aguardá un segundo...');return;}
+  if(authMode==='recuperar'){
+    if(!email){alert('Ingresá tu email.');return;}
+    btn.textContent='Enviando...';btn.disabled=true;btn.style.opacity='.7';
+    await window.recuperarContrasena(email);
+    btn.textContent=orig;btn.disabled=false;btn.style.opacity='1';return;
   }
-  document.getElementById('auth-error').style.display = 'none';
+  btn.textContent='Cargando...';btn.disabled=true;btn.style.opacity='.7';
+  const ok=authMode==='registro'?await window.registrarse():await window.iniciarSesion();
+  if(!ok){btn.textContent=orig;btn.disabled=false;btn.style.opacity='1';}
 }
 
-function mostrarRecuperarPass() {
-  authMode = 'recuperar';
-  document.getElementById('authTitle').textContent = 'Recuperar Contraseña 🔐';
-  document.getElementById('authSub').textContent = 'Ingresá tu email y te enviaremos un enlace para crear una nueva contraseña.';
-  
-  // Esconder lo que no sirve ahora
-  document.getElementById('passFieldContainer').style.display = 'none';
-  document.getElementById('authTabsContainer').style.display = 'none';
-  document.getElementById('skipAuthText').style.display = 'none';
-  
-  // Cambiar botones
-  document.getElementById('btnBackToLogin').style.display = 'block';
-  document.getElementById('obAuthBtn').textContent = 'Enviar enlace →';
-  document.getElementById('auth-error').style.display = 'none';
+function obGo(n){
+  document.querySelectorAll('.ob-step').forEach(s=>s.classList.remove('active'));
+  document.getElementById('obs'+n).classList.add('active');
+  document.getElementById('obProgress').style.width=[25,50,75,100][n-1]+'%';
 }
 
-async function obDoAuth() {
-  document.getElementById('auth-error').style.display = 'none';
-  const email = document.getElementById('ob-email').value.trim();
-  const btn = document.getElementById('obAuthBtn');
-  const textoOriginal = btn.textContent;
-  
-  // Si Firebase todavía no terminó de cargar
-  if (!window.iniciarSesion) {
-    alert("Aguardá un segundito que está conectando de forma segura...");
-    return;
-  }
-
-  if (authMode === 'recuperar') {
-    if(!email) { alert('Por favor, ingresá tu email.'); return; }
-    if (window.recuperarContrasena) {
-        btn.textContent = "Enviando enlace...";
-        btn.disabled = true;
-        btn.style.opacity = '0.7';
-        await window.recuperarContrasena(email);
-        btn.textContent = textoOriginal;
-        btn.disabled = false;
-        btn.style.opacity = '1';
-    }
-    return; 
-  }
-
-  // Animación de cargando
-  btn.textContent = "Cargando...";
-  btn.disabled = true;
-  btn.style.opacity = '0.7';
-
-  let exito = false;
-  if (authMode === 'registro') exito = await window.registrarse();
-  else exito = await window.iniciarSesion();
-
-  // Si falló la contraseña, devolvemos el botón a la normalidad
-  if (!exito) {
-    btn.textContent = textoOriginal;
-    btn.disabled = false;
-    btn.style.opacity = '1';
-  }
-}
-  
-function obGo(n) {
-  document.querySelectorAll('.ob-step').forEach(s => s.classList.remove('active'));
-  document.getElementById('obs' + n).classList.add('active');
-  const pct = [25,50,75,100][n-1];
-  document.getElementById('obProgress').style.width = pct + '%';
-}
-  
-function obGoCarrera() {
-  obState.career = document.getElementById('ob-career').value.trim();
-  obState.uni    = document.getElementById('ob-uni').value.trim();
-  obState.years  = document.getElementById('ob-years').value;
-  if (!obState.career || !obState.uni || !obState.years) { alert('Completá todos los campos para continuar.'); return; }
+function obGoCarrera(){
+  obState.career=document.getElementById('ob-career').value.trim();
+  obState.uni=document.getElementById('ob-uni').value.trim();
+  obState.years=document.getElementById('ob-years').value;
+  if(!obState.career||!obState.uni||!obState.years){alert('Completá todos los campos.');return;}
   obGo(3);
 }
-  
-function obSelectTheme(el) {
-  document.querySelectorAll('.theme-card').forEach(c => c.classList.remove('selected'));
+
+function obSelectTheme(el){
+  document.querySelectorAll('.theme-card').forEach(c=>c.classList.remove('selected'));
   el.classList.add('selected');
-  obState.accent=el.dataset.accent; obState.dark=el.dataset.dark;
-  obState.light=el.dataset.light;   obState.bg=el.dataset.bg;
-  obState.theme=el.dataset.label;
-  document.getElementById('obProgress').style.background = obState.accent;
-  document.querySelectorAll('.ob-btn-next').forEach(b => b.style.background = obState.accent);
+  obState.accent=el.dataset.accent;obState.dark=el.dataset.dark;
+  obState.light=el.dataset.light;obState.bg=el.dataset.bg;obState.theme=el.dataset.label;
+  document.getElementById('obProgress').style.background=obState.accent;
+  document.querySelectorAll('.ob-btn-next').forEach(b=>b.style.background=obState.accent);
 }
-  
-async function obHandleFile(input) {
-  const f = input.files[0];
-  if (!f) return;
-  if (f.size > 10*1024*1024) { alert('Archivo muy grande. Máximo 10 MB.'); return; }
-  obState.file = f;
-  const ext = f.name.split('.').pop().toLowerCase();
-  document.getElementById('obFileIcon').textContent = ['pdf'].includes(ext) ? '📄' : '🖼️';
-  document.getElementById('obFileName').textContent = f.name;
+
+async function obHandleFile(input){
+  const f=input.files[0];if(!f)return;
+  if(f.size>10*1024*1024){alert('Archivo muy grande. Máximo 10 MB.');return;}
+  obState.file=f;
+  const ext=f.name.split('.').pop().toLowerCase();
+  document.getElementById('obFileIcon').textContent=ext==='pdf'?'📄':'🖼️';
+  document.getElementById('obFileName').textContent=f.name;
   document.getElementById('obFilePreview').classList.add('show');
-  document.getElementById('obUploadZone').style.opacity = '0.4';
+  document.getElementById('obUploadZone').style.opacity='0.4';
   document.getElementById('obAnalyzing').classList.add('show');
   document.getElementById('obAiError').classList.remove('show');
   document.getElementById('obAiResult').classList.remove('show');
-  document.getElementById('obBtn4').disabled = true;
-  try {
-    const formData = new FormData();
-    formData.append('archivo', f);
-    const response = await fetch('https://api-malla.onrender.com/analizar-pdf', { method:'POST', body:formData });
-    if (!response.ok) throw new Error('El servidor no respondió. Intentá de nuevo.');
-    const data = await response.json();
-    if (data.error) throw new Error(data.error);
-    const match = data.resultado.match(/\{[\s\S]*\}/);
-    if (!match) throw new Error('No se pudo leer la respuesta de la IA.');
-    const parsed = JSON.parse(match[0]);
-    if (!parsed.anios || !Array.isArray(parsed.anios)) throw new Error('El archivo no parece un plan de estudios válido.');
-    let total = 0;
-    parsed.anios.forEach(a => { total += (a.materias||[]).length; });
-    if (total === 0) throw new Error('No se encontraron materias en el documento.');
-    obState.materias = parsed.anios;
+  document.getElementById('obBtn4').disabled=true;
+  try{
+    const fd=new FormData();fd.append('archivo',f);
+    const res=await fetch('https://api-malla.onrender.com/analizar-pdf',{method:'POST',body:fd});
+    if(!res.ok)throw new Error('El servidor no respondió. Intentá de nuevo.');
+    const data=await res.json();
+    if(data.error)throw new Error(data.error);
+    const match=data.resultado.match(/\{[\s\S]*\}/);
+    if(!match)throw new Error('No se pudo leer la respuesta de la IA.');
+    const parsed=JSON.parse(match[0]);
+    if(!parsed.anios||!Array.isArray(parsed.anios))throw new Error('El archivo no parece un plan de estudios válido.');
+    let total=0;parsed.anios.forEach(a=>{total+=(a.materias||[]).length;});
+    if(total===0)throw new Error('No se encontraron materias en el documento.');
+    obState.materias=parsed.anios;
     document.getElementById('obAnalyzing').classList.remove('show');
     document.getElementById('obAiResult').classList.add('show');
-    document.getElementById('obAiResultText').innerHTML =
-      `<strong>¡Listo!</strong> Se encontraron <strong>${total} materias</strong> en <strong>${parsed.anios.length} bloques</strong>.`;
-    document.getElementById('obBtn4').disabled = false;
-  } catch(err) {
+    document.getElementById('obAiResultText').innerHTML=`<strong>¡Listo!</strong> Se encontraron <strong>${total} materias</strong> en <strong>${parsed.anios.length} bloques</strong>.`;
+    document.getElementById('obBtn4').disabled=false;
+  }catch(err){
     document.getElementById('obAnalyzing').classList.remove('show');
-    const el = document.getElementById('obAiError');
-    el.classList.add('show');
-    el.innerHTML = `⚠️ <strong>Error:</strong> ${err.message}`;
-    document.getElementById('obBtn4').disabled = true;
+    const el=document.getElementById('obAiError');el.classList.add('show');
+    el.innerHTML=`⚠️ <strong>Error:</strong> ${err.message}`;document.getElementById('obBtn4').disabled=true;
   }
 }
-  
-function obRemoveFile() {
-  obState.file=null; obState.materias=[];
-  document.getElementById('obFileInput').value = '';
+
+function obRemoveFile(){
+  obState.file=null;obState.materias=[];
+  document.getElementById('obFileInput').value='';
   document.getElementById('obFilePreview').classList.remove('show');
-  document.getElementById('obUploadZone').style.opacity = '1';
+  document.getElementById('obUploadZone').style.opacity='1';
   document.getElementById('obAnalyzing').classList.remove('show');
   document.getElementById('obAiError').classList.remove('show');
   document.getElementById('obAiResult').classList.remove('show');
-  document.getElementById('obBtn4').disabled = true;
+  document.getElementById('obBtn4').disabled=true;
 }
-  
-function obFinish() {
-  const config = {
-    career:obState.career, uni:obState.uni, years:obState.years,
-    theme:{ accent:obState.accent, dark:obState.dark, light:obState.light, bg:obState.bg, label:obState.theme },
-    materias:obState.materias, setup:true
-  };
-  localStorage.setItem('userConfig', JSON.stringify(config));
-  if (window.syncCloud) window.syncCloud();
+
+function obFinish(){
+  const config={career:obState.career,uni:obState.uni,years:obState.years,
+    theme:{accent:obState.accent,dark:obState.dark,light:obState.light,bg:obState.bg,label:obState.theme},
+    materias:obState.materias,setup:true};
+  localStorage.setItem('userConfig',JSON.stringify(config));
+  if(window.syncCloud)window.syncCloud();
   aplicarTema(config.theme);
   document.getElementById('onboardingScreen').classList.remove('visible');
-  document.getElementById('appContent').style.display = 'block';
-  document.getElementById('headerCareer').textContent = config.career;
-  document.getElementById('headerUni').textContent    = config.uni;
-  document.getElementById('profileCareer').textContent = config.career;
-  document.getElementById('profileUni').textContent    = config.uni;
+  document.getElementById('appContent').style.display='block';
+  document.getElementById('headerCareer').textContent=config.career;
+  document.getElementById('headerUni').textContent=config.uni;
+  document.getElementById('profileCareer').textContent=config.career;
+  document.getElementById('profileUni').textContent=config.uni;
   marcarTemaActivo(config.theme);
   construirMalla(config.materias);
   window.initApp();
-  confetti({ particleCount:150, spread:80, origin:{y:.5}, colors:[obState.accent,obState.light,'#ffffff'] });
+  confetti({particleCount:150,spread:80,origin:{y:.5},colors:[obState.accent,'#ffffff']});
 }
-  
-// ====== TEMA ======
-function aplicarTema(t) {
-  if (!t||!t.accent) return;
-  document.documentElement.style.setProperty('--accent',      t.accent);
-  document.documentElement.style.setProperty('--accent-dark', t.dark);
+
+// ==================== TEMA ====================
+function aplicarTema(t){
+  if(!t||!t.accent)return;
+  document.documentElement.style.setProperty('--accent',t.accent);
+  document.documentElement.style.setProperty('--accent-dark',t.dark);
   document.documentElement.style.setProperty('--accent-light',t.light);
-  document.documentElement.style.setProperty('--accent-bg',   t.bg);
-  document.body.style.backgroundColor = t.bg;
+  document.documentElement.style.setProperty('--accent-bg',t.bg);
+  document.body.style.backgroundColor=t.bg;
+  
+  // Custom RGB vars for glow effects if needed
+  let hex = t.accent.replace('#','');
+  let r = parseInt(hex.substring(0,2), 16);
+  let g = parseInt(hex.substring(2,4), 16);
+  let b = parseInt(hex.substring(4,6), 16);
+  document.documentElement.style.setProperty('--accent-rgb', `${r}, ${g}, ${b}`);
 }
-function marcarTemaActivo(t) {
-  if (!t) return;
-  document.querySelectorAll('.profile-theme-card').forEach(c => c.classList.toggle('selected', c.dataset.accent===t.accent));
+function marcarTemaActivo(t){
+  if(!t)return;
+  document.querySelectorAll('.profile-theme-card').forEach(c=>c.classList.toggle('selected',c.dataset.accent===t.accent));
 }
-function profileSelectTheme(el) {
-  document.querySelectorAll('.profile-theme-card').forEach(c => c.classList.remove('selected'));
+function profileSelectTheme(el){
+  document.querySelectorAll('.profile-theme-card').forEach(c=>c.classList.remove('selected'));
   el.classList.add('selected');
-  profileSelectedTheme = { accent:el.dataset.accent, dark:el.dataset.dark, light:el.dataset.light, bg:el.dataset.bg, label:el.dataset.label };
+  profileSelectedTheme={accent:el.dataset.accent,dark:el.dataset.dark,light:el.dataset.light,bg:el.dataset.bg,label:el.dataset.label};
   aplicarTema(profileSelectedTheme);
 }
-function saveProfileTheme() {
-  if (!profileSelectedTheme) { alert('Seleccioná un tema primero.'); return; }
-  const cfg = JSON.parse(localStorage.getItem('userConfig')||'{}');
-  cfg.theme = profileSelectedTheme;
-  localStorage.setItem('userConfig', JSON.stringify(cfg));
-  if (window.syncCloud) window.syncCloud();
-  alert('¡Tema guardado! 🎨');
+function saveProfileTheme(){
+  if(!profileSelectedTheme){alert('Seleccioná un tema primero.');return;}
+  const cfg=JSON.parse(localStorage.getItem('userConfig')||'{}');
+  cfg.theme=profileSelectedTheme;localStorage.setItem('userConfig',JSON.stringify(cfg));
+  if(window.syncCloud)window.syncCloud();alert('¡Tema guardado! 🎨');
 }
-  
-// ====== MALLA ======
-function construirMalla(anios) {
-  const container = document.getElementById('mallaContainer');
-  container.innerHTML = '';
-  anios.forEach(anio => {
-    const col = document.createElement('div');
-    col.className = 'year-column';
-    col.innerHTML = `<h2>${anio.nombre}</h2>`;
-    if (anio.es_electiva && anio.requeridas > 0) {
-      col.innerHTML += `<div class="electiva-counter">Aprobar ${anio.requeridas} de ${(anio.materias||[]).length}</div>`;
-    }
-    (anio.materias||[]).forEach(m => {
-      const div = document.createElement('div');
-      div.className = 'course';
-      div.dataset.id = m.id;
-      if (m.correlativas && m.correlativas.length > 0) div.dataset.req = m.correlativas.join(',');
-      if (anio.es_electiva) div.dataset.electiva = '1';
-      div.textContent = m.nombre;
+
+// ==================== MALLA ====================
+function getCourses(){return document.querySelectorAll('.course');}
+
+function construirMalla(anios){
+  const container=document.getElementById('mallaContainer');container.innerHTML='';
+  anios.forEach(anio=>{
+    const col=document.createElement('div');col.className='year-column';
+    col.innerHTML=`<h2>${anio.nombre}</h2>`;
+    if(anio.es_electiva&&anio.requeridas>0)
+      col.innerHTML+=`<div class="electiva-counter">Aprobar ${anio.requeridas} de ${(anio.materias||[]).length}</div>`;
+    (anio.materias||[]).forEach(m=>{
+      const div=document.createElement('div');div.className='course';div.dataset.id=m.id;
+      if(m.correlativas&&m.correlativas.length>0)div.dataset.req=m.correlativas.join(',');
+      if(anio.es_electiva)div.dataset.electiva='1';
+      div.innerHTML=`<span class="course-name">${m.nombre}</span><span class="course-grade-badge no-grade" title="Cargar nota">+</span>`;
       col.appendChild(div);
     });
     container.appendChild(col);
   });
   asignarEventosMaterias();
 }
-  
-// ====== INITAPP ======
-window.initApp = function() {
-  const cfg = JSON.parse(localStorage.getItem('userConfig')||'{}');
-  if (cfg.setup) {
-    document.getElementById('onboardingScreen').classList.remove('visible');
-    document.getElementById('appContent').style.display = 'block';
-    aplicarTema(cfg.theme||{});
-    document.getElementById('headerCareer').textContent  = cfg.career||'Mi Carrera';
-    document.getElementById('headerUni').textContent     = cfg.uni||'Mi Universidad';
-    document.getElementById('profileCareer').textContent = cfg.career||'—';
-    document.getElementById('profileUni').textContent    = cfg.uni||'—';
-    marcarTemaActivo(cfg.theme);
-    if (cfg.materias && cfg.materias.length > 0) construirMalla(cfg.materias);
-  } else {
-    // Tiene cuenta pero no malla → avanzar al paso 2
-    const ob = document.getElementById('onboardingScreen');
-    if (ob.classList.contains('visible')) obGo(2);
-    else { showOnboarding(); setTimeout(()=>obGo(2),200); }
-  }
-  tableData    = JSON.parse(localStorage.getItem('materiasTabla')        ||'{}');
-  gradesData   = JSON.parse(localStorage.getItem('materiasNotas')        ||'{}');
-  calendarData = JSON.parse(localStorage.getItem('indCalendar')          ||'{}');
-  plannedData  = JSON.parse(localStorage.getItem('materiasPlanificadas') ||'{}');
-  initScheduleModal();
-  loadProgress();
-  updateStates();
-  renderCalendar();
-  buildSchedule();
-  renderGrades();
-  renderStatsAndPlanner();
-};
-  
-// ====== MATERIAS ======
-function getCourses() { return document.querySelectorAll('.course'); }
-  
-function asignarEventosMaterias() {
-  getCourses().forEach(c => {
-    const fresh = c.cloneNode(true);
-    c.parentNode.replaceChild(fresh, c);
-  });
-  getCourses().forEach(c => {
-    c.addEventListener('click', () => {
-      if (!c.classList.contains('enabled')) return;
+
+function asignarEventosMaterias(){
+  getCourses().forEach(c=>{const f=c.cloneNode(true);c.parentNode.replaceChild(f,c);});
+  const cfg=(()=>{try{return JSON.parse(localStorage.getItem('userConfig')||'{}');}catch{return{};}})();
+  getCourses().forEach(c=>{
+    const badge=c.querySelector('.course-grade-badge');
+    if(badge){
+      badge.addEventListener('click',e=>{
+        if(!c.classList.contains('completed'))return;
+        e.stopPropagation();
+        openGradeModal(c.dataset.id,c.querySelector('.course-name')?.textContent||'Materia');
+      });
+    }
+    c.addEventListener('click',()=>{
+      if(!c.classList.contains('enabled'))return;
       c.classList.toggle('completed');
-      const cfg = JSON.parse(localStorage.getItem('userConfig')||'{}');
-      if (c.classList.contains('completed')) {
-        confetti({ origin:{y:.7}, colors:[cfg.theme?.accent||'#c43670', cfg.theme?.light||'#ffc3cc','#fff'] });
+      if(c.classList.contains('completed')){
+        confetti({origin:{y:.7},colors:[cfg.theme?.accent||'#A33E79', '#ffffff']});
       } else {
-        delete gradesData[c.dataset.id]; delete plannedData[c.dataset.id];
-        localStorage.setItem('materiasNotas', JSON.stringify(gradesData));
-        localStorage.setItem('materiasPlanificadas', JSON.stringify(plannedData));
-        renderGrades();
+        delete gradesData[c.dataset.id];
+        try{localStorage.setItem('materiasNotas',JSON.stringify(gradesData));}catch(e){}
       }
-      saveProgress(); updateStates();
+      actualizarBadge(c);saveProgress();updateStates();renderGradesInStats();renderDashboard();
     });
+    actualizarBadge(c);
   });
 }
-  
-function saveProgress() {
-  const saved = {};
-  getCourses().forEach(c => saved[c.dataset.id] = c.classList.contains('completed'));
-  localStorage.setItem('materiasAprobadas', JSON.stringify(saved));
-  if (window.syncCloud) window.syncCloud();
+
+function actualizarBadge(courseEl){
+  const badge=courseEl.querySelector('.course-grade-badge');if(!badge)return;
+  const nota=gradesData[courseEl.dataset.id];
+  if(nota!==undefined&&nota!==''){
+    badge.textContent=nota;badge.className='course-grade-badge has-grade';badge.title='Nota: '+nota+' — tocá para editar';
+  } else {
+    badge.textContent='+';badge.className='course-grade-badge no-grade';badge.title='Tocá para cargar tu nota';
+  }
 }
-  
-function loadProgress() {
-  const saved = JSON.parse(localStorage.getItem('materiasAprobadas')||'{}');
-  getCourses().forEach(c => { saved[c.dataset.id] ? c.classList.add('completed') : c.classList.remove('completed'); });
+
+function saveProgress(){
+  const saved={};
+  getCourses().forEach(c=>{saved[c.dataset.id]=c.classList.contains('completed');});
+  try{localStorage.setItem('materiasAprobadas',JSON.stringify(saved));}catch(e){}
+  if(window.syncCloud)window.syncCloud();
 }
-  
-function updateStates() {
-  const completed = new Set();
-  getCourses().forEach(c => { if (c.classList.contains('completed')) completed.add(c.dataset.id); });
-  getCourses().forEach(c => {
-    const reqs = c.dataset.req ? c.dataset.req.split(',').filter(Boolean) : [];
-    const ok = reqs.every(r => completed.has(r));
-    if (reqs.length===0||ok) c.classList.add('enabled');
-    else { c.classList.remove('enabled'); c.classList.remove('completed'); }
+
+function loadProgress(){
+  let saved={};try{saved=JSON.parse(localStorage.getItem('materiasAprobadas')||'{}');}catch{}
+  getCourses().forEach(c=>{saved[c.dataset.id]?c.classList.add('completed'):c.classList.remove('completed');actualizarBadge(c);});
+}
+
+function updateStates(){
+  const completed=new Set();
+  getCourses().forEach(c=>{if(c.classList.contains('completed'))completed.add(c.dataset.id);});
+  getCourses().forEach(c=>{
+    const reqs=c.dataset.req?c.dataset.req.split(',').filter(Boolean):[];
+    const ok=reqs.every(r=>completed.has(r));
+    if(reqs.length===0||ok)c.classList.add('enabled');
+    else{c.classList.remove('enabled');c.classList.remove('completed');}
   });
-  renderStatsAndPlanner();
+  renderGradesInStats();renderDashboard();renderStudyStats();
 }
-  
-window.switchTab = (name, event) => {
+
+window.switchTab=(name,event)=>{
   document.querySelectorAll('.view-section').forEach(s=>s.classList.remove('active'));
   document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
-  const el = document.getElementById('view-'+name);
-  if (el) el.classList.add('active');
-  if (event&&event.currentTarget) event.currentTarget.classList.add('active');
+  const el=document.getElementById('view-'+name);if(el)el.classList.add('active');
+  if(event&&event.currentTarget)event.currentTarget.classList.add('active');
+  if(name==='notes')renderNotesTab();
+  if(name==='pomodoro')renderPomSubjectSelect();
 };
-  
-// ====== HORARIO ======
+
+// ==================== MODAL DE NOTA ====================
+function openGradeModal(id,nombre){
+  _gradeModalCourseId=id;
+  document.getElementById('gradeModalName').textContent=nombre;
+  const nota=gradesData[id];
+  document.getElementById('gradeInput').value=nota!==undefined?nota:'';
+  document.querySelectorAll('.grade-star-btn').forEach(b=>b.classList.toggle('selected',parseFloat(b.textContent)===parseFloat(nota)));
+  openModal('gradeModal');
+}
+function setQuickGrade(val,btn){
+  document.getElementById('gradeInput').value=val;
+  document.querySelectorAll('.grade-star-btn').forEach(b=>b.classList.remove('selected'));
+  if(btn)btn.classList.add('selected');
+}
+function saveGradeFromModal(){
+  const id=_gradeModalCourseId;if(!id)return;
+  let val=document.getElementById('gradeInput').value.trim();
+  const n=parseFloat(val);
+  if(val!==''&&(isNaN(n)||n<1||n>10)){alert('Ingresá una nota entre 1 y 10.');return;}
+  if(val==='')delete gradesData[id];
+  else{if(n>10)val='10';if(n<1)val='1';gradesData[id]=val;}
+  try{localStorage.setItem('materiasNotas',JSON.stringify(gradesData));}catch(e){}
+  if(window.syncCloud)window.syncCloud();
+  const courseEl=document.querySelector(`.course[data-id="${id}"]`);
+  if(courseEl)actualizarBadge(courseEl);
+  renderGradesInStats();renderDashboard();closeModal('gradeModal');
+}
+
+// ==================== DASHBOARD ====================
+function renderDashboard(){
+  const total=getCourses().length,done=document.querySelectorAll('.course.completed').length;
+  const pending=total-done,pct=total>0?Math.round((done/total)*100):0;
+  const circ=2*Math.PI*42;
+  const fill=document.getElementById('dashRingFill');
+  if(fill){fill.style.strokeDasharray=circ;fill.style.strokeDashoffset=circ-(circ*pct/100);}
+  const dp=document.getElementById('dashPct');if(dp)dp.textContent=pct+'%';
+  const dd=document.getElementById('dashDone');if(dd)dd.textContent=done;
+  const dpe=document.getElementById('dashPending');if(dpe)dpe.textContent=pending;
+  const cfg=(()=>{try{return JSON.parse(localStorage.getItem('userConfig')||'{}');}catch{return{};}})();
+  const dg=document.getElementById('dashGreeting');if(dg)dg.textContent=cfg.career||'Tu progreso';
+  const dt=document.getElementById('dashProgressText');
+  if(dt){
+    if(done===0)dt.textContent='Todavía no marcaste ninguna materia como aprobada.';
+    else if(pct===100)dt.textContent='¡Terminaste la carrera! 🎉';
+    else dt.textContent=`Aprobaste ${done} de ${total} materias.`;
+  }
+  const grades=Object.values(gradesData).map(x=>parseFloat(x)).filter(x=>!isNaN(x));
+  const avg=grades.length>0?(grades.reduce((a,b)=>a+b,0)/grades.length).toFixed(2):null;
+  const dah=document.getElementById('dashAvgHome');if(dah)dah.textContent=avg!==null?avg:'—';
+  const chips=document.getElementById('dashAvailChips');
+  if(chips){
+    const avail=Array.from(getCourses()).filter(c=>c.classList.contains('enabled')&&!c.classList.contains('completed'));
+    chips.innerHTML=avail.length===0
+      ?'<span style="opacity:.6;font-size:.85rem;font-style:italic">No hay materias disponibles o ya aprobaste todas 🎉</span>'
+      :avail.map(c=>`<span class="avail-chip">${c.querySelector('.course-name')?.textContent||c.textContent}</span>`).join('');
+  }
+  renderNextClass();renderUpcoming();
+}
+
+// ==================== PRÓXIMA CLASE ====================
+function renderNextClass(){
+  const cont=document.getElementById('nextClassContent');if(!cont)return;
+  const now=new Date();
+  const dayNames=['domingo','lunes','martes','miercoles','jueves','viernes','sabado'];
+  const today=dayNames[now.getDay()];
+  const hh=now.getHours(),mm=now.getMinutes();
+  let found=null;
+  horas.forEach((h,i)=>{
+    const [hNum]=h.split(':').map(Number);
+    if(hNum>hh||(hNum===hh&&mm<30)){
+      const key=`${today}-${h}`;
+      const val=tableData[key];
+      if(val&&val.trim()&&!found){
+        const extra=horarioExtraData[key]||{};
+        found={materia:val.trim(),hora:h,modalidad:extra.modalidad||'presencial',link:extra.link||'',salon:extra.salon||''};
+      }
+    }
+  });
+  if(!found){
+    const tomDayIdx=(now.getDay()+1)%7;
+    const tom=dayNames[tomDayIdx];
+    horas.forEach(h=>{
+      const key=`${tom}-${h}`;const val=tableData[key];
+      if(val&&val.trim()&&!found){
+        const extra=horarioExtraData[key]||{};
+        found={materia:val.trim(),hora:h,dia:'mañana',modalidad:extra.modalidad||'presencial',link:extra.link||'',salon:extra.salon||''};
+      }
+    });
+  }
+  if(!found){cont.innerHTML='<span style="opacity:.6;font-size:.85rem">No encontré clases en tu horario. Podes completarlo en la pestaña Horario.</span>';return;}
+  const iconMod=found.modalidad==='virtual'?'💻':'🏫';
+  const detalle=found.modalidad==='virtual'&&found.link
+    ?`<a href="${found.link}" target="_blank" style="color:#fff;text-decoration:underline;font-size:.78rem;font-weight:600">Entrar a la clase →</a>`
+    :found.salon?`<span style="font-size:.85rem;opacity:.8">${found.salon}</span>`:'';
+  const diaLabel=found.dia?` (${found.dia})`:'';
+  cont.innerHTML=`
+    <div style="display:flex;align-items:flex-start;gap:12px">
+      <span style="font-size:2rem">${iconMod}</span>
+      <div>
+        <div style="font-size:1.05rem;font-weight:700;color:#fff">${found.materia}</div>
+        <div style="font-size:.85rem;opacity:.7;margin-top:2px">${found.hora}${diaLabel}</div>
+        ${detalle?'<div style="margin-top:6px">'+detalle+'</div>':''}
+      </div>
+    </div>`;
+}
+
+// ==================== PRÓXIMOS EVENTOS ====================
+function renderUpcoming(){
+  const cont=document.getElementById('upcomingContent');if(!cont)return;
+  const now=new Date();now.setHours(0,0,0,0);
+  const items=[];
+  for(let d=0;d<=7;d++){
+    const dt=new Date(now);dt.setDate(now.getDate()+d);
+    const key=`${dt.getFullYear()}-${dt.getMonth()}-${dt.getDate()}`;
+    if(calendarData[key]){
+      calendarData[key].forEach(ev=>{
+        items.push({days:d,title:ev.title,time:ev.time,color:ev.color});
+      });
+    }
+  }
+  if(!items.length){cont.innerHTML='<span style="opacity:.6;font-size:.85rem">Sin eventos en los próximos 7 días.</span>';return;}
+  cont.innerHTML=items.map(it=>{
+    const label=it.days===0?'Hoy':it.days===1?'Mañana':`En ${it.days}d`;
+    return`<div class="upcoming-item"><span class="upcoming-days">${label}</span><span class="upcoming-title">${it.title}</span><span style="width:12px;height:12px;border-radius:50%;background:${it.color};flex-shrink:0;display:inline-block"></span></div>`;
+  }).join('');
+}
+
+// ==================== HORARIO ====================
 const horas=["08:00","09:00","10:00","11:00","12:00","13:00","14:00","15:00","16:00","17:00","18:00","19:00","20:00","21:00","22:00","23:00"];
 const dias=["Lunes","Martes","Miercoles","Jueves","Viernes","Sabado"];
-  
-function buildSchedule() {
-  const wrapper = document.getElementById('scheduleWrapper');
-  if (!wrapper) return;
-  
-  let html = '<div class="schedule-grid">';
-  dias.forEach(d => {
-    html += `<div class="day-column">
-               <div class="day-header">${d}</div>`;
-    
-    horas.forEach(h => {
-      const id = `${d.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'')}-${h}`;
-      const val = tableData[id] || '';
-      const occupied = val.trim() ? ' occupied-cell' : '';
-      
-      html += `<div class="hour-cell">
-                 <div class="hour-label">${h}</div>
-                 <textarea class="schedule-input${occupied}" data-id="${id}" oninput="saveTableCell(this)">${val}</textarea>
-               </div>`;
+let _extraModalKey=null;
+
+function buildSchedule(){
+  const wrapper=document.getElementById('scheduleWrapper');if(!wrapper)return;
+  let html='<div class="schedule-grid">';
+  dias.forEach(d=>{
+    html+=`<div class="day-column"><div class="day-header">${d}</div>`;
+    horas.forEach(h=>{
+      const id=`${d.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'')}-${h}`;
+      const val=tableData[id]||'';const cls=val.trim()?' occupied-cell':'';
+      html+=`<div class="hour-cell" style="position:relative"><div class="hour-label">${h}</div><textarea class="schedule-input${cls}" data-id="${id}" oninput="saveTableCell(this)">${val}</textarea>${val.trim()?`<span onclick="openExtraModal('${id}')" title="Info de la clase" style="position:absolute;right:3px;top:3px;cursor:pointer;font-size:.65rem;opacity:.5">✏️</span>`:''}`;
+      html+=`</div>`;
     });
-    
-    html += `</div>`;
+    html+=`</div>`;
   });
-  html += '</div>';
-  
-  wrapper.innerHTML = html;
+  html+='</div>';
+  wrapper.innerHTML=html;
 }
-  
-window.saveTableCell = (el) => {
+
+window.saveTableCell=(el)=>{
   tableData[el.dataset.id]=el.value;
-  localStorage.setItem('materiasTabla',JSON.stringify(tableData));
-  el.value.trim() ? el.classList.add('occupied-cell') : el.classList.remove('occupied-cell');
-  if (window.syncCloud) window.syncCloud();
+  try{localStorage.setItem('materiasTabla',JSON.stringify(tableData));}catch(e){}
+  el.value.trim()?el.classList.add('occupied-cell'):el.classList.remove('occupied-cell');
+  if(window.syncCloud)window.syncCloud();
+  renderNextClass();
 };
-  
-function initScheduleModal() {
-  const ss=document.getElementById('schStart'), se=document.getElementById('schEnd');
-  if (!ss||!se) return;
-  ss.innerHTML=''; se.innerHTML='';
-  horas.forEach((h,i)=>{
-    ss.innerHTML+=`<option value="${i}">${h}</option>`;
-    se.innerHTML+=`<option value="${i+1}">${parseInt(h)+1}:00</option>`;
-  });
+
+function initScheduleModal(){
+  const ss=document.getElementById('schStart'),se=document.getElementById('schEnd');if(!ss||!se)return;
+  ss.innerHTML='';se.innerHTML='';
+  horas.forEach((h,i)=>{ss.innerHTML+=`<option value="${i}">${h}</option>`;se.innerHTML+=`<option value="${i+1}">${parseInt(h)+1}:00</option>`;});
 }
-  
-function fillScheduleModal() {
-  const sel=document.getElementById('schSubject');
-  sel.innerHTML='';
+
+function fillScheduleModal(){
+  const sel=document.getElementById('schSubject');sel.innerHTML='';
   const enabled=document.querySelectorAll('.course.enabled:not(.completed)');
-  if (!enabled.length) sel.innerHTML='<option>No hay materias disponibles</option>';
-  else enabled.forEach(c=>sel.innerHTML+=`<option>${c.textContent}</option>`);
+  if(!enabled.length)sel.innerHTML='<option>No hay materias disponibles</option>';
+  else enabled.forEach(c=>{sel.innerHTML+=`<option>${c.querySelector('.course-name')?.textContent||c.textContent}</option>`;});
 }
-  
-window.saveToSchedule = () => {
+
+window.saveToSchedule=()=>{
   const subject=document.getElementById('schSubject').value;
   const day=document.getElementById('schDay').value;
   const si=parseInt(document.getElementById('schStart').value);
   const ei=parseInt(document.getElementById('schEnd').value);
-  if (!subject) return;
-  if (si>=ei) { alert('Revisá la hora de fin.'); return; }
-  for (let i=si;i<ei;i++) tableData[`${day}-${horas[i]}`]=subject;
-  localStorage.setItem('materiasTabla',JSON.stringify(tableData));
-  if (window.syncCloud) window.syncCloud();
-  buildSchedule(); closeModal('scheduleModal');
+  if(!subject)return;if(si>=ei){alert('Revisá la hora de fin.');return;}
+  const modalidad=(document.getElementById('schModalidad')?.value)||'presencial';
+  const link=(document.getElementById('schLink')?.value||'').trim();
+  const salon=(document.getElementById('schSalon')?.value||'').trim();
+  for(let i=si;i<ei;i++){
+    const key=`${day}-${horas[i]}`;
+    tableData[key]=subject;
+    if(modalidad||link||salon)horarioExtraData[key]={modalidad,link,salon};
+  }
+  try{
+    localStorage.setItem('materiasTabla',JSON.stringify(tableData));
+    if(link||salon||modalidad)localStorage.setItem('horarioExtra',JSON.stringify(horarioExtraData));
+  }catch(e){}
+  if(window.syncCloud)window.syncCloud();
+  buildSchedule();closeModal('scheduleModal');renderNextClass();
+  if(document.getElementById('schLink'))document.getElementById('schLink').value='';
+  if(document.getElementById('schSalon'))document.getElementById('schSalon').value='';
 };
-  
-// ====== MODALES ======
-function openModal(id)  { document.getElementById(id).classList.add('open'); }
-function closeModal(id) { document.getElementById(id).classList.remove('open'); }
-  
-// ====== CALENDARIO ======
+
+function openExtraModal(key){
+  _extraModalKey=key;
+  const subj=tableData[key]||'';
+  document.getElementById('extraModalTitle').textContent=subj||'Detalles de la clase';
+  const ex=horarioExtraData[key]||{};
+  document.getElementById('extraModalidad').value=ex.modalidad||'presencial';
+  document.getElementById('extraLink').value=ex.link||'';
+  document.getElementById('extraSalon').value=ex.salon||'';
+  openModal('scheduleExtraModal');
+}
+function saveExtraInfo(){
+  if(!_extraModalKey)return;
+  horarioExtraData[_extraModalKey]={
+    modalidad:document.getElementById('extraModalidad').value,
+    link:document.getElementById('extraLink').value.trim(),
+    salon:document.getElementById('extraSalon').value.trim()
+  };
+  try{localStorage.setItem('horarioExtra',JSON.stringify(horarioExtraData));}catch(e){}
+  if(window.syncCloud)window.syncCloud();
+  closeModal('scheduleExtraModal');renderNextClass();
+}
+
+// ==================== MODALES ====================
+function openModal(id){document.getElementById(id).classList.add('open');}
+function closeModal(id){document.getElementById(id).classList.remove('open');}
+
+// ==================== CALENDARIO ====================
 const monthNames=["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"];
-let currentMonth=new Date().getMonth(), currentYear=new Date().getFullYear();
-  
+let currentMonth=new Date().getMonth(),currentYear=new Date().getFullYear();
 window.changeMonth=(offset)=>{
   currentMonth+=offset;
-  if (currentMonth>11){currentMonth=0;currentYear++;}
-  if (currentMonth<0){currentMonth=11;currentYear--;}
+  if(currentMonth>11){currentMonth=0;currentYear++;}
+  if(currentMonth<0){currentMonth=11;currentYear--;}
   renderCalendar();
 };
-  
-function renderCalendar() {
-  const grid=document.getElementById('calendarGrid');
-  if (!grid) return;
+
+function renderCalendar(){
+  const grid=document.getElementById('calendarGrid');if(!grid)return;
   grid.innerHTML='';
   document.getElementById('monthYearDisplay').textContent=`${monthNames[currentMonth]} ${currentYear}`;
   const first=new Date(currentYear,currentMonth,1).getDay();
   const days=new Date(currentYear,currentMonth+1,0).getDate();
-  for(let i=0;i<first;i++) grid.innerHTML+=`<div class="cal-day empty"></div>`;
+  const now=new Date();
+  const todayD=now.getDate(),todayM=now.getMonth(),todayY=now.getFullYear();
+  for(let i=0;i<first;i++)grid.innerHTML+='<div class="cal-day empty"></div>';
   for(let d=1;d<=days;d++){
     const key=`${currentYear}-${currentMonth}-${d}`;
+    const isToday=(d===todayD&&currentMonth===todayM&&currentYear===todayY);
     let ev='';
-    if(calendarData[key]) calendarData[key].forEach((e,i)=>{
+    if(calendarData[key])calendarData[key].forEach((e,i)=>{
       ev+=`<div class="cal-event-pill" style="background:${e.color}" onclick="deleteCalEvent('${key}',${i},event)">${e.time} - ${e.title}</div>`;
     });
-    grid.innerHTML+=`<div class="cal-day" onclick="openCalModal('${key}',${d})"><div class="cal-date-num">${d}</div>${ev}</div>`;
+    grid.innerHTML+=`<div class="cal-day${isToday?' today':''}" onclick="openCalModal('${key}',${d})"><div class="cal-date-num">${d}</div>${ev}</div>`;
   }
 }
-  
+
 window.openCalModal=(key,day)=>{
   document.getElementById('calDateKey').value=key;
   document.getElementById('calModalDateDisplay').textContent=`${day} de ${monthNames[currentMonth]} de ${currentYear}`;
-  document.getElementById('calTitle').value='';
-  document.getElementById('calTime').value='';
+  document.getElementById('calTitle').value='';document.getElementById('calTime').value='';
   openModal('calModal');
 };
-  
 window.saveCalEvent=(openGoogle)=>{
   const key=document.getElementById('calDateKey').value;
-  const title=document.getElementById('calTitle').value;
+  const title=document.getElementById('calTitle').value.trim();
   const time=document.getElementById('calTime').value||'Todo el día';
   const color=document.getElementById('calColor').value;
-  if (!title){alert('Escribí qué vas a hacer.');return;}
-  if (!calendarData[key]) calendarData[key]=[];
+  if(!title){alert('Escribí qué vas a hacer.');return;}
+  if(!calendarData[key])calendarData[key]=[];
   calendarData[key].push({title,time,color});
-  localStorage.setItem('indCalendar',JSON.stringify(calendarData));
-  if (window.syncCloud) window.syncCloud();
-  renderCalendar(); closeModal('calModal');
-  if (openGoogle){
-    const [y,m,d]=key.split('-');
-    const fm=(parseInt(m)+1).toString().padStart(2,'0');
-    const fd=d.padStart(2,'0');
+  try{localStorage.setItem('indCalendar',JSON.stringify(calendarData));}catch(e){}
+  if(window.syncCloud)window.syncCloud();
+  renderCalendar();closeModal('calModal');renderUpcoming();
+  if(openGoogle){
+    const[y,m,d]=key.split('-');const fm=(parseInt(m)+1).toString().padStart(2,'0');const fd=d.padStart(2,'0');
     window.open(`https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(title)}&dates=${y}${fm}${fd}/${y}${fm}${fd}&details=${encodeURIComponent('Horario: '+time)}`,'_blank');
   }
 };
-  
 window.deleteCalEvent=(key,idx,e)=>{
   e.stopPropagation();
   if(confirm('¿Borrar esta actividad?')){
-    calendarData[key].splice(idx,1);
-    if(!calendarData[key].length) delete calendarData[key];
-    localStorage.setItem('indCalendar',JSON.stringify(calendarData));
-    if (window.syncCloud) window.syncCloud();
-    renderCalendar();
+    calendarData[key].splice(idx,1);if(!calendarData[key].length)delete calendarData[key];
+    try{localStorage.setItem('indCalendar',JSON.stringify(calendarData));}catch(e){}
+    if(window.syncCloud)window.syncCloud();renderCalendar();renderUpcoming();
   }
 };
-  
-// ====== NOTAS ======
-function renderGrades(){
-  const container=document.getElementById('gradesContainer');
-  if (!container) return;
-  container.innerHTML='';
-  const done=Array.from(getCourses()).filter(c=>c.classList.contains('completed'));
-  if (!done.length){ container.innerHTML='<div style="text-align:center;opacity:.6">Aún no hay materias aprobadas.</div>'; document.getElementById('averageDisplay').textContent='0.00'; return; }
-  done.forEach(course=>{
-    const id=course.dataset.id;
-    const row=document.createElement('div'); row.className='grade-row';
-    row.innerHTML=`<span>${course.textContent}</span><input type="text" class="grade-input" placeholder="-" value="${gradesData[id]||''}" oninput="updateGrade('${id}',this.value)">`;
-    container.appendChild(row);
-  });
-  calculateAverage();
-}
-  
-window.updateGrade=(id,value)=>{
-  const n=parseFloat(value);
-  if(!isNaN(n)){if(n>10)value='10';if(n<0)value='0';}
-  value===''?delete gradesData[id]:gradesData[id]=value;
-  localStorage.setItem('materiasNotas',JSON.stringify(gradesData));
-  if(window.syncCloud) window.syncCloud();
-  calculateAverage();
-};
-  
-function calculateAverage(){
-  const v=Object.values(gradesData).map(x=>parseFloat(x)).filter(x=>!isNaN(x));
-  document.getElementById('averageDisplay').textContent=v.length===0?'0.00':(v.reduce((a,b)=>a+b,0)/v.length).toFixed(2);
-}
-  
-// ====== PROGRESO ======
-function renderStatsAndPlanner(){
-  const total=getCourses().length;
-  const done=document.querySelectorAll('.course.completed').length;
+
+// ==================== PROGRESO + NOTAS ====================
+function renderGradesInStats(){
+  const container=document.getElementById('gradesInStats');if(!container)return;
+  const total=getCourses().length,done=document.querySelectorAll('.course.completed').length;
   const pct=total>0?Math.round((done/total)*100):0;
-  const sp=document.getElementById('statsPercentage');
-  const sc=document.getElementById('statsCompleted');
-  const sr=document.getElementById('statsRemaining');
-  const pc=document.getElementById('progressCircle');
-  if(sp) sp.textContent=pct+'%';
-  if(sc) sc.textContent=done;
-  if(sr) sr.textContent=total-done;
-  if(pc) pc.style.background=`conic-gradient(var(--accent-light) ${pct}%, #ffffff ${pct}% 100%)`;
-  const grid=document.getElementById('plannerGrid');
-  if(!grid) return;
-  grid.innerHTML='';
-  const avail=Array.from(getCourses()).filter(c=>c.classList.contains('enabled')&&!c.classList.contains('completed'));
-  if(!avail.length){grid.innerHTML='<div style="opacity:.6;font-style:italic">No hay materias disponibles por ahora.</div>';return;}
-  avail.forEach(course=>{
-    const id=course.dataset.id;
-    const card=document.createElement('div');
-    card.className=`plan-card ${plannedData[id]?'planned':''}`;
-    card.textContent=course.textContent;
-    card.onclick=()=>{
-      plannedData[id]?delete plannedData[id]:plannedData[id]=true;
-      card.classList.toggle('planned');
-      localStorage.setItem('materiasPlanificadas',JSON.stringify(plannedData));
-      if(window.syncCloud) window.syncCloud();
-    };
-    grid.appendChild(card);
-  });
+  const sp=document.getElementById('statsPercentage'),sc=document.getElementById('statsCompleted'),sr=document.getElementById('statsRemaining'),pc=document.getElementById('progressCircle');
+  if(sp)sp.textContent=pct+'%';if(sc)sc.textContent=done;if(sr)sr.textContent=total-done;
+  if(pc)pc.style.background=`conic-gradient(var(--accent) ${pct}%, #f0f0f0 ${pct}% 100%)`;
+  const grades=Object.values(gradesData).map(x=>parseFloat(x)).filter(x=>!isNaN(x));
+  const avg=grades.length>0?(grades.reduce((a,b)=>a+b,0)/grades.length).toFixed(2):'—';
+  const sa=document.getElementById('statsAvg');if(sa)sa.textContent=avg;
+  const completedCourses=Array.from(getCourses()).filter(c=>c.classList.contains('completed'));
+  if(!completedCourses.length){container.innerHTML='<div style="opacity:.6;font-style:italic;font-size:.9rem;padding:12px 0">Todavía no aprobaste ninguna materia.</div>';return;}
+  container.innerHTML=completedCourses.map(c=>{
+    const id=c.dataset.id,name=c.querySelector('.course-name')?.textContent||'',nota=gradesData[id]||'';
+    return`<div class="completed-row"><span class="cr-name">${name}</span><input type="number" min="1" max="10" step="0.1" class="cr-input" placeholder="-" value="${nota}" data-id="${id}" oninput="updateGradeInStats(this)"></div>`;
+  }).join('');
 }
-// ====== REINICIAR CUENTA ======
-window.reiniciarCuenta = async () => {
-  // 1. Pedimos confirmación para que no sea un accidente
-  const seguro = confirm("⚠️ ¿Estás seguro de que querés borrar TODA tu malla, notas, calendario y horarios? Esta acción NO se puede deshacer.");
-  
-  if (seguro) {
-    // 2. Borramos todo de la memoria local
-    ['materiasAprobadas','materiasNotas','materiasPlanificadas','materiasTabla','indCalendar','userConfig'].forEach(k => localStorage.removeItem(k));
-    
-    // 3. Sobreescribimos la base de datos en la nube con "nada" (vacío)
-    if (window.syncCloud) {
-      await window.syncCloud();
-    }
-    
-    // 4. Recargamos la página. Como no hay datos, la app te va a llevar al paso 1 del Onboarding automáticamente.
-    location.reload();
-  }
+
+window.updateGradeInStats=(el)=>{
+  let v=el.value.trim();const n=parseFloat(v);
+  if(!isNaN(n)){if(n>10)v='10';if(n<0)v='0';}
+  v===''?delete gradesData[el.dataset.id]:gradesData[el.dataset.id]=v;
+  try{localStorage.setItem('materiasNotas',JSON.stringify(gradesData));}catch(e){}
+  if(window.syncCloud)window.syncCloud();
+  const courseEl=document.querySelector(`.course[data-id="${el.dataset.id}"]`);
+  if(courseEl)actualizarBadge(courseEl);
+  const grades=Object.values(gradesData).map(x=>parseFloat(x)).filter(x=>!isNaN(x));
+  const avg=grades.length>0?(grades.reduce((a,b)=>a+b,0)/grades.length).toFixed(2):'—';
+  const sa=document.getElementById('statsAvg');if(sa)sa.textContent=avg;
+  const dah=document.getElementById('dashAvgHome');if(dah)dah.textContent=avg!=='—'?avg:'—';
 };
+
+// ==================== POMODORO ====================
+let pomInterval=null,pomSeconds=25*60,pomMode='work',pomRunning=false,pomSessions=0;
+let POM_WORK=25*60,POM_BREAK=5*60;
+let pomTodayLog=[];
+
+function pomApplyConfig(){
+  if(pomRunning)return;
+  const w=parseInt(document.getElementById('pomWorkMin').value)||25;
+  const b=parseInt(document.getElementById('pomBreakMin').value)||5;
+  POM_WORK=Math.max(1,w)*60;
+  POM_BREAK=Math.max(1,b)*60;
+  if(pomMode==='work')pomSeconds=POM_WORK;
+  else pomSeconds=POM_BREAK;
+  pomUpdateDisplay();
+}
+
+function renderPomSubjectSelect(){
+  const sel=document.getElementById('pomSubject');if(!sel)return;
+  sel.innerHTML='<option value="">— Elegí una materia —</option>';
+  const all=Array.from(getCourses()).filter(c=>c.classList.contains('enabled'));
+  all.forEach(c=>{sel.innerHTML+=`<option value="${c.dataset.id}">${c.querySelector('.course-name')?.textContent||c.textContent}</option>`;});
+}
+
+function pomUpdateDisplay(){
+  const m=Math.floor(pomSeconds/60),s=pomSeconds%60;
+  document.getElementById('pomDisplay').textContent=`${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+  document.getElementById('pomMode').textContent=pomMode==='work'?'ESTUDIO':'DESCANSO';
+}
+
+function pomToggle(){
+  if(pomRunning){clearInterval(pomInterval);pomRunning=false;document.getElementById('pomPlayBtn').textContent='▶ Continuar';}
+  else{
+    const subj=document.getElementById('pomSubject').value;
+    if(pomMode==='work'&&!subj){alert('Elegí una materia primero.');return;}
+    pomRunning=true;document.getElementById('pomPlayBtn').textContent='⏸ Pausar';
+    pomInterval=setInterval(()=>{
+      pomSeconds--;pomUpdateDisplay();
+      if(pomSeconds<=0){
+        clearInterval(pomInterval);pomRunning=false;
+        if(pomMode==='work'){
+          const subjName=document.getElementById('pomSubject').options[document.getElementById('pomSubject').selectedIndex]?.text||'—';
+          const sid=document.getElementById('pomSubject').value;
+          pomSessions++;
+          const workMin=parseInt(document.getElementById('pomWorkMin')?.value)||25;
+          pomTodayLog.unshift({subject:subjName,time:new Date().toLocaleTimeString('es-AR',{hour:'2-digit',minute:'2-digit'})});
+          if(!pomodoroStats[sid])pomodoroStats[sid]={name:subjName,minutes:0};
+          pomodoroStats[sid].minutes+=workMin;
+          try{localStorage.setItem('pomodoroStats',JSON.stringify(pomodoroStats));}catch(e){}
+          if(window.syncCloud)window.syncCloud();
+          renderPomLog();renderStudyStats();
+          document.getElementById('pomSessionCount').textContent='Sesiones completadas: '+pomSessions;
+          pomMode='break';pomSeconds=POM_BREAK;
+          alert(`✅ ${workMin} minutos completados! Tomá un descanso.`);
+        } else {
+          pomMode='work';pomSeconds=POM_WORK;
+          alert('⏰ ¡Descanso terminado! Listo para seguir estudiando.');
+        }
+        pomUpdateDisplay();document.getElementById('pomPlayBtn').textContent='▶ Iniciar Sesión';
+      }
+    },1000);
+  }
+}
+
+function pomReset(){
+  clearInterval(pomInterval);pomRunning=false;pomSeconds=POM_WORK;pomMode='work';
+  pomUpdateDisplay();document.getElementById('pomPlayBtn').textContent='▶ Iniciar Sesión';
+}
+
+function renderPomLog(){
+  const log=document.getElementById('pomLog');if(!log)return;
+  if(!pomTodayLog.length){log.innerHTML='<span style="opacity:.6;font-size:.85rem">Todavía no completaste ninguna sesión de estudio hoy.</span>';return;}
+  log.innerHTML=pomTodayLog.map(s=>`<div class="pom-log-item"><span>📚 ${s.subject}</span><span style="opacity:.7;font-weight:600">${s.time}</span></div>`).join('');
+}
+
+function renderStudyStats(){
+  const grid=document.getElementById('studyStatsGrid');if(!grid)return;
+  const entries=Object.values(pomodoroStats);
+  const total=entries.reduce((s,e)=>s+e.minutes,0);
+  const ts=document.getElementById('statsTotalStudy');
+  if(ts)ts.textContent=total>=60?Math.floor(total/60)+'h '+(total%60)+'m':total+'m';
+  if(!entries.length){grid.innerHTML='<span style="opacity:.6;font-size:.85rem;font-style:italic">Usá el Pomodoro para medir tu tiempo de estudio.</span>';return;}
+  grid.innerHTML=entries.sort((a,b)=>b.minutes-a.minutes).map(e=>{
+    const t=e.minutes>=60?Math.floor(e.minutes/60)+'h '+(e.minutes%60)+'m':e.minutes+'m';
+    return`<div class="study-stat-pill"><div class="sp-name" title="${e.name}">${e.name}</div><div class="sp-time">${t}</div></div>`;
+  }).join('');
+}
+
+// ==================== APUNTES ====================
+let _notesActiveSubject=null;
+const NOTE_CATS=[
+  {id:'parciales', label:'Parciales viejos',    icon:'📝'},
+  {id:'resumenes', label:'Mis resúmenes',        icon:'📖'},
+  {id:'videos',    label:'Videos y links',       icon:'🎥'},
+  {id:'otros',     label:'Otros archivos',       icon:'📁'},
+];
+
+function renderNotesTab(){
+  const grid=document.getElementById('notesGrid');
+  const detail=document.getElementById('notesDetail');
+  if(!grid)return;
+  grid.style.display='grid';
+  detail.style.display='none';
+  _notesActiveSubject=null;
   
-// ====== ARRANQUE ======
-window.addEventListener('load', () => {
-  const cfg = JSON.parse(localStorage.getItem('userConfig')||'{}');
-  if (cfg.setup) window.initApp();
-  else showOnboarding();
+  // Limpiar el buscador cuando se vuelve a la lista general
+  const searchInput = document.getElementById('notesSearchInput');
+  if(searchInput) searchInput.value = '';
+  
+  const enabled=Array.from(getCourses()).filter(c=>c.classList.contains('enabled')||c.classList.contains('completed'));
+  if(!enabled.length){
+    grid.innerHTML='<span style="color:var(--text-muted);font-size:.9rem">Habilitá materias en el Plan de estudios para ver sus apuntes.</span>';
+    return;
+  }
+  grid.innerHTML=enabled.map(c=>{
+    const id=c.dataset.id;
+    const name=c.querySelector('.course-name')?.textContent||'';
+    const subj=apuntesData[id]||{};
+    let count=0;
+    if(Array.isArray(subj))count=subj.length;
+    else NOTE_CATS.forEach(cat=>{count+=(subj[cat.id]||[]).length;});
+    const hasLinks=subj._campus||subj._drive;
+    const hasNotes=count>0||hasLinks;
+    return`<div class="notes-subject-card${hasNotes?' has-notes':''}" onclick="openNotesDetail('${id}','${name.replace(/'/g,"\'")}')">
+      <div class="nsc-icon">📘</div>
+      <div class="nsc-name">${name}</div>
+      <div class="nsc-count">${count>0?`<b>${count}</b> recurso${count!==1?'s':''}`:hasLinks?'Links guardados':'Sin recursos aún'}</div>
+    </div>`;
+  }).join('');
+}
+
+// NUEVO: Función de buscador para las materias de apuntes
+window.filterNotes = () => {
+  const query = document.getElementById('notesSearchInput').value.toLowerCase();
+  document.querySelectorAll('.notes-subject-card').forEach(card => {
+    const name = card.querySelector('.nsc-name').textContent.toLowerCase();
+    card.style.display = name.includes(query) ? 'block' : 'none';
+  });
+};
+
+function openNotesDetail(id,name){
+  _notesActiveSubject=id;
+  const grid=document.getElementById('notesGrid');
+  const detail=document.getElementById('notesDetail');
+  grid.style.display='none';
+  detail.style.display='block';
+  renderNotesDetail(id,name);
+}
+
+function renderNotesDetail(id,name){
+  const detail=document.getElementById('notesDetail');if(!detail)return;
+  if(!apuntesData[id]||Array.isArray(apuntesData[id])){
+    const old=Array.isArray(apuntesData[id])?apuntesData[id]:[];
+    apuntesData[id]={_campus:'',_drive:'',otros:old};
+  }
+  const subj=apuntesData[id];
+  const campus=subj._campus||'';
+  const drive=subj._drive||'';
+  const driveCreateUrl=`https://drive.google.com/drive/folders?action=create&name=${encodeURIComponent(name)}`;
+  const headerLinks=`
+    ${campus?`<a href="${campus}" target="_blank" class="ndh-link-btn">🖥️ Campus Virtual</a>`:''}
+    ${drive?`<a href="${drive}" target="_blank" class="ndh-link-btn">📁 Carpeta Drive</a>`:''}
+    <a href="${driveCreateUrl}" target="_blank" class="ndh-link-btn" title="Abre Google Drive para crear la carpeta" onclick="showDriveTip()">📂 Crear Drive</a>
+    <button class="ndh-link-btn" onclick="toggleAddLinkRow()" style="background: rgba(0,0,0,0.2)">⚙️ Editar Links</button>`;
+  const addLinkRow=`
+    <div class="ndh-add-link-row" id="ndh-link-row">
+      <input type="url" id="ndh-campus-input" placeholder="Link Campus virtual (https://...)" value="${campus}">
+      <input type="url" id="ndh-drive-input" placeholder="Link Google Drive (https://...)" value="${drive}">
+      <button class="nc-add-btn" onclick="saveQuickLinks('${id}')">Guardar links</button>
+    </div>`;
+  const catsHtml=NOTE_CATS.map(cat=>{
+    const items=subj[cat.id]||[];
+    const itemsHtml=items.length
+      ? items.map((n,i)=>`
+          <div class="note-item">
+            <span class="note-item-icon">${n.url?'🔗':'📄'}</span>
+            <div class="note-item-info">
+              <div class="note-item-name">${n.name}</div>
+              ${n.url?`<div class="note-item-url">${n.url}</div>`:''}
+            </div>
+            <div class="note-item-actions">
+              ${n.url?`<a href="${n.url}" target="_blank" class="note-open-btn">Abrir →</a>`:''}
+              <span class="note-item-del" onclick="deleteNoteInCat('${id}','${cat.id}',${i})">✕</span>
+            </div>
+          </div>`).join('')
+      : `<div class="nc-empty">No hay recursos agregados en esta categoría todavía.</div>`;
+    return`<div class="notes-category">
+      <div class="nc-header" onclick="toggleCat('cat-${cat.id}')">
+        <div class="nc-title"><span class="nc-title-icon">${cat.icon}</span>${cat.label}${items.length?` <span class="nc-count-badge">${items.length}</span>`:''}</div>
+        <span class="nc-chevron open" id="chev-cat-${cat.id}">▼</span>
+      </div>
+      <div class="nc-body" id="cat-${cat.id}">
+        ${itemsHtml}
+        <div class="nc-add-form">
+          <input type="text" id="nn-${cat.id}" placeholder="Nombre del recurso (Ej: Resumen Primer Parcial)">
+          <input type="url" id="nu-${cat.id}" placeholder="Link del documento o video (opcional)">
+          <button class="nc-add-btn" onclick="addNoteInCat('${id}','${cat.id}')">+ Agregar recurso</button>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+  detail.innerHTML=`
+    <div class="notes-detail">
+      <div class="notes-detail-header">
+        <button class="ndh-back" onclick="renderNotesTab()">← Volver a materias</button>
+        <div class="ndh-title">${name}</div>
+        <div class="ndh-links">${headerLinks}</div>
+      </div>
+      ${addLinkRow}
+      ${catsHtml}
+    </div>`;
+}
+
+function toggleAddLinkRow(){
+  const row=document.getElementById('ndh-link-row');
+  if(row)row.classList.toggle('show');
+}
+
+function showDriveTip(){
+  setTimeout(()=>{
+    const row=document.getElementById('ndh-link-row');
+    if(row&&!row.classList.contains('show')){
+      row.classList.add('show');
+      const driveInput=document.getElementById('ndh-drive-input');
+      if(driveInput){
+        driveInput.focus();
+        driveInput.style.borderColor='var(--accent)';
+        driveInput.placeholder='Pegá acá el link de la carpeta que acabás de crear en Drive';
+        setTimeout(()=>{driveInput.style.borderColor='';},3000);
+      }
+    }
+  },400);
+}
+
+function saveQuickLinks(id){
+  if(!apuntesData[id]||Array.isArray(apuntesData[id]))apuntesData[id]={_campus:'',_drive:''};
+  apuntesData[id]._campus=document.getElementById('ndh-campus-input')?.value.trim()||'';
+  apuntesData[id]._drive=document.getElementById('ndh-drive-input')?.value.trim()||'';
+  _saveApuntes();
+  const name=document.querySelector(`.notes-subject-card[onclick*="${id}"] .nsc-name`)?.textContent||'';
+  renderNotesDetail(id,name||id);
+}
+
+function toggleCat(catBodyId){
+  const body=document.getElementById(catBodyId);
+  const chev=document.getElementById('chev-'+catBodyId);
+  if(!body)return;
+  const isOpen=body.style.display!=='none';
+  body.style.display=isOpen?'none':'block';
+  if(chev)chev.classList.toggle('open',!isOpen);
+}
+
+function addNoteInCat(subjectId,catId){
+  const name=document.getElementById(`nn-${catId}`)?.value.trim();
+  const url=document.getElementById(`nu-${catId}`)?.value.trim();
+  if(!name){alert('Escribí un nombre para el recurso.');return;}
+  if(!apuntesData[subjectId]||Array.isArray(apuntesData[subjectId]))apuntesData[subjectId]={_campus:'',_drive:''};
+  if(!apuntesData[subjectId][catId])apuntesData[subjectId][catId]=[];
+  apuntesData[subjectId][catId].push({name,url});
+  _saveApuntes();
+  const nameEl=document.querySelector('.ndh-title');
+  renderNotesDetail(subjectId,nameEl?.textContent||subjectId);
+}
+
+function deleteNoteInCat(subjectId,catId,idx){
+  if(!confirm('¿Estás seguro de que querés borrar este recurso?'))return;
+  apuntesData[subjectId][catId].splice(idx,1);
+  _saveApuntes();
+  const nameEl=document.querySelector('.ndh-title');
+  renderNotesDetail(subjectId,nameEl?.textContent||subjectId);
+}
+
+function _saveApuntes(){
+  try{localStorage.setItem('apuntes',JSON.stringify(apuntesData));}catch(e){}
+  if(window.syncCloud)window.syncCloud();
+}
+
+function addNote(){}
+function deleteNote(){}
+
+// ==================== INITAPP ====================
+window.initApp=function(){
+  const cfg=(()=>{try{return JSON.parse(localStorage.getItem('userConfig')||'{}');}catch{return{};}})();
+  if(cfg.setup){
+    document.getElementById('onboardingScreen').classList.remove('visible');
+    document.getElementById('appContent').style.display='block';
+    aplicarTema(cfg.theme||{});
+    document.getElementById('headerCareer').textContent=cfg.career||'Mi Carrera';
+    document.getElementById('headerUni').textContent=cfg.uni||'Mi Universidad';
+    document.getElementById('profileCareer').textContent=cfg.career||'—';
+    document.getElementById('profileUni').textContent=cfg.uni||'—';
+    marcarTemaActivo(cfg.theme);
+    if(cfg.materias&&cfg.materias.length>0)construirMalla(cfg.materias);
+  } else {
+    const ob=document.getElementById('onboardingScreen');
+    if(ob.classList.contains('visible'))obGo(2);
+    else{showOnboarding();setTimeout(()=>obGo(2),200);}
+  }
+  try{
+    tableData=JSON.parse(localStorage.getItem('materiasTabla')||'{}');
+    gradesData=JSON.parse(localStorage.getItem('materiasNotas')||'{}');
+    calendarData=JSON.parse(localStorage.getItem('indCalendar')||'{}');
+    apuntesData=JSON.parse(localStorage.getItem('apuntes')||'{}');
+    pomodoroStats=JSON.parse(localStorage.getItem('pomodoroStats')||'{}');
+    horarioExtraData=JSON.parse(localStorage.getItem('horarioExtra')||'{}');
+  }catch(e){}
+  initScheduleModal();loadProgress();updateStates();renderCalendar();
+  buildSchedule();renderGradesInStats();renderStudyStats();
+  pomUpdateDisplay();renderDashboard();
+};
+
+// ==================== REINICIAR ====================
+window.reiniciarCuenta=async()=>{
+  if(!confirm('⚠️ ¿Estás seguro de que querés borrar TODO? Esta acción no se puede deshacer.'))return;
+  ['materiasAprobadas','materiasNotas','materiasPlanificadas','materiasTabla','indCalendar','userConfig','apuntes','pomodoroStats','horarioExtra'].forEach(k=>localStorage.removeItem(k));
+  if(window.syncCloud)await window.syncCloud();location.reload();
+};
+
+// ==================== ARRANQUE ====================
+window.addEventListener('load',()=>{
+  const cfg=(()=>{try{return JSON.parse(localStorage.getItem('userConfig')||'{}');}catch{return{};}})();
+  if(cfg.setup)window.initApp();else showOnboarding();
 });
 </script>
 </body>
