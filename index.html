@@ -131,7 +131,6 @@
 
   <style>
     :root{
-      /* === Tema por Defecto (Púrpura) === */
       --accent:#820065;
       --accent-dark:#820065;
       --accent-light:#e8b4f5;
@@ -353,7 +352,7 @@
     /* ===== APUNTES ===== */
     #view-notes{max-width:1000px;margin:0 auto;padding-bottom:60px;}
     
-    .notes-search-bar { width: 100%; max-width: 400px; padding: 12px 16px; border-radius: 10px; border: 2px solid #eaeaea; margin-top: 15px; outline: none; font-family: 'Poppins', sans-serif; font-size: 0.9rem; transition: border-color 0.2s;}
+    .notes-search-bar { width: 100%; padding: 12px 16px; border-radius: 10px; border: 2px solid #eaeaea; margin-top: 15px; outline: none; font-family: 'Poppins', sans-serif; font-size: 0.9rem; transition: border-color 0.2s;}
     .notes-search-bar:focus { border-color: var(--accent); }
 
     .notes-subjects-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:16px;margin-top:20px;}
@@ -389,20 +388,60 @@
     .nc-empty{font-size:.85rem;color:#aaa;font-style:italic;padding:8px 0;}
     .note-item{display:flex;align-items:center;gap:12px;padding:12px 16px;border-radius:10px;border:1px solid #eaeaea;margin-bottom:8px;background:#fff;transition:all .15s;}
     .note-item:hover{border-color:var(--accent); box-shadow: 0 2px 8px rgba(0,0,0,0.05);}
+    .note-item.completed-note{background:#f0fdf4;border-color:#86efac;}
+    .note-item.completed-note .note-item-name{text-decoration:line-through;color:#888;}
     .note-item-icon{font-size:1.3rem;flex-shrink:0;}
     .note-item-info{flex:1;min-width:0;}
     .note-item-name{font-size:.9rem;font-weight:600;color:var(--text-main);overflow:hidden;white-space:nowrap;text-overflow:ellipsis;}
     .note-item-url{font-size:.75rem;color:var(--text-muted);overflow:hidden;white-space:nowrap;text-overflow:ellipsis;margin-top:2px;}
-    .note-item-actions{display:flex;gap:8px;flex-shrink:0;}
+    .note-item-actions{display:flex;gap:8px;flex-shrink:0;align-items:center;}
     .note-open-btn{padding:6px 12px;border-radius:6px;border:none;background:var(--accent);color:#fff;font-size:.75rem;font-weight:600;cursor:pointer;font-family:'Poppins',sans-serif;transition:.15s;text-decoration:none;display:inline-block;}
     .note-open-btn:hover{opacity:.9;}
     .note-item-del{cursor:pointer;color:#bbb;font-size:1.1rem;padding:2px 6px;transition:.15s;}
     .note-item-del:hover{color:#ef4444;}
+    /* Checkbox estilo */
+    .note-check{width:20px;height:20px;accent-color:var(--accent);cursor:pointer;flex-shrink:0;border-radius:4px;}
+    
     .nc-add-form{background:#fafafa;border-radius:10px;border:1px dashed #ccc;padding:16px;margin-top:12px;}
     .nc-add-form input{width:100%;padding:10px 12px;margin-bottom:10px;border-radius:8px;border:1px solid #ddd;font-family:'Poppins',sans-serif;font-size:.85rem;color:var(--text-main);background:#fff;outline:none;box-sizing:border-box;}
     .nc-add-form input:focus{border-color:var(--accent);}
     .nc-add-btn{padding:10px 18px;border-radius:8px;border:none;background:var(--accent-dark);color:#fff;font-family:'Poppins',sans-serif;font-weight:600;font-size:.85rem;cursor:pointer;transition:.18s;}
     .nc-add-btn:hover{background:var(--accent);}
+
+    /* ===== POST-IT ===== */
+    .notes-postit{background:#fffde7;border:1.5px solid #f9e03b;border-radius:12px;padding:14px 18px;margin:16px 24px 0;position:relative;}
+    .notes-postit-label{font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#a38a00;margin-bottom:8px;display:flex;align-items:center;gap:6px;}
+    .notes-postit-label span{font-size:1rem;}
+    .notes-postit textarea{width:100%;min-height:80px;border:none;background:transparent;font-family:'Poppins',sans-serif;font-size:.88rem;color:#4a3800;resize:vertical;outline:none;box-sizing:border-box;line-height:1.6;}
+    .notes-postit-saved{font-size:.72rem;color:#a38a00;opacity:.7;position:absolute;bottom:8px;right:14px;}
+
+    /* ===== AI FLASHCARDS ===== */
+    .ai-flashcards-btn{display:flex;align-items:center;gap:8px;padding:10px 18px;border-radius:10px;border:none;background:linear-gradient(135deg,var(--accent-dark),var(--accent));color:#fff;font-family:'Poppins',sans-serif;font-weight:700;font-size:.85rem;cursor:pointer;transition:all .2s;box-shadow:0 4px 12px rgba(0,0,0,.15);}
+    .ai-flashcards-btn:hover{opacity:.9;transform:translateY(-1px);}
+    .ai-flashcards-btn:disabled{opacity:.5;cursor:not-allowed;transform:none;}
+    .flashcards-container{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px;margin-top:16px;}
+    .flashcard{background:#fff;border-radius:12px;border:1px solid #eaeaea;box-shadow:0 2px 8px rgba(0,0,0,.04);overflow:hidden;transition:all .2s;}
+    .flashcard:hover{box-shadow:0 6px 20px rgba(0,0,0,.08);transform:translateY(-2px);}
+    .flashcard-q{background:var(--accent-dark);color:#fff;padding:14px 16px;font-size:.85rem;font-weight:700;line-height:1.4;}
+    .flashcard-a{padding:14px 16px;font-size:.85rem;color:var(--text-main);line-height:1.5;display:none;}
+    .flashcard.flipped .flashcard-a{display:block;}
+    .flashcard-toggle{width:100%;padding:8px;border:none;background:#f5f5f5;color:var(--text-muted);font-family:'Poppins',sans-serif;font-size:.75rem;font-weight:600;cursor:pointer;border-top:1px solid #eee;transition:.15s;}
+    .flashcard-toggle:hover{background:#eee;}
+    .ai-loading{display:flex;align-items:center;gap:12px;padding:18px;background:#fdf2f8;border-radius:12px;border:1.5px solid #fce7f3;margin-top:12px;}
+    .ai-loading-spinner{width:24px;height:24px;border:3px solid #fce7f3;border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite;flex-shrink:0;}
+    .ai-loading-text{font-size:.85rem;color:#666;}
+
+    /* ===== BUSCADOR PROFUNDO ===== */
+    .deep-search-results{margin-top:16px;display:none;}
+    .deep-search-results.show{display:block;}
+    .deep-result-item{display:flex;gap:12px;align-items:flex-start;padding:12px 16px;border-radius:10px;border:1px solid #eaeaea;margin-bottom:8px;background:#fff;cursor:pointer;transition:all .15s;}
+    .deep-result-item:hover{border-color:var(--accent);box-shadow:0 2px 8px rgba(0,0,0,.06);}
+    .deep-result-subject{font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--accent);margin-bottom:2px;}
+    .deep-result-name{font-size:.9rem;font-weight:600;color:var(--text-main);}
+    .deep-result-url{font-size:.75rem;color:var(--text-muted);overflow:hidden;white-space:nowrap;text-overflow:ellipsis;}
+    .deep-result-cat{font-size:.7rem;background:#f0f0f0;color:#666;padding:2px 8px;border-radius:20px;font-weight:600;flex-shrink:0;}
+    .search-mode-indicator{font-size:.78rem;color:var(--accent);font-weight:700;margin-top:8px;display:none;}
+    .search-mode-indicator.show{display:block;}
 
     /* ===== MODAL CREAR DRIVE ===== */
     #createDriveModal .modal-box{text-align:left;max-width:440px;}
@@ -555,10 +594,10 @@
       <div class="theme-grid">
         <div class="theme-card selected" data-accent="#820065" data-dark="#820065" data-light="#e8b4f5" data-bg="#f7d9fc" data-label="Púrpura" onclick="obSelectTheme(this)"><div class="theme-swatch" style="background:linear-gradient(135deg,#820065,#5a0046)"></div><div class="theme-name">Púrpura</div></div>
         <div class="theme-card" data-accent="#1B2CC1" data-dark="#091540" data-light="#7692FF" data-bg="#abd2fa" data-label="Azul" onclick="obSelectTheme(this)"><div class="theme-swatch" style="background:linear-gradient(135deg,#1B2CC1,#091540)"></div><div class="theme-name">Azul</div></div>
-        <div class="theme-card" data-accent="#47622A" data-dark="#243313" data-light="#9FB878" data-bg="#f9f9fc" data-label="Verde" onclick="obSelectTheme(this)"><div class="theme-swatch" style="background:linear-gradient(135deg,#47622A,#243313)"></div><div class="theme-name">Verde</div></div>
+        <div class="theme-card" data-accent="#47622A" data-dark="#132f06" data-light="#9FB878" data-bg="#e7e7e7" data-label="Verde" onclick="obSelectTheme(this)"><div class="theme-swatch" style="background:linear-gradient(135deg,#47622A,#132f06)"></div><div class="theme-name">Verde</div></div>
         <div class="theme-card" data-accent="#d1868f" data-dark="#b06068" data-light="#fbe0e5" data-bg="#fbcad9" data-label="Rosa" onclick="obSelectTheme(this)"><div class="theme-swatch" style="background:linear-gradient(135deg,#d1868f,#b06068)"></div><div class="theme-name">Rosa</div></div>
-        <div class="theme-card" data-accent="#B31B1B" data-dark="#660f0f" data-light="#E57373" data-bg="#f9f9fc" data-label="Rojo" onclick="obSelectTheme(this)"><div class="theme-swatch" style="background:linear-gradient(135deg,#B31B1B,#660f0f)"></div><div class="theme-name">Rojo</div></div>
-        <div class="theme-card" data-accent="#565656" data-dark="#2B2B2B" data-light="#B3B3B3" data-bg="#f9f9fc" data-label="Gris" onclick="obSelectTheme(this)"><div class="theme-swatch" style="background:linear-gradient(135deg,#565656,#2B2B2B)"></div><div class="theme-name">Gris</div></div>
+        <div class="theme-card" data-accent="#780109" data-dark="#780109" data-light="#E57373" data-bg="#ddd7d7" data-label="Rojo" onclick="obSelectTheme(this)"><div class="theme-swatch" style="background:linear-gradient(135deg,#780109,#500006)"></div><div class="theme-name">Rojo</div></div>
+        <div class="theme-card" data-accent="#707070" data-dark="#707070" data-light="#B3B3B3" data-bg="#e7e7e7" data-label="Gris" onclick="obSelectTheme(this)"><div class="theme-swatch" style="background:linear-gradient(135deg,#707070,#2B2B2B)"></div><div class="theme-name">Gris</div></div>
       </div>
       <div class="ob-nav"><button class="ob-btn-back" onclick="obGo(2)">← Atrás</button><button class="ob-btn-next" onclick="obGo(4)">Continuar →</button></div>
     </div>
@@ -821,7 +860,7 @@
     <div id="view-pomodoro" class="view-section">
       <div class="section-header">
         <h2>⏱️ Modo estudio</h2>
-        <p>25 minutos de estudio, 5 de descanso. Elegí la materia y dale play. El tiempo queda guardado en tu Progreso.</p>
+        <p>Configurá tus tiempos, elegí la materia y dale play. El tiempo queda guardado en tu Progreso.</p>
       </div>
       <label style="display:block;font-size:.8rem;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--text-main);margin-bottom:8px;text-align:center">¿Qué vas a estudiar ahora?</label>
       <select class="pom-subject-select" id="pomSubject"><option value="">— Elegí una materia —</option></select>
@@ -856,10 +895,10 @@
       <div class="section-header">
         <h2>Mis apuntes</h2>
         <p>Seleccioná una materia para ver y cargar tus recursos. Organizados por tipo para que siempre sepas dónde buscar.</p>
-        
-        <input type="text" id="notesSearchInput" class="notes-search-bar" placeholder="Buscar materia por nombre..." oninput="filterNotes()">
+        <input type="text" id="notesSearchInput" class="notes-search-bar" placeholder="🔍 Buscar materia o recurso..." oninput="filterNotes()">
+        <div class="search-mode-indicator" id="searchModeIndicator"></div>
       </div>
-      
+      <div class="deep-search-results" id="deepSearchResults"></div>
       <div id="notesGrid" class="notes-subjects-grid"></div>
       <div id="notesDetail" style="display:none"></div>
     </div>
@@ -880,10 +919,10 @@
         <div class="profile-grid" id="profileThemeGrid">
           <div class="profile-theme-card" data-accent="#820065" data-dark="#820065" data-light="#e8b4f5" data-bg="#f7d9fc" data-label="Púrpura" onclick="profileSelectTheme(this)"><div class="theme-swatch" style="background:linear-gradient(135deg,#820065,#5a0046)"></div><div class="theme-name">Púrpura</div></div>
           <div class="profile-theme-card" data-accent="#1B2CC1" data-dark="#091540" data-light="#7692FF" data-bg="#abd2fa" data-label="Azul" onclick="profileSelectTheme(this)"><div class="theme-swatch" style="background:linear-gradient(135deg,#1B2CC1,#091540)"></div><div class="theme-name">Azul</div></div>
-          <div class="profile-theme-card" data-accent="#47622A" data-dark="#243313" data-light="#9FB878" data-bg="#f9f9fc" data-label="Verde" onclick="profileSelectTheme(this)"><div class="theme-swatch" style="background:linear-gradient(135deg,#47622A,#243313)"></div><div class="theme-name">Verde</div></div>
+          <div class="profile-theme-card" data-accent="#47622A" data-dark="#132f06" data-light="#9FB878" data-bg="#e7e7e7" data-label="Verde" onclick="profileSelectTheme(this)"><div class="theme-swatch" style="background:linear-gradient(135deg,#47622A,#132f06)"></div><div class="theme-name">Verde</div></div>
           <div class="profile-theme-card" data-accent="#d1868f" data-dark="#b06068" data-light="#fbe0e5" data-bg="#fbcad9" data-label="Rosa" onclick="profileSelectTheme(this)"><div class="theme-swatch" style="background:linear-gradient(135deg,#d1868f,#b06068)"></div><div class="theme-name">Rosa</div></div>
-          <div class="profile-theme-card" data-accent="#B31B1B" data-dark="#660f0f" data-light="#E57373" data-bg="#f9f9fc" data-label="Rojo" onclick="profileSelectTheme(this)"><div class="theme-swatch" style="background:linear-gradient(135deg,#B31B1B,#660f0f)"></div><div class="theme-name">Rojo</div></div>
-          <div class="profile-theme-card" data-accent="#565656" data-dark="#2B2B2B" data-light="#B3B3B3" data-bg="#f9f9fc" data-label="Gris" onclick="profileSelectTheme(this)"><div class="theme-swatch" style="background:linear-gradient(135deg,#565656,#2B2B2B)"></div><div class="theme-name">Gris</div></div>
+          <div class="profile-theme-card" data-accent="#780109" data-dark="#780109" data-light="#E57373" data-bg="#ddd7d7" data-label="Rojo" onclick="profileSelectTheme(this)"><div class="theme-swatch" style="background:linear-gradient(135deg,#780109,#500006)"></div><div class="theme-name">Rojo</div></div>
+          <div class="profile-theme-card" data-accent="#707070" data-dark="#707070" data-light="#B3B3B3" data-bg="#e7e7e7" data-label="Gris" onclick="profileSelectTheme(this)"><div class="theme-swatch" style="background:linear-gradient(135deg,#707070,#2B2B2B)"></div><div class="theme-name">Gris</div></div>
         </div>
         <button class="profile-save-btn" onclick="saveProfileTheme()">💾 Confirmar y guardar tema</button>
       </div>
@@ -1570,16 +1609,35 @@ const NOTE_CATS=[
   {id:'otros',     label:'Otros archivos',       icon:'📁'},
 ];
 
+// --- POST-IT guardado automático ---
+let _postitSaveTimer=null;
+function autoSavePostit(subjectId){
+  clearTimeout(_postitSaveTimer);
+  _postitSaveTimer=setTimeout(()=>{
+    const ta=document.getElementById('postit-'+subjectId);
+    if(!ta)return;
+    if(!apuntesData[subjectId]||Array.isArray(apuntesData[subjectId]))apuntesData[subjectId]={_campus:'',_drive:''};
+    apuntesData[subjectId]._postit=ta.value;
+    _saveApuntes();
+    const savedEl=document.getElementById('postit-saved-'+subjectId);
+    if(savedEl){savedEl.textContent='Guardado ✓';setTimeout(()=>{savedEl.textContent='';},1500);}
+  },800);
+}
+
 function renderNotesTab(){
   const grid=document.getElementById('notesGrid');
   const detail=document.getElementById('notesDetail');
+  const deepRes=document.getElementById('deepSearchResults');
   if(!grid)return;
   grid.style.display='grid';
   detail.style.display='none';
+  if(deepRes)deepRes.classList.remove('show');
   _notesActiveSubject=null;
   
   const searchInput = document.getElementById('notesSearchInput');
   if(searchInput) searchInput.value = '';
+  const ind=document.getElementById('searchModeIndicator');
+  if(ind)ind.classList.remove('show');
   
   const enabled=Array.from(getCourses()).filter(c=>c.classList.contains('enabled')||c.classList.contains('completed'));
   if(!enabled.length){
@@ -1594,28 +1652,97 @@ function renderNotesTab(){
     if(Array.isArray(subj))count=subj.length;
     else NOTE_CATS.forEach(cat=>{count+=(subj[cat.id]||[]).length;});
     const hasLinks=subj._campus||subj._drive;
-    const hasNotes=count>0||hasLinks;
-    return`<div class="notes-subject-card${hasNotes?' has-notes':''}" onclick="openNotesDetail('${id}','${name.replace(/'/g,"\'")}')">
+    const hasPostit=subj._postit&&subj._postit.trim();
+    const hasNotes=count>0||hasLinks||hasPostit;
+    // Checkboxes completados
+    let checked=0;
+    NOTE_CATS.forEach(cat=>{(subj[cat.id]||[]).forEach(n=>{if(n.done)checked++;});});
+    const progressTxt=count>0?` · ${checked}/${count} listos`:'';
+    return`<div class="notes-subject-card${hasNotes?' has-notes':''}" onclick="openNotesDetail('${id}','${name.replace(/'/g,"\\'").replace(/"/g,'&quot;')}')">
       <div class="nsc-icon">📘</div>
       <div class="nsc-name">${name}</div>
-      <div class="nsc-count">${count>0?`<b>${count}</b> recurso${count!==1?'s':''}`:hasLinks?'Links guardados':'Sin recursos aún'}</div>
+      <div class="nsc-count">${count>0?`<b>${count}</b> recurso${count!==1?'s':''}${progressTxt}`:hasPostit?'📌 Nota rápida':hasLinks?'Links guardados':'Sin recursos aún'}</div>
     </div>`;
   }).join('');
 }
 
+// ==================== BÚSQUEDA PROFUNDA ====================
 window.filterNotes = () => {
-  const query = document.getElementById('notesSearchInput').value.toLowerCase();
-  document.querySelectorAll('.notes-subject-card').forEach(card => {
-    const name = card.querySelector('.nsc-name').textContent.toLowerCase();
-    card.style.display = name.includes(query) ? 'block' : 'none';
+  const query = document.getElementById('notesSearchInput').value.toLowerCase().trim();
+  const deepRes=document.getElementById('deepSearchResults');
+  const grid=document.getElementById('notesGrid');
+  const ind=document.getElementById('searchModeIndicator');
+  const detail=document.getElementById('notesDetail');
+
+  if(!query){
+    // Volver a mostrar grid normal
+    if(deepRes)deepRes.classList.remove('show');
+    if(ind)ind.classList.remove('show');
+    if(detail.style.display==='none'){
+      document.querySelectorAll('.notes-subject-card').forEach(card=>{card.style.display='block';});
+    }
+    return;
+  }
+
+  // Primero filtrar tarjetas por nombre
+  const cards=document.querySelectorAll('.notes-subject-card');
+  let nameMatches=0;
+  cards.forEach(card=>{
+    const name=card.querySelector('.nsc-name').textContent.toLowerCase();
+    const show=name.includes(query);
+    card.style.display=show?'block':'none';
+    if(show)nameMatches++;
   });
+
+  // Búsqueda profunda en recursos
+  const deepResults=[];
+  const enabledCourses=Array.from(getCourses()).filter(c=>c.classList.contains('enabled')||c.classList.contains('completed'));
+  enabledCourses.forEach(c=>{
+    const id=c.dataset.id;
+    const subjectName=c.querySelector('.course-name')?.textContent||id;
+    const subj=apuntesData[id]||{};
+    NOTE_CATS.forEach(cat=>{
+      (subj[cat.id]||[]).forEach((n,i)=>{
+        if(n.name.toLowerCase().includes(query)||(n.url&&n.url.toLowerCase().includes(query))){
+          deepResults.push({subjectId:id,subjectName,catId:cat.id,catLabel:cat.label,catIcon:cat.icon,name:n.name,url:n.url,idx:i});
+        }
+      });
+    });
+    // También buscar en post-it
+    if(subj._postit&&subj._postit.toLowerCase().includes(query)){
+      deepResults.push({subjectId:id,subjectName,catId:'_postit',catLabel:'Nota rápida',catIcon:'📌',name:subj._postit.substring(0,60)+'...',url:null,idx:-1});
+    }
+  });
+
+  if(deepResults.length>0){
+    if(deepRes){
+      deepRes.classList.add('show');
+      deepRes.innerHTML=`<div style="font-size:.8rem;font-weight:700;color:var(--accent);margin-bottom:10px;text-transform:uppercase;letter-spacing:.8px">🔍 Recursos encontrados (${deepResults.length})</div>`+
+        deepResults.map(r=>`
+          <div class="deep-result-item" onclick="openNotesDetail('${r.subjectId}','${r.subjectName.replace(/'/g,"\\'")}')">
+            <span style="font-size:1.3rem">${r.catIcon}</span>
+            <div style="flex:1;min-width:0">
+              <div class="deep-result-subject">${r.subjectName}</div>
+              <div class="deep-result-name">${r.name}</div>
+              ${r.url?`<div class="deep-result-url">${r.url}</div>`:''}
+            </div>
+            <span class="deep-result-cat">${r.catLabel}</span>
+          </div>`).join('');
+    }
+    if(ind){ind.textContent=`Búsqueda profunda: ${deepResults.length} recurso${deepResults.length!==1?'s':''} encontrado${deepResults.length!==1?'s':''}`;ind.classList.add('show');}
+  } else {
+    if(deepRes)deepRes.classList.remove('show');
+    if(ind)ind.classList.remove('show');
+  }
 };
 
 function openNotesDetail(id,name){
   _notesActiveSubject=id;
   const grid=document.getElementById('notesGrid');
   const detail=document.getElementById('notesDetail');
+  const deepRes=document.getElementById('deepSearchResults');
   grid.style.display='none';
+  if(deepRes)deepRes.classList.remove('show');
   detail.style.display='block';
   renderNotesDetail(id,name);
 }
@@ -1629,8 +1756,8 @@ function renderNotesDetail(id,name){
   const subj=apuntesData[id];
   const campus=subj._campus||'';
   const drive=subj._drive||'';
+  const postitText=subj._postit||'';
 
-  // Escape name for use in JS attributes
   const nameEscaped = name.replace(/\\/g,'\\\\').replace(/'/g,"\\'").replace(/"/g,'&quot;');
 
   const headerLinks=`
@@ -1645,11 +1772,36 @@ function renderNotesDetail(id,name){
       <input type="url" id="ndh-drive-input" placeholder="Link Google Drive (https://...)" value="${drive}">
       <button class="nc-add-btn" onclick="saveQuickLinks('${id}')">Guardar links</button>
     </div>`;
+
+  // Post-it
+  const postitSection=`
+    <div class="notes-postit">
+      <div class="notes-postit-label"><span>📌</span> Nota rápida</div>
+      <textarea id="postit-${id}" placeholder="Anotá acá lo que quieras: fórmulas, recordatorios, lo que dijo el profe... Se guarda solo." oninput="autoSavePostit('${id}')">${postitText}</textarea>
+      <span class="notes-postit-saved" id="postit-saved-${id}"></span>
+    </div>`;
+
+  // Botón IA Flashcards
+  const aiSection=`
+    <div style="padding:16px 24px;border-bottom:1px solid #eaeaea;background:#fafafa;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;">
+      <div>
+        <div style="font-size:.85rem;font-weight:700;color:var(--accent-dark);">✨ Generar Flashcards con IA</div>
+        <div style="font-size:.75rem;color:var(--text-muted);margin-top:2px;">La IA lee tu nota rápida y genera preguntas para repasar antes del parcial.</div>
+      </div>
+      <button class="ai-flashcards-btn" id="ai-btn-${id}" onclick="generarFlashcards('${id}')" ${!postitText.trim()?'disabled title="Primero escribí algo en la nota rápida"':''}>
+        🧠 Generar preguntas
+      </button>
+    </div>
+    <div id="ai-flashcards-area-${id}" style="padding:0 24px;"></div>`;
+
   const catsHtml=NOTE_CATS.map(cat=>{
     const items=subj[cat.id]||[];
+    const doneCount=items.filter(n=>n.done).length;
+    const progressBar=items.length>0?`<div style="height:3px;background:#f0f0f0;border-radius:2px;margin-top:4px;overflow:hidden"><div style="height:100%;width:${Math.round(doneCount/items.length*100)}%;background:var(--accent);border-radius:2px;transition:width .3s"></div></div>`:'';
     const itemsHtml=items.length
       ? items.map((n,i)=>`
-          <div class="note-item">
+          <div class="note-item${n.done?' completed-note':''}" id="ni-${id}-${cat.id}-${i}">
+            <input type="checkbox" class="note-check" ${n.done?'checked':''} onchange="toggleNoteCheck('${id}','${cat.id}',${i},this)" title="Marcar como listo">
             <span class="note-item-icon">${n.url?'🔗':'📄'}</span>
             <div class="note-item-info">
               <div class="note-item-name">${n.name}</div>
@@ -1661,12 +1813,13 @@ function renderNotesDetail(id,name){
             </div>
           </div>`).join('')
       : `<div class="nc-empty">No hay recursos agregados en esta categoría todavía.</div>`;
+    const badgeLabel=items.length?` <span class="nc-count-badge">${doneCount}/${items.length}</span>`:'';
     return`<div class="notes-category">
-      <div class="nc-header" onclick="toggleCat('cat-${cat.id}')">
-        <div class="nc-title"><span class="nc-title-icon">${cat.icon}</span>${cat.label}${items.length?` <span class="nc-count-badge">${items.length}</span>`:''}</div>
-        <span class="nc-chevron open" id="chev-cat-${cat.id}">▼</span>
+      <div class="nc-header" onclick="toggleCat('cat-${id}-${cat.id}')">
+        <div class="nc-title"><span class="nc-title-icon">${cat.icon}</span>${cat.label}${badgeLabel}${progressBar}</div>
+        <span class="nc-chevron open" id="chev-cat-${id}-${cat.id}">▼</span>
       </div>
-      <div class="nc-body" id="cat-${cat.id}">
+      <div class="nc-body" id="cat-${id}-${cat.id}">
         ${itemsHtml}
         <div class="nc-add-form">
           <input type="text" id="nn-${cat.id}" placeholder="Nombre del recurso (Ej: Resumen Primer Parcial)">
@@ -1676,6 +1829,7 @@ function renderNotesDetail(id,name){
       </div>
     </div>`;
   }).join('');
+
   detail.innerHTML=`
     <div class="notes-detail">
       <div class="notes-detail-header">
@@ -1684,35 +1838,106 @@ function renderNotesDetail(id,name){
         <div class="ndh-links">${headerLinks}</div>
       </div>
       ${addLinkRow}
+      ${postitSection}
+      ${aiSection}
       ${catsHtml}
     </div>`;
 }
 
+// ==================== TOGGLE CHECKBOX ====================
+function toggleNoteCheck(subjectId,catId,idx,checkbox){
+  if(!apuntesData[subjectId]||!apuntesData[subjectId][catId])return;
+  apuntesData[subjectId][catId][idx].done=checkbox.checked;
+  _saveApuntes();
+  // Actualizar visualmente sin re-render completo
+  const item=document.getElementById(`ni-${subjectId}-${catId}-${idx}`);
+  if(item){
+    item.classList.toggle('completed-note',checkbox.checked);
+    const nameEl=item.querySelector('.note-item-name');
+    if(nameEl){nameEl.style.textDecoration=checkbox.checked?'line-through':'';}
+  }
+  // Actualizar progress bar en el header de la categoría
+  const nameEl2=document.querySelector(`.nc-chevron#chev-cat-${subjectId}-${catId}`)?.closest('.notes-category')?.querySelector('.nc-title');
+  if(nameEl2){
+    const items=apuntesData[subjectId][catId];
+    const done=items.filter(n=>n.done).length;
+    const badge=nameEl2.querySelector('.nc-count-badge');
+    if(badge)badge.textContent=`${done}/${items.length}`;
+    const bar=nameEl2.querySelector('div[style]');
+    if(bar){const inner=bar.querySelector('div');if(inner)inner.style.width=Math.round(done/items.length*100)+'%';}
+  }
+}
+
+// ==================== IA FLASHCARDS ====================
+async function generarFlashcards(subjectId){
+  const btn=document.getElementById(`ai-btn-${subjectId}`);
+  const area=document.getElementById(`ai-flashcards-area-${subjectId}`);
+  const subj=apuntesData[subjectId]||{};
+  const postit=subj._postit||'';
+  if(!postit.trim()){alert('Primero escribí algo en la nota rápida para que la IA pueda generar preguntas.');return;}
+
+  btn.disabled=true;btn.textContent='⏳ Generando...';
+  area.innerHTML=`<div class="ai-loading" style="margin:16px 0"><div class="ai-loading-spinner"></div><div class="ai-loading-text">La IA está leyendo tus notas y generando preguntas de repaso...</div></div>`;
+
+  try{
+    const response=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        model:'claude-sonnet-4-20250514',
+        max_tokens:1000,
+        messages:[{
+          role:'user',
+          content:`Sos un asistente de estudio universitario argentino. Basándote en estas notas de un estudiante, generá exactamente 5 flashcards de repaso. Cada flashcard debe tener una pregunta concisa y una respuesta clara.
+
+NOTAS DEL ESTUDIANTE:
+${postit}
+
+Respondé ÚNICAMENTE con un JSON válido sin texto adicional ni backticks:
+{"flashcards":[{"q":"¿Pregunta?","a":"Respuesta clara."},{"q":"...","a":"..."}]}`
+        }]
+      })
+    });
+    const data=await response.json();
+    const text=data.content.map(i=>i.text||'').join('');
+    const clean=text.replace(/```json|```/g,'').trim();
+    const parsed=JSON.parse(clean);
+    if(!parsed.flashcards||!parsed.flashcards.length)throw new Error('Sin flashcards');
+    area.innerHTML=`<div style="padding:16px 0 8px"><div style="font-size:.8rem;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:.8px;margin-bottom:12px;">✅ ${parsed.flashcards.length} Flashcards generadas — tocá para ver la respuesta</div><div class="flashcards-container">${
+      parsed.flashcards.map((fc,i)=>`
+        <div class="flashcard" id="fc-${i}" onclick="toggleFlashcard(${i})">
+          <div class="flashcard-q">${fc.q}</div>
+          <div class="flashcard-a">${fc.a}</div>
+          <button class="flashcard-toggle">👁️ Ver respuesta</button>
+        </div>`).join('')
+    }</div></div>`;
+  }catch(err){
+    area.innerHTML=`<div style="padding:12px;background:#fff1f2;border-radius:10px;font-size:.85rem;color:#9f1239;margin:12px 0">⚠️ No se pudieron generar las flashcards. Verificá que tenés notas escritas y volvé a intentar.</div>`;
+  }finally{
+    btn.disabled=false;btn.innerHTML='🧠 Generar preguntas';
+  }
+}
+
+function toggleFlashcard(idx){
+  const fc=document.getElementById('fc-'+idx);if(!fc)return;
+  fc.classList.toggle('flipped');
+  const btn=fc.querySelector('.flashcard-toggle');
+  if(btn)btn.textContent=fc.classList.contains('flipped')?'🙈 Ocultar respuesta':'👁️ Ver respuesta';
+}
+
 // ==================== MODAL CREAR DRIVE ====================
 function openCreateDriveModal(subjectName) {
-  // Pre-fill the input with the subject name
   const input = document.getElementById('driveFolderName');
   if(input) input.value = subjectName || '';
   openModal('createDriveModal');
-  // Focus and select the text so user can easily edit it
-  setTimeout(() => {
-    if(input) { input.focus(); input.select(); }
-  }, 150);
+  setTimeout(() => {if(input) { input.focus(); input.select(); }}, 150);
 }
 
 function confirmCreateDrive() {
   const folderName = document.getElementById('driveFolderName').value.trim();
   if(!folderName) { alert('Escribí un nombre para la carpeta.'); return; }
-  // Open Google Drive with the folder creation dialog pre-filled
-  // Google Drive's "new folder" URL with name pre-filled
-  const driveUrl = `https://drive.google.com/drive/folders/create?usp=drive_link`;
-  // Since Drive doesn't support direct name pre-fill via URL, 
-  // we open My Drive and show a tip to copy the name
-  const nameEncoded = encodeURIComponent(folderName);
-  // Best approach: open Drive home, the name is in clipboard / shown to user
   window.open(`https://drive.google.com/drive/my-drive`, '_blank');
   closeModal('createDriveModal');
-  // Show the add link row so user can paste the Drive link after creating
   setTimeout(() => {
     const row = document.getElementById('ndh-link-row');
     if(row && !row.classList.contains('show')) {
@@ -1724,13 +1949,11 @@ function confirmCreateDrive() {
         driveInput.style.borderColor = 'var(--accent)';
         driveInput.style.background = '#fffbf0';
         setTimeout(() => {
-          driveInput.style.borderColor = '';
-          driveInput.style.background = '';
+          driveInput.style.borderColor = '';driveInput.style.background = '';
           driveInput.placeholder = 'Link Google Drive (https://...)';
         }, 5000);
       }
     }
-    // Also show a helpful toast
     showToast(`📂 Creá la carpeta "${folderName}" en Drive, luego pegá el link acá con ⚙️ Editar Links`);
   }, 400);
 }
@@ -1738,19 +1961,13 @@ function confirmCreateDrive() {
 function showToast(msg) {
   let t = document.getElementById('app-toast');
   if(!t) {
-    t = document.createElement('div');
-    t.id = 'app-toast';
+    t = document.createElement('div');t.id = 'app-toast';
     t.style.cssText = 'position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);background:#1a1a1a;color:#fff;padding:12px 20px;border-radius:12px;font-size:.85rem;font-weight:600;z-index:9999;opacity:0;transition:all .35s;max-width:90%;text-align:center;box-shadow:0 6px 20px rgba(0,0,0,0.25);font-family:Poppins,sans-serif;';
     document.body.appendChild(t);
   }
-  t.textContent = msg;
-  t.style.opacity = '1';
-  t.style.transform = 'translateX(-50%) translateY(0)';
+  t.textContent = msg;t.style.opacity = '1';t.style.transform = 'translateX(-50%) translateY(0)';
   clearTimeout(t._timeout);
-  t._timeout = setTimeout(() => {
-    t.style.opacity = '0';
-    t.style.transform = 'translateX(-50%) translateY(20px)';
-  }, 5000);
+  t._timeout = setTimeout(() => {t.style.opacity = '0';t.style.transform = 'translateX(-50%) translateY(20px)';}, 5000);
 }
 
 function toggleAddLinkRow(){
@@ -1782,7 +1999,7 @@ function addNoteInCat(subjectId,catId){
   if(!name){alert('Escribí un nombre para el recurso.');return;}
   if(!apuntesData[subjectId]||Array.isArray(apuntesData[subjectId]))apuntesData[subjectId]={_campus:'',_drive:''};
   if(!apuntesData[subjectId][catId])apuntesData[subjectId][catId]=[];
-  apuntesData[subjectId][catId].push({name,url});
+  apuntesData[subjectId][catId].push({name,url,done:false});
   _saveApuntes();
   const nameEl=document.querySelector('.ndh-title');
   renderNotesDetail(subjectId,nameEl?.textContent||subjectId);
