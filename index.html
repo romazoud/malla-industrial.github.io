@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -131,7 +132,6 @@
 
   <style>
     :root{
-      /* === Tema por Defecto (Púrpura) === */
       --accent:#820065;
       --accent-dark:#820065;
       --accent-light:#e8b4f5;
@@ -279,6 +279,13 @@
     .cal-nav{display:flex;align-items:center;gap:15px;}
     .cal-nav-btn{background:var(--accent);color:#fff;border:none;padding:8px 15px;border-radius:8px;font-weight:bold;cursor:pointer;font-size:1.1rem;}
     .cal-month-display{font-size:1.1rem;font-weight:700;color:var(--text-main);min-width:150px;text-align:center;}
+
+    /* Toggles de vista */
+    .cal-view-toggle{display:flex;gap:0;border:1.5px solid var(--accent);border-radius:10px;overflow:hidden;}
+    .cal-view-btn{padding:7px 18px;border:none;background:transparent;color:var(--accent);font-family:'Poppins',sans-serif;font-size:.8rem;font-weight:700;cursor:pointer;transition:.2s;}
+    .cal-view-btn.active{background:var(--accent);color:#fff;}
+    .cal-view-btn:hover:not(.active){background:rgba(var(--accent-rgb),.08);}
+
     .calendar-container{background:#fff;border-radius:20px;padding:20px;border:1px solid #eaeaea;box-shadow: 0 4px 15px rgba(0,0,0,0.04);}
     .cal-weekdays{display:grid;grid-template-columns:repeat(7,1fr);gap:5px;margin-bottom:10px;text-align:center;font-weight:700;color:var(--text-muted);font-size:.85rem;}
     .cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:5px;}
@@ -288,6 +295,25 @@
     .cal-date-num{font-weight:700;color:var(--text-muted);margin-bottom:4px;text-align:right;font-size:.85rem;}
     .cal-day.today .cal-date-num{color:var(--accent);font-size:.95rem;}
     .cal-event-pill{font-size:.72rem;padding:4px 6px;border-radius:4px;margin-bottom:3px;color:#fff;font-weight:600;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;}
+
+    /* ===== VISTA SEMANA DEL CALENDARIO ===== */
+    .week-view-container{background:#fff;border-radius:20px;border:1px solid #eaeaea;box-shadow:0 4px 15px rgba(0,0,0,.04);overflow:hidden;}
+    .week-days-header{display:grid;grid-template-columns:60px repeat(7,1fr);background:var(--accent-dark);border-bottom:2px solid rgba(255,255,255,.15);}
+    .week-hour-col-header{padding:12px 0;}
+    .week-day-header{padding:12px 8px;text-align:center;border-left:1px solid rgba(255,255,255,.1);}
+    .week-day-header .wdh-name{font-size:.75rem;font-weight:700;color:rgba(255,255,255,.7);text-transform:uppercase;letter-spacing:.8px;}
+    .week-day-header .wdh-date{font-size:1.2rem;font-weight:900;color:#fff;line-height:1.1;margin-top:2px;}
+    .week-day-header.is-today .wdh-date{background:rgba(255,255,255,.2);border-radius:8px;width:36px;height:36px;display:flex;align-items:center;justify-content:center;margin:2px auto 0;}
+    .week-body{display:grid;grid-template-columns:60px repeat(7,1fr);max-height:520px;overflow-y:auto;}
+    .week-hour-labels{display:flex;flex-direction:column;}
+    .week-hour-label{height:64px;display:flex;align-items:flex-start;justify-content:center;padding-top:6px;font-size:.7rem;font-weight:700;color:var(--text-muted);border-bottom:1px solid #f0f0f0;background:#fafafa;}
+    .week-day-col{display:flex;flex-direction:column;border-left:1px solid #f0f0f0;}
+    .week-cell{height:64px;border-bottom:1px solid #f0f0f0;padding:4px 5px;cursor:pointer;transition:background .15s;position:relative;}
+    .week-cell:hover{background:#fdf7ff;}
+    .week-event{background:var(--accent);color:#fff;border-radius:6px;padding:3px 7px;font-size:.72rem;font-weight:700;height:100%;display:flex;align-items:center;cursor:pointer;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;box-shadow:0 2px 6px rgba(0,0,0,.12);}
+    .week-event-empty{height:100%;}
+    .week-today-col{background:rgba(var(--accent-rgb),.03);}
+    .week-no-events{padding:40px;text-align:center;color:var(--text-muted);font-size:.9rem;opacity:.6;}
 
     /* ===== HORARIO ===== */
     #view-schedule{max-width:1100px;margin:0 auto;padding-bottom:50px;}
@@ -404,17 +430,6 @@
     .nc-add-btn{padding:10px 18px;border-radius:8px;border:none;background:var(--accent-dark);color:#fff;font-family:'Poppins',sans-serif;font-weight:600;font-size:.85rem;cursor:pointer;transition:.18s;}
     .nc-add-btn:hover{background:var(--accent);}
 
-    /* ===== MODAL CREAR DRIVE ===== */
-    #createDriveModal .modal-box{text-align:left;max-width:440px;}
-    .drive-modal-icon{font-size:2.5rem;text-align:center;margin-bottom:8px;}
-    .drive-modal-hint{font-size:.82rem;color:var(--text-muted);margin:0 0 16px;line-height:1.5;}
-    .drive-modal-name-input{width:100%;padding:14px 16px;border-radius:10px;border:2px solid var(--accent);font-family:'Poppins',sans-serif;font-size:1rem;font-weight:600;color:var(--text-main);background:#fafafa;outline:none;box-sizing:border-box;margin-bottom:8px;}
-    .drive-modal-name-input:focus{background:#fff;border-color:var(--accent-dark);}
-    .drive-modal-tip{font-size:.75rem;color:var(--text-muted);margin-bottom:18px;font-style:italic;}
-    .drive-modal-btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:13px;border-radius:10px;border:none;background:#4285F4;color:#fff;font-family:'Poppins',sans-serif;font-weight:700;font-size:.95rem;cursor:pointer;transition:.2s;margin-bottom:8px;}
-    .drive-modal-btn:hover{background:#3367d6;transform:translateY(-1px);}
-    .drive-modal-btn svg{flex-shrink:0;}
-
     /* ===== DASHBOARD ===== */
     #view-home{padding-bottom:50px;}
     .dash-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:24px;}
@@ -498,6 +513,8 @@
       .stats-header{flex-direction:column;align-items:center;gap:16px;}
       .pom-circle{width:180px;height:180px;}
       .pom-time{font-size:2.8rem;}
+      .week-days-header,.week-body{grid-template-columns:44px repeat(7,1fr);}
+      .week-hour-label{font-size:.6rem;}
     }
   </style>
 </head>
@@ -582,28 +599,7 @@
 </div>
 
 <!-- ===== MODAL CREAR CARPETA EN DRIVE ===== -->
-<div id="createDriveModal" class="modal-overlay">
-  <div class="modal-box" style="text-align:left;max-width:440px;">
-    <div style="text-align:center;font-size:2.2rem;margin-bottom:4px;">📂</div>
-    <h3 style="margin:0 0 6px;color:var(--accent-dark);text-align:center;">Crear carpeta en Drive</h3>
-    <p style="font-size:.85rem;color:var(--text-muted);margin:0 0 18px;text-align:center;line-height:1.5;">
-      Confirmá el nombre de la carpeta. Se va a abrir Google Drive listo para crearla.
-    </p>
-    <label style="display:block;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--text-muted);margin-bottom:8px;">Nombre de la carpeta</label>
-    <input type="text" id="driveFolderName" class="drive-modal-name-input" placeholder="Nombre de la materia">
-    <p style="font-size:.75rem;color:var(--text-muted);margin:0 0 18px;font-style:italic;">
-      Podés editarlo antes de abrir Drive si querés un nombre diferente.
-    </p>
-    <button class="drive-modal-btn" onclick="confirmCreateDrive()">
-      <svg width="18" height="18" viewBox="0 0 87.3 78" xmlns="http://www.w3.org/2000/svg"><path d="m6.6 66.85 3.85 6.65c.8 1.4 1.95 2.5 3.3 3.3l13.75-23.8h-27.5c0 1.55.4 3.1 1.2 4.5z" fill="#0066da"/><path d="m43.65 25-13.75-23.8c-1.35.8-2.5 1.9-3.3 3.3l-25.4 44a9.06 9.06 0 0 0 -1.2 4.5h27.5z" fill="#00ac47"/><path d="m73.55 76.8c1.35-.8 2.5-1.9 3.3-3.3l1.6-2.75 7.65-13.25c.8-1.4 1.2-2.95 1.2-4.5h-27.502l5.852 11.5z" fill="#ea4335"/><path d="m43.65 25 13.75-23.8c-1.35-.8-2.9-1.2-4.5-1.2h-18.5c-1.6 0-3.15.45-4.5 1.2z" fill="#00832d"/><path d="m59.8 53h-32.3l-13.75 23.8c1.35.8 2.9 1.2 4.5 1.2h50.8c1.6 0 3.15-.45 4.5-1.2z" fill="#2684fc"/><path d="m73.4 26.5-12.7-22c-.8-1.4-1.95-2.5-3.3-3.3l-13.75 23.8 16.15 27h27.45c0-1.55-.4-3.1-1.2-4.5z" fill="#ffba00"/></svg>
-      Abrir Google Drive para crear carpeta
-    </button>
-    <p style="font-size:.75rem;color:var(--text-muted);margin:0 0 12px;text-align:center;">
-      Una vez creada la carpeta en Drive, copiá el link y pegalo con el botón <strong>⚙️ Editar Links</strong>.
-    </p>
-    <button class="btn-close-modal" onclick="closeModal('createDriveModal')">Cancelar</button>
-  </div>
-</div>
+<!-- REMOVED - replaced with inline Drive creation flow -->
 
 <div id="scheduleModal" class="modal-overlay">
   <div class="modal-box">
@@ -757,22 +753,29 @@
       <div class="mapa-scroll-wrapper"><div class="year-row" id="mallaContainer"></div></div>
     </div>
 
+    <!-- ===== CALENDARIO con toggle Mes/Semana ===== -->
     <div id="view-calendar" class="view-section">
       <div class="section-header">
         <h2>🗓️ Calendario</h2>
         <p>Anotá exámenes, parciales y entregas. Tocá cualquier día para agregar un evento.</p>
       </div>
       <div class="cal-header">
-        <h3>Mis fechas importantes</h3>
-        <div class="cal-nav">
-          <button class="cal-nav-btn" onclick="changeMonth(-1)">❮</button>
-          <div id="monthYearDisplay" class="cal-month-display"></div>
-          <button class="cal-nav-btn" onclick="changeMonth(1)">❯</button>
+        <h3 id="calHeaderTitle">Mis fechas importantes</h3>
+        <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+          <!-- Toggle Mes / Semana -->
+          <div class="cal-view-toggle">
+            <button class="cal-view-btn active" id="btnViewMonth" onclick="setCalView('month')">📅 Mes</button>
+            <button class="cal-view-btn" id="btnViewWeek" onclick="setCalView('week')">📆 Semana</button>
+          </div>
+          <div class="cal-nav">
+            <button class="cal-nav-btn" onclick="calNavPrev()">❮</button>
+            <div id="monthYearDisplay" class="cal-month-display"></div>
+            <button class="cal-nav-btn" onclick="calNavNext()">❯</button>
+          </div>
         </div>
       </div>
-      <div class="calendar-container">
-        <div class="cal-weekdays"><div>Dom</div><div>Lun</div><div>Mar</div><div>Mié</div><div>Jue</div><div>Vie</div><div>Sáb</div></div>
-        <div id="calendarGrid" class="cal-grid"></div>
+      <div class="calendar-container" id="calendarContainer">
+        <!-- Se renderiza dinámicamente -->
       </div>
     </div>
 
@@ -856,10 +859,8 @@
       <div class="section-header">
         <h2>Mis apuntes</h2>
         <p>Seleccioná una materia para ver y cargar tus recursos. Organizados por tipo para que siempre sepas dónde buscar.</p>
-        
         <input type="text" id="notesSearchInput" class="notes-search-bar" placeholder="Buscar materia por nombre..." oninput="filterNotes()">
       </div>
-      
       <div id="notesGrid" class="notes-subjects-grid"></div>
       <div id="notesDetail" style="display:none"></div>
     </div>
@@ -1158,6 +1159,7 @@ window.switchTab=(name,event)=>{
   if(event&&event.currentTarget)event.currentTarget.classList.add('active');
   if(name==='notes')renderNotesTab();
   if(name==='pomodoro')renderPomSubjectSelect();
+  if(name==='calendar')renderCalendarView();
 };
 
 // ==================== MODAL DE NOTA ====================
@@ -1380,25 +1382,63 @@ function saveExtraInfo(){
 function openModal(id){document.getElementById(id).classList.add('open');}
 function closeModal(id){document.getElementById(id).classList.remove('open');}
 
-// ==================== CALENDARIO ====================
+// ==================== CALENDARIO (MES + SEMANA) ====================
 const monthNames=["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"];
-let currentMonth=new Date().getMonth(),currentYear=new Date().getFullYear();
-window.changeMonth=(offset)=>{
-  currentMonth+=offset;
-  if(currentMonth>11){currentMonth=0;currentYear++;}
-  if(currentMonth<0){currentMonth=11;currentYear--;}
-  renderCalendar();
-};
+const dayNamesShort=["Dom","Lun","Mar","Mié","Jue","Vie","Sáb"];
+const dayNamesFull=["Domingo","Lunes","Martes","Miércoles","Jueves","Viernes","Sábado"];
 
-function renderCalendar(){
-  const grid=document.getElementById('calendarGrid');if(!grid)return;
-  grid.innerHTML='';
+let currentMonth=new Date().getMonth();
+let currentYear=new Date().getFullYear();
+let currentWeekStart=null; // lunes de la semana actual
+let calView='month'; // 'month' | 'week'
+
+// Inicializar semana: lunes de la semana actual
+function initWeekStart(){
+  const now=new Date();
+  const day=now.getDay(); // 0=dom
+  const diff=day===0?-6:1-day; // ajustar a lunes
+  currentWeekStart=new Date(now);
+  currentWeekStart.setDate(now.getDate()+diff);
+  currentWeekStart.setHours(0,0,0,0);
+}
+
+function setCalView(v){
+  calView=v;
+  document.getElementById('btnViewMonth').classList.toggle('active',v==='month');
+  document.getElementById('btnViewWeek').classList.toggle('active',v==='week');
+  renderCalendarView();
+}
+
+function calNavPrev(){
+  if(calView==='month'){currentMonth--;if(currentMonth<0){currentMonth=11;currentYear--;}}
+  else{currentWeekStart.setDate(currentWeekStart.getDate()-7);}
+  renderCalendarView();
+}
+function calNavNext(){
+  if(calView==='month'){currentMonth++;if(currentMonth>11){currentMonth=0;currentYear++;}}
+  else{currentWeekStart.setDate(currentWeekStart.getDate()+7);}
+  renderCalendarView();
+}
+// Compatibilidad con funciones antiguas
+window.changeMonth=(offset)=>{calView='month';setCalView('month');if(offset>0)calNavNext();else calNavPrev();};
+
+function renderCalendarView(){
+  if(!currentWeekStart)initWeekStart();
+  if(calView==='month')renderMonthView();
+  else renderWeekView();
+}
+
+/* ---- VISTA MES ---- */
+function renderCalendar(){ renderMonthView(); } // alias
+function renderMonthView(){
+  const cont=document.getElementById('calendarContainer');if(!cont)return;
   document.getElementById('monthYearDisplay').textContent=`${monthNames[currentMonth]} ${currentYear}`;
-  const first=new Date(currentYear,currentMonth,1).getDay();
-  const days=new Date(currentYear,currentMonth+1,0).getDate();
   const now=new Date();
   const todayD=now.getDate(),todayM=now.getMonth(),todayY=now.getFullYear();
-  for(let i=0;i<first;i++)grid.innerHTML+='<div class="cal-day empty"></div>';
+  const first=new Date(currentYear,currentMonth,1).getDay();
+  const days=new Date(currentYear,currentMonth+1,0).getDate();
+  let html=`<div class="cal-weekdays">${dayNamesShort.map(d=>`<div>${d}</div>`).join('')}</div><div class="cal-grid">`;
+  for(let i=0;i<first;i++)html+='<div class="cal-day empty"></div>';
   for(let d=1;d<=days;d++){
     const key=`${currentYear}-${currentMonth}-${d}`;
     const isToday=(d===todayD&&currentMonth===todayM&&currentYear===todayY);
@@ -1406,13 +1446,96 @@ function renderCalendar(){
     if(calendarData[key])calendarData[key].forEach((e,i)=>{
       ev+=`<div class="cal-event-pill" style="background:${e.color}" onclick="deleteCalEvent('${key}',${i},event)">${e.time} - ${e.title}</div>`;
     });
-    grid.innerHTML+=`<div class="cal-day${isToday?' today':''}" onclick="openCalModal('${key}',${d})"><div class="cal-date-num">${d}</div>${ev}</div>`;
+    html+=`<div class="cal-day${isToday?' today':''}" onclick="openCalModal('${key}',${d})"><div class="cal-date-num">${d}</div>${ev}</div>`;
+  }
+  html+='</div>';
+  cont.innerHTML=html;
+}
+
+/* ---- VISTA SEMANA ---- */
+function renderWeekView(){
+  const cont=document.getElementById('calendarContainer');if(!cont)return;
+  const ws=new Date(currentWeekStart);
+  const we=new Date(ws);we.setDate(ws.getDate()+6);
+  // Formatear rango
+  const fmt=(d)=>`${d.getDate()} ${monthNames[d.getMonth()].slice(0,3)}`;
+  document.getElementById('monthYearDisplay').textContent=`${fmt(ws)} – ${fmt(we)} ${we.getFullYear()}`;
+
+  const now=new Date();
+  const todayStr=`${now.getFullYear()}-${now.getMonth()}-${now.getDate()}`;
+
+  // Construir 7 días de la semana
+  const weekDays=[];
+  for(let i=0;i<7;i++){
+    const d=new Date(ws);d.setDate(ws.getDate()+i);
+    weekDays.push(d);
+  }
+
+  // Encabezado días
+  let headerHtml=`<div class="week-days-header">
+    <div class="week-hour-col-header"></div>`;
+  weekDays.forEach(d=>{
+    const dStr=`${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
+    const isToday=dStr===todayStr;
+    headerHtml+=`<div class="week-day-header${isToday?' is-today':''}">
+      <div class="wdh-name">${dayNamesShort[d.getDay()]}</div>
+      <div class="wdh-date">${d.getDate()}</div>
+    </div>`;
+  });
+  headerHtml+='</div>';
+
+  // Horas de 8:00 a 23:00
+  const weekHoras=["08:00","09:00","10:00","11:00","12:00","13:00","14:00","15:00","16:00","17:00","18:00","19:00","20:00","21:00","22:00","23:00"];
+
+  // Cuerpo
+  let bodyHtml='<div class="week-body"><div class="week-hour-labels">';
+  weekHoras.forEach(h=>{bodyHtml+=`<div class="week-hour-label">${h}</div>`;});
+  bodyHtml+='</div>';
+
+  weekDays.forEach((d,di)=>{
+    const dStr=`${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
+    const isToday=dStr===todayStr;
+    bodyHtml+=`<div class="week-day-col${isToday?' week-today-col':''}">`;
+    weekHoras.forEach(h=>{
+      const calKey=dStr;
+      // Buscar eventos del calendario para esa fecha y hora aproximada
+      const evs=(calendarData[calKey]||[]).filter(ev=>{
+        return ev.time&&ev.time.startsWith(h.substring(0,2));
+      });
+      let cellContent='';
+      if(evs.length){
+        cellContent=evs.map((ev,i)=>{
+          const idx=(calendarData[calKey]||[]).findIndex(e=>e===ev);
+          return`<div class="week-event" style="background:${ev.color}" onclick="deleteCalEvent('${calKey}',${idx},event)" title="${ev.title}">${ev.title}</div>`;
+        }).join('');
+      } else {
+        cellContent='<div class="week-event-empty"></div>';
+      }
+      bodyHtml+=`<div class="week-cell" onclick="openCalModal('${calKey}',${d.getDate()})" title="Agregar evento">${cellContent}</div>`;
+    });
+    bodyHtml+='</div>';
+  });
+  bodyHtml+='</div>';
+
+  cont.innerHTML=headerHtml+bodyHtml;
+
+  // Scroll al horario actual si es la semana presente
+  const nowH=now.getHours();
+  if(nowH>=8&&nowH<=23){
+    const idx=nowH-8;
+    setTimeout(()=>{
+      const body=cont.querySelector('.week-body');
+      if(body)body.scrollTop=Math.max(0,(idx-1)*64);
+    },50);
   }
 }
 
 window.openCalModal=(key,day)=>{
   document.getElementById('calDateKey').value=key;
-  document.getElementById('calModalDateDisplay').textContent=`${day} de ${monthNames[currentMonth]} de ${currentYear}`;
+  // Parsear key para mostrar fecha legible
+  const parts=key.split('-');
+  const y=parseInt(parts[0]),m=parseInt(parts[1]),d=parseInt(parts[2]);
+  document.getElementById('calModalDateDisplay').textContent=`${d} de ${monthNames[m]} de ${y}`;
   document.getElementById('calTitle').value='';document.getElementById('calTime').value='';
   openModal('calModal');
 };
@@ -1426,10 +1549,10 @@ window.saveCalEvent=(openGoogle)=>{
   calendarData[key].push({title,time,color});
   try{localStorage.setItem('indCalendar',JSON.stringify(calendarData));}catch(e){}
   if(window.syncCloud)window.syncCloud();
-  renderCalendar();closeModal('calModal');renderUpcoming();
+  renderCalendarView();closeModal('calModal');renderUpcoming();
   if(openGoogle){
-    const[y,m,d]=key.split('-');const fm=(parseInt(m)+1).toString().padStart(2,'0');const fd=d.padStart(2,'0');
-    window.open(`https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(title)}&dates=${y}${fm}${fd}/${y}${fm}${fd}&details=${encodeURIComponent('Horario: '+time)}`,'_blank');
+    const parts=key.split('-');const y=parts[0];const m=(parseInt(parts[1])+1).toString().padStart(2,'0');const d=parts[2].padStart(2,'0');
+    window.open(`https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(title)}&dates=${y}${m}${d}/${y}${m}${d}&details=${encodeURIComponent('Horario: '+time)}`,'_blank');
   }
 };
 window.deleteCalEvent=(key,idx,e)=>{
@@ -1437,7 +1560,7 @@ window.deleteCalEvent=(key,idx,e)=>{
   if(confirm('¿Borrar esta actividad?')){
     calendarData[key].splice(idx,1);if(!calendarData[key].length)delete calendarData[key];
     try{localStorage.setItem('indCalendar',JSON.stringify(calendarData));}catch(e){}
-    if(window.syncCloud)window.syncCloud();renderCalendar();renderUpcoming();
+    if(window.syncCloud)window.syncCloud();renderCalendarView();renderUpcoming();
   }
 };
 
@@ -1577,10 +1700,8 @@ function renderNotesTab(){
   grid.style.display='grid';
   detail.style.display='none';
   _notesActiveSubject=null;
-  
   const searchInput = document.getElementById('notesSearchInput');
   if(searchInput) searchInput.value = '';
-  
   const enabled=Array.from(getCourses()).filter(c=>c.classList.contains('enabled')||c.classList.contains('completed'));
   if(!enabled.length){
     grid.innerHTML='<span style="color:var(--text-muted);font-size:.9rem">Habilitá materias en el Plan de estudios para ver sus apuntes.</span>';
@@ -1629,14 +1750,15 @@ function renderNotesDetail(id,name){
   const subj=apuntesData[id];
   const campus=subj._campus||'';
   const drive=subj._drive||'';
-
-  // Escape name for use in JS attributes
   const nameEscaped = name.replace(/\\/g,'\\\\').replace(/'/g,"\\'").replace(/"/g,'&quot;');
 
   const headerLinks=`
     ${campus?`<a href="${campus}" target="_blank" class="ndh-link-btn">🖥️ Campus Virtual</a>`:''}
     ${drive?`<a href="${drive}" target="_blank" class="ndh-link-btn">📁 Ver Carpeta Drive</a>`:''}
-    <button class="ndh-link-btn" onclick="openCreateDriveModal('${nameEscaped}')" style="background:rgba(255,255,255,0.12);border:none;cursor:pointer;">📂 Crear Drive</button>
+    <button class="ndh-link-btn" onclick="crearCarpetaDrive('${nameEscaped}','${id}')" style="background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,.3);cursor:pointer;">
+      <svg width="14" height="14" viewBox="0 0 87.3 78" xmlns="http://www.w3.org/2000/svg" style="flex-shrink:0"><path d="m6.6 66.85 3.85 6.65c.8 1.4 1.95 2.5 3.3 3.3l13.75-23.8h-27.5c0 1.55.4 3.1 1.2 4.5z" fill="#0066da"/><path d="m43.65 25-13.75-23.8c-1.35.8-2.5 1.9-3.3 3.3l-25.4 44a9.06 9.06 0 0 0 -1.2 4.5h27.5z" fill="#00ac47"/><path d="m73.55 76.8c1.35-.8 2.5-1.9 3.3-3.3l1.6-2.75 7.65-13.25c.8-1.4 1.2-2.95 1.2-4.5h-27.502l5.852 11.5z" fill="#ea4335"/><path d="m43.65 25 13.75-23.8c-1.35-.8-2.9-1.2-4.5-1.2h-18.5c-1.6 0-3.15.45-4.5 1.2z" fill="#00832d"/><path d="m59.8 53h-32.3l-13.75 23.8c1.35.8 2.9 1.2 4.5 1.2h50.8c1.6 0 3.15-.45 4.5-1.2z" fill="#2684fc"/><path d="m73.4 26.5-12.7-22c-.8-1.4-1.95-2.5-3.3-3.3l-13.75 23.8 16.15 27h27.45c0-1.55-.4-3.1-1.2-4.5z" fill="#ffba00"/></svg>
+      Crear carpeta en Drive
+    </button>
     <button class="ndh-link-btn" onclick="toggleAddLinkRow()" style="background:rgba(0,0,0,0.15);border:none;cursor:pointer;">⚙️ Editar Links</button>`;
 
   const addLinkRow=`
@@ -1688,51 +1810,54 @@ function renderNotesDetail(id,name){
     </div>`;
 }
 
-// ==================== MODAL CREAR DRIVE ====================
-function openCreateDriveModal(subjectName) {
-  // Pre-fill the input with the subject name
-  const input = document.getElementById('driveFolderName');
-  if(input) input.value = subjectName || '';
-  openModal('createDriveModal');
-  // Focus and select the text so user can easily edit it
-  setTimeout(() => {
-    if(input) { input.focus(); input.select(); }
-  }, 150);
+// ==================== CREAR CARPETA DRIVE DIRECTAMENTE ====================
+// Google Drive permite crear carpeta directamente via API Apps Script o via la URL de "new folder"
+// La solución más directa: copiar el nombre al portapapeles y abrir drive.google.com/drive/folders/create
+// Pero la URL que realmente pre-llena el nombre es via Google Apps Script web app.
+// Usamos la mejor alternativa disponible sin backend: 
+// 1. Copiamos el nombre al clipboard
+// 2. Abrimos Drive en el directorio raíz con un mensaje instructivo
+// 3. Mostramos un panel para pegar el link una vez creada
+
+let _driveCreateSubjectId = null;
+let _driveCreateSubjectName = null;
+
+function crearCarpetaDrive(name, subjectId) {
+  _driveCreateSubjectId = subjectId;
+  _driveCreateSubjectName = name;
+  
+  // Copiar el nombre al portapapeles
+  navigator.clipboard.writeText(name).catch(()=>{});
+  
+  // Abrir Google Drive en la vista "nueva carpeta"
+  // Esta URL abre Drive con el diálogo de nueva carpeta listo para usar
+  window.open('https://drive.google.com/drive/folders/new', '_blank');
+
+  // Mostrar panel para pegar el link después de crear
+  showDriveLinkPanel(name, subjectId);
 }
 
-function confirmCreateDrive() {
-  const folderName = document.getElementById('driveFolderName').value.trim();
-  if(!folderName) { alert('Escribí un nombre para la carpeta.'); return; }
-  // Open Google Drive with the folder creation dialog pre-filled
-  // Google Drive's "new folder" URL with name pre-filled
-  const driveUrl = `https://drive.google.com/drive/folders/create?usp=drive_link`;
-  // Since Drive doesn't support direct name pre-fill via URL, 
-  // we open My Drive and show a tip to copy the name
-  const nameEncoded = encodeURIComponent(folderName);
-  // Best approach: open Drive home, the name is in clipboard / shown to user
-  window.open(`https://drive.google.com/drive/my-drive`, '_blank');
-  closeModal('createDriveModal');
-  // Show the add link row so user can paste the Drive link after creating
-  setTimeout(() => {
-    const row = document.getElementById('ndh-link-row');
-    if(row && !row.classList.contains('show')) {
-      row.classList.add('show');
-      const driveInput = document.getElementById('ndh-drive-input');
-      if(driveInput) {
-        driveInput.focus();
-        driveInput.placeholder = `Pegá acá el link de la carpeta "${folderName}" que acabás de crear`;
-        driveInput.style.borderColor = 'var(--accent)';
-        driveInput.style.background = '#fffbf0';
-        setTimeout(() => {
-          driveInput.style.borderColor = '';
-          driveInput.style.background = '';
-          driveInput.placeholder = 'Link Google Drive (https://...)';
-        }, 5000);
-      }
+function showDriveLinkPanel(name, subjectId){
+  // Mostrar el row de editar links con mensaje destacado
+  const row = document.getElementById('ndh-link-row');
+  if(row){
+    row.classList.add('show');
+    const driveInput = document.getElementById('ndh-drive-input');
+    if(driveInput){
+      driveInput.focus();
+      driveInput.placeholder = `Pegá acá el link de la carpeta "${name}"`;
+      driveInput.style.borderColor='var(--accent)';
+      driveInput.style.background='#fffbf0';
+      setTimeout(()=>{
+        driveInput.style.borderColor='';
+        driveInput.style.background='';
+        driveInput.placeholder='Link Google Drive (https://...)';
+      },6000);
     }
-    // Also show a helpful toast
-    showToast(`📂 Creá la carpeta "${folderName}" en Drive, luego pegá el link acá con ⚙️ Editar Links`);
-  }, 400);
+  }
+  
+  // Toast informativo
+  showToast(`📂 "${name}" copiado al portapapeles. Creá la carpeta en Drive y pegá el link acá.`);
 }
 
 function showToast(msg) {
@@ -1750,7 +1875,7 @@ function showToast(msg) {
   t._timeout = setTimeout(() => {
     t.style.opacity = '0';
     t.style.transform = 'translateX(-50%) translateY(20px)';
-  }, 5000);
+  }, 6000);
 }
 
 function toggleAddLinkRow(){
@@ -1830,7 +1955,8 @@ window.initApp=function(){
     pomodoroStats=JSON.parse(localStorage.getItem('pomodoroStats')||'{}');
     horarioExtraData=JSON.parse(localStorage.getItem('horarioExtra')||'{}');
   }catch(e){}
-  initScheduleModal();loadProgress();updateStates();renderCalendar();
+  initWeekStart();
+  initScheduleModal();loadProgress();updateStates();renderCalendarView();
   buildSchedule();renderGradesInStats();renderStudyStats();
   pomUpdateDisplay();renderDashboard();
 };
