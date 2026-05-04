@@ -131,7 +131,6 @@
 
   <style>
     :root{
-      /* === Tema por Defecto (Púrpura) === */
       --accent:#820065;
       --accent-dark:#820065;
       --accent-light:#e8b4f5;
@@ -856,10 +855,8 @@
       <div class="section-header">
         <h2>Mis apuntes</h2>
         <p>Seleccioná una materia para ver y cargar tus recursos. Organizados por tipo para que siempre sepas dónde buscar.</p>
-        
         <input type="text" id="notesSearchInput" class="notes-search-bar" placeholder="Buscar materia por nombre..." oninput="filterNotes()">
       </div>
-      
       <div id="notesGrid" class="notes-subjects-grid"></div>
       <div id="notesDetail" style="display:none"></div>
     </div>
@@ -1577,10 +1574,8 @@ function renderNotesTab(){
   grid.style.display='grid';
   detail.style.display='none';
   _notesActiveSubject=null;
-  
   const searchInput = document.getElementById('notesSearchInput');
   if(searchInput) searchInput.value = '';
-  
   const enabled=Array.from(getCourses()).filter(c=>c.classList.contains('enabled')||c.classList.contains('completed'));
   if(!enabled.length){
     grid.innerHTML='<span style="color:var(--text-muted);font-size:.9rem">Habilitá materias en el Plan de estudios para ver sus apuntes.</span>';
@@ -1594,11 +1589,12 @@ function renderNotesTab(){
     if(Array.isArray(subj))count=subj.length;
     else NOTE_CATS.forEach(cat=>{count+=(subj[cat.id]||[]).length;});
     const hasLinks=subj._campus||subj._drive;
-    const hasNotes=count>0||hasLinks;
+    const hasPostit=subj._postit&&subj._postit.trim().length>0;
+    const hasNotes=count>0||hasLinks||hasPostit;
     return`<div class="notes-subject-card${hasNotes?' has-notes':''}" onclick="openNotesDetail('${id}','${name.replace(/'/g,"\'")}')">
       <div class="nsc-icon">📘</div>
       <div class="nsc-name">${name}</div>
-      <div class="nsc-count">${count>0?`<b>${count}</b> recurso${count!==1?'s':''}`:hasLinks?'Links guardados':'Sin recursos aún'}</div>
+      <div class="nsc-count">${count>0?`<b>${count}</b> recurso${count!==1?'s':''}`:hasPostit?'Tiene notas':hasLinks?'Links guardados':'Sin recursos aún'}</div>
     </div>`;
   }).join('');
 }
@@ -1620,18 +1616,18 @@ function openNotesDetail(id,name){
   renderNotesDetail(id,name);
 }
 
+// ==================== DETALLE DE APUNTES (MODIFICADO) ====================
 function renderNotesDetail(id,name){
   const detail=document.getElementById('notesDetail');if(!detail)return;
   if(!apuntesData[id]||Array.isArray(apuntesData[id])){
     const old=Array.isArray(apuntesData[id])?apuntesData[id]:[];
-    apuntesData[id]={_campus:'',_drive:'',otros:old};
+    apuntesData[id]={_campus:'',_drive:'',_postit:'',otros:old};
   }
   const subj=apuntesData[id];
+  if(subj._postit===undefined)subj._postit='';
   const campus=subj._campus||'';
   const drive=subj._drive||'';
-
-  // Escape name for use in JS attributes
-  const nameEscaped = name.replace(/\\/g,'\\\\').replace(/'/g,"\\'").replace(/"/g,'&quot;');
+  const nameEscaped=name.replace(/\\/g,'\\\\').replace(/'/g,"\\'").replace(/"/g,'&quot;');
 
   const headerLinks=`
     ${campus?`<a href="${campus}" target="_blank" class="ndh-link-btn">🖥️ Campus Virtual</a>`:''}
@@ -1645,14 +1641,54 @@ function renderNotesDetail(id,name){
       <input type="url" id="ndh-drive-input" placeholder="Link Google Drive (https://...)" value="${drive}">
       <button class="nc-add-btn" onclick="saveQuickLinks('${id}')">Guardar links</button>
     </div>`;
+
+  // ===== POST-IT SECTION =====
+  const postitSection=`
+    <div style="padding:18px 24px;border-bottom:1px solid #eaeaea;background:#fffdf5;">
+      <div style="font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--text-muted);margin-bottom:10px;">📌 Post-it rápido</div>
+      <textarea id="postitArea" onchange="savePostit('${id}')" oninput="savePostit('${id}')"
+        placeholder="Anotá algo rápido: fechas clave, lo que dijo el profe, fórmulas importantes..."
+        style="width:100%;min-height:90px;padding:12px 14px;border-radius:10px;border:1.5px solid #e8d98a;font-family:'Poppins',sans-serif;font-size:.88rem;color:var(--text-main);background:#fffdf0;resize:vertical;outline:none;box-sizing:border-box;line-height:1.6;transition:border-color .2s;"
+        onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='#e8d98a'">${subj._postit||''}</textarea>
+      <div style="display:flex;gap:10px;margin-top:12px;flex-wrap:wrap;align-items:center;">
+        <button onclick="generateAI('${id}','flashcards')"
+          style="padding:9px 18px;border-radius:8px;border:none;background:var(--accent);color:#fff;font-family:'Poppins',sans-serif;font-weight:600;font-size:.82rem;cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:6px;"
+          onmouseover="this.style.opacity='.85'" onmouseout="this.style.opacity='1'">
+          ⚡ Generar flashcards
+        </button>
+        <button onclick="generateAI('${id}','resumen')"
+          style="padding:9px 18px;border-radius:8px;border:1.5px solid var(--accent);color:var(--accent);background:transparent;font-family:'Poppins',sans-serif;font-weight:600;font-size:.82rem;cursor:pointer;transition:all .2s;"
+          onmouseover="this.style.background='var(--accent-bg)'" onmouseout="this.style.background='transparent'">
+          📋 Resumir notas
+        </button>
+        <span id="aiLoadingIndicator" style="display:none;font-size:.8rem;color:var(--text-muted);font-style:italic;">⏳ Generando con IA...</span>
+      </div>
+      <div id="aiOutput" style="display:none;margin-top:14px;background:#f8f0ff;border:1.5px solid var(--accent-light);border-radius:12px;padding:16px;font-size:.87rem;line-height:1.75;color:var(--text-main);white-space:pre-wrap;word-break:break-word;"></div>
+    </div>`;
+
+  // ===== CATEGORIAS CON CHECKBOXES =====
   const catsHtml=NOTE_CATS.map(cat=>{
     const items=subj[cat.id]||[];
+    const done=items.filter(n=>n.checked).length;
+    const pct=items.length>0?Math.round((done/items.length)*100):0;
+
+    const progressBar=items.length>0?`
+      <div style="height:5px;background:#eee;border-radius:3px;margin:2px 0 8px;overflow:hidden;">
+        <div style="height:100%;width:${pct}%;background:var(--accent);border-radius:3px;transition:width .4s;"></div>
+      </div>
+      <div style="font-size:.72rem;color:var(--text-muted);margin-bottom:12px;font-weight:500;">${done} de ${items.length} revisado${items.length!==1?'s':''}</div>`:'';
+
     const itemsHtml=items.length
       ? items.map((n,i)=>`
-          <div class="note-item">
-            <span class="note-item-icon">${n.url?'🔗':'📄'}</span>
+          <div class="note-item" style="opacity:${n.checked?.75:1};transition:opacity .2s;">
+            <span
+              onclick="toggleCheck('${id}','${cat.id}',${i})"
+              title="${n.checked?'Marcar como no revisado':'Marcar como revisado'}"
+              style="width:22px;height:22px;border-radius:6px;border:2px solid var(--accent);flex-shrink:0;display:flex;align-items:center;justify-content:center;cursor:pointer;background:${n.checked?'var(--accent)':'transparent'};transition:all .2s;">
+              ${n.checked?'<span style="color:#fff;font-size:13px;line-height:1;font-weight:700;">✓</span>':''}
+            </span>
             <div class="note-item-info">
-              <div class="note-item-name">${n.name}</div>
+              <div class="note-item-name" style="${n.checked?'text-decoration:line-through;color:var(--text-muted);':''}">${n.name}</div>
               ${n.url?`<div class="note-item-url">${n.url}</div>`:''}
             </div>
             <div class="note-item-actions">
@@ -1661,12 +1697,14 @@ function renderNotesDetail(id,name){
             </div>
           </div>`).join('')
       : `<div class="nc-empty">No hay recursos agregados en esta categoría todavía.</div>`;
+
     return`<div class="notes-category">
       <div class="nc-header" onclick="toggleCat('cat-${cat.id}')">
         <div class="nc-title"><span class="nc-title-icon">${cat.icon}</span>${cat.label}${items.length?` <span class="nc-count-badge">${items.length}</span>`:''}</div>
         <span class="nc-chevron open" id="chev-cat-${cat.id}">▼</span>
       </div>
       <div class="nc-body" id="cat-${cat.id}">
+        ${progressBar}
         ${itemsHtml}
         <div class="nc-add-form">
           <input type="text" id="nn-${cat.id}" placeholder="Nombre del recurso (Ej: Resumen Primer Parcial)">
@@ -1676,6 +1714,7 @@ function renderNotesDetail(id,name){
       </div>
     </div>`;
   }).join('');
+
   detail.innerHTML=`
     <div class="notes-detail">
       <div class="notes-detail-header">
@@ -1684,17 +1723,75 @@ function renderNotesDetail(id,name){
         <div class="ndh-links">${headerLinks}</div>
       </div>
       ${addLinkRow}
+      ${postitSection}
       ${catsHtml}
     </div>`;
 }
 
+// ==================== POSTIT SAVE ====================
+function savePostit(id){
+  if(!apuntesData[id]||Array.isArray(apuntesData[id]))apuntesData[id]={_campus:'',_drive:'',_postit:''};
+  const ta=document.getElementById('postitArea');
+  if(ta)apuntesData[id]._postit=ta.value;
+  _saveApuntes();
+}
+
+// ==================== TOGGLE CHECKBOX ====================
+function toggleCheck(subjectId,catId,idx){
+  if(!apuntesData[subjectId]||!apuntesData[subjectId][catId])return;
+  apuntesData[subjectId][catId][idx].checked=!apuntesData[subjectId][catId][idx].checked;
+  _saveApuntes();
+  const nameEl=document.querySelector('.ndh-title');
+  renderNotesDetail(subjectId,nameEl?.textContent||subjectId);
+}
+
+// ==================== GENERAR IA ====================
+async function generateAI(id,mode){
+  const ta=document.getElementById('postitArea');
+  const text=ta?ta.value.trim():'';
+  const out=document.getElementById('aiOutput');
+  const loader=document.getElementById('aiLoadingIndicator');
+  if(!out)return;
+  if(!text){
+    alert('Primero escribí algo en el Post-it para que la IA lo analice.');
+    return;
+  }
+  const subjName=document.querySelector('.ndh-title')?.textContent||'la materia';
+  const prompt=mode==='flashcards'
+    ?`Sos un tutor universitario experto. A partir de estas notas de la materia "${subjName}", generá exactamente 5 flashcards de estudio en español argentino. Formato:\n\nP: [pregunta clara y concreta]\nR: [respuesta corta y precisa]\n\n(repetí el formato para cada una)\n\nNotas del alumno:\n${text}`
+    :`Sos un tutor universitario experto. A partir de estas notas de la materia "${subjName}", hacé un resumen claro y organizado en español argentino. Destacá los conceptos clave, usá viñetas cuando ayude a la claridad. Sé conciso pero completo.\n\nNotas del alumno:\n${text}`;
+
+  if(loader)loader.style.display='inline';
+  out.style.display='none';
+
+  try{
+    const res=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        model:'claude-sonnet-4-20250514',
+        max_tokens:1000,
+        messages:[{role:'user',content:prompt}]
+      })
+    });
+    const data=await res.json();
+    const answer=data.content?.[0]?.text||'No se pudo generar la respuesta.';
+    const label=mode==='flashcards'?'⚡ Flashcards generadas:':'📋 Resumen generado:';
+    out.style.display='block';
+    out.innerHTML=`<strong style="display:block;margin-bottom:10px;color:var(--accent-dark);font-size:.9rem;">${label}</strong>${answer.replace(/\n/g,'<br>')}`;
+  }catch(e){
+    out.style.display='block';
+    out.textContent='❌ Error al conectar con la IA. Revisá tu conexión e intentá de nuevo.';
+  }finally{
+    if(loader)loader.style.display='none';
+  }
+}
+
 // ==================== MODAL CREAR DRIVE ====================
 function openCreateDriveModal(subjectName) {
-  // Pre-fill the input with the subject name
   const input = document.getElementById('driveFolderName');
   if(input) input.value = subjectName || '';
   openModal('createDriveModal');
-  // Focus and select the text so user can easily edit it
   setTimeout(() => {
     if(input) { input.focus(); input.select(); }
   }, 150);
@@ -1703,16 +1800,8 @@ function openCreateDriveModal(subjectName) {
 function confirmCreateDrive() {
   const folderName = document.getElementById('driveFolderName').value.trim();
   if(!folderName) { alert('Escribí un nombre para la carpeta.'); return; }
-  // Open Google Drive with the folder creation dialog pre-filled
-  // Google Drive's "new folder" URL with name pre-filled
-  const driveUrl = `https://drive.google.com/drive/folders/create?usp=drive_link`;
-  // Since Drive doesn't support direct name pre-fill via URL, 
-  // we open My Drive and show a tip to copy the name
-  const nameEncoded = encodeURIComponent(folderName);
-  // Best approach: open Drive home, the name is in clipboard / shown to user
   window.open(`https://drive.google.com/drive/my-drive`, '_blank');
   closeModal('createDriveModal');
-  // Show the add link row so user can paste the Drive link after creating
   setTimeout(() => {
     const row = document.getElementById('ndh-link-row');
     if(row && !row.classList.contains('show')) {
@@ -1730,7 +1819,6 @@ function confirmCreateDrive() {
         }, 5000);
       }
     }
-    // Also show a helpful toast
     showToast(`📂 Creá la carpeta "${folderName}" en Drive, luego pegá el link acá con ⚙️ Editar Links`);
   }, 400);
 }
@@ -1759,7 +1847,7 @@ function toggleAddLinkRow(){
 }
 
 function saveQuickLinks(id){
-  if(!apuntesData[id]||Array.isArray(apuntesData[id]))apuntesData[id]={_campus:'',_drive:''};
+  if(!apuntesData[id]||Array.isArray(apuntesData[id]))apuntesData[id]={_campus:'',_drive:'',_postit:''};
   apuntesData[id]._campus=document.getElementById('ndh-campus-input')?.value.trim()||'';
   apuntesData[id]._drive=document.getElementById('ndh-drive-input')?.value.trim()||'';
   _saveApuntes();
@@ -1780,9 +1868,9 @@ function addNoteInCat(subjectId,catId){
   const name=document.getElementById(`nn-${catId}`)?.value.trim();
   const url=document.getElementById(`nu-${catId}`)?.value.trim();
   if(!name){alert('Escribí un nombre para el recurso.');return;}
-  if(!apuntesData[subjectId]||Array.isArray(apuntesData[subjectId]))apuntesData[subjectId]={_campus:'',_drive:''};
+  if(!apuntesData[subjectId]||Array.isArray(apuntesData[subjectId]))apuntesData[subjectId]={_campus:'',_drive:'',_postit:''};
   if(!apuntesData[subjectId][catId])apuntesData[subjectId][catId]=[];
-  apuntesData[subjectId][catId].push({name,url});
+  apuntesData[subjectId][catId].push({name,url,checked:false});
   _saveApuntes();
   const nameEl=document.querySelector('.ndh-title');
   renderNotesDetail(subjectId,nameEl?.textContent||subjectId);
