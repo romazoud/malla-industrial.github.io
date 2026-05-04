@@ -1559,13 +1559,6 @@ function renderStudyStats(){
 }
 
 // ==================== APUNTES ====================
-let _notesActiveSubject=null;
-const NOTE_CATS=[
-  {id:'parciales', label:'Parciales viejos',    icon:'📝'},
-  {id:'resumenes', label:'Mis resúmenes',        icon:'📖'},
-  {id:'videos',    label:'Videos y links',       icon:'🎥'},
-  {id:'otros',     label:'Otros archivos',       icon:'📁'},
-];
 
 function renderNotesTab(){
   const grid=document.getElementById('notesGrid');
@@ -1574,8 +1567,8 @@ function renderNotesTab(){
   grid.style.display='grid';
   detail.style.display='none';
   _notesActiveSubject=null;
-  const searchInput = document.getElementById('notesSearchInput');
-  if(searchInput) searchInput.value = '';
+  const searchInput=document.getElementById('notesSearchInput');
+  if(searchInput)searchInput.value='';
   const enabled=Array.from(getCourses()).filter(c=>c.classList.contains('enabled')||c.classList.contains('completed'));
   if(!enabled.length){
     grid.innerHTML='<span style="color:var(--text-muted);font-size:.9rem">Habilitá materias en el Plan de estudios para ver sus apuntes.</span>';
@@ -1585,312 +1578,166 @@ function renderNotesTab(){
     const id=c.dataset.id;
     const name=c.querySelector('.course-name')?.textContent||'';
     const subj=apuntesData[id]||{};
-    let count=0;
-    if(Array.isArray(subj))count=subj.length;
-    else NOTE_CATS.forEach(cat=>{count+=(subj[cat.id]||[]).length;});
-    const hasLinks=subj._campus||subj._drive;
-    const hasPostit=subj._postit&&subj._postit.trim().length>0;
-    const hasNotes=count>0||hasLinks||hasPostit;
-    return`<div class="notes-subject-card${hasNotes?' has-notes':''}" onclick="openNotesDetail('${id}','${name.replace(/'/g,"\'")}')">
+    const nota=subj._nota||'';
+    const temas=subj._temas||[];
+    const temasHechos=temas.filter(t=>t.hecho).length;
+    const hasContent=nota.trim()||temas.length>0;
+    let preview='Sin contenido aún';
+    if(temas.length>0) preview=`${temasHechos}/${temas.length} temas estudiados`;
+    else if(nota.trim()) preview='Tiene notas';
+    return\`<div class="notes-subject-card\${hasContent?' has-notes':''}" onclick="openNotesDetail('\${id}','\${name.replace(/'/g,"\\'")}')">
       <div class="nsc-icon">📘</div>
-      <div class="nsc-name">${name}</div>
-      <div class="nsc-count">${count>0?`<b>${count}</b> recurso${count!==1?'s':''}`:hasPostit?'Tiene notas':hasLinks?'Links guardados':'Sin recursos aún'}</div>
-    </div>`;
+      <div class="nsc-name">\${name}</div>
+      <div class="nsc-count">\${hasContent?'<b>'+preview+'</b>':preview}</div>
+      \${temas.length>0?\`<div style="margin-top:8px;height:4px;background:#eee;border-radius:2px;overflow:hidden;"><div style="height:100%;width:\${Math.round(temasHechos/temas.length*100)}%;background:var(--accent);border-radius:2px;transition:width .3s;"></div></div>\`:''}
+    </div>\`;
   }).join('');
 }
 
-window.filterNotes = () => {
-  const query = document.getElementById('notesSearchInput').value.toLowerCase();
-  document.querySelectorAll('.notes-subject-card').forEach(card => {
-    const name = card.querySelector('.nsc-name').textContent.toLowerCase();
-    card.style.display = name.includes(query) ? 'block' : 'none';
+window.filterNotes=()=>{
+  const query=document.getElementById('notesSearchInput').value.toLowerCase();
+  document.querySelectorAll('.notes-subject-card').forEach(card=>{
+    const name=card.querySelector('.nsc-name').textContent.toLowerCase();
+    card.style.display=name.includes(query)?'block':'none';
   });
 };
 
 function openNotesDetail(id,name){
   _notesActiveSubject=id;
-  const grid=document.getElementById('notesGrid');
-  const detail=document.getElementById('notesDetail');
-  grid.style.display='none';
-  detail.style.display='block';
+  document.getElementById('notesGrid').style.display='none';
+  document.getElementById('notesDetail').style.display='block';
   renderNotesDetail(id,name);
 }
 
-// ==================== DETALLE DE APUNTES (MODIFICADO) ====================
 function renderNotesDetail(id,name){
   const detail=document.getElementById('notesDetail');if(!detail)return;
+  // Migrar datos viejos si existen
   if(!apuntesData[id]||Array.isArray(apuntesData[id])){
-    const old=Array.isArray(apuntesData[id])?apuntesData[id]:[];
-    apuntesData[id]={_campus:'',_drive:'',_postit:'',otros:old};
+    apuntesData[id]={_nota:'',_temas:[]};
   }
   const subj=apuntesData[id];
-  if(subj._postit===undefined)subj._postit='';
-  const campus=subj._campus||'';
-  const drive=subj._drive||'';
-  const nameEscaped=name.replace(/\\/g,'\\\\').replace(/'/g,"\\'").replace(/"/g,'&quot;');
+  if(!subj._nota)subj._nota='';
+  if(!subj._temas)subj._temas=[];
 
-  const headerLinks=`
-    ${campus?`<a href="${campus}" target="_blank" class="ndh-link-btn">🖥️ Campus Virtual</a>`:''}
-    ${drive?`<a href="${drive}" target="_blank" class="ndh-link-btn">📁 Ver Carpeta Drive</a>`:''}
-    <button class="ndh-link-btn" onclick="openCreateDriveModal('${nameEscaped}')" style="background:rgba(255,255,255,0.12);border:none;cursor:pointer;">📂 Crear Drive</button>
-    <button class="ndh-link-btn" onclick="toggleAddLinkRow()" style="background:rgba(0,0,0,0.15);border:none;cursor:pointer;">⚙️ Editar Links</button>`;
+  const temas=subj._temas;
+  const temasHechos=temas.filter(t=>t.hecho).length;
+  const pct=temas.length>0?Math.round(temasHechos/temas.length*100):0;
 
-  const addLinkRow=`
-    <div class="ndh-add-link-row" id="ndh-link-row">
-      <input type="url" id="ndh-campus-input" placeholder="Link Campus virtual (https://...)" value="${campus}">
-      <input type="url" id="ndh-drive-input" placeholder="Link Google Drive (https://...)" value="${drive}">
-      <button class="nc-add-btn" onclick="saveQuickLinks('${id}')">Guardar links</button>
-    </div>`;
+  const temasHtml=temas.length===0
+    ?'<div style="font-size:.88rem;color:#aaa;font-style:italic;padding:8px 0;">Todavía no agregaste temas. Escribilos uno por uno abajo.</div>'
+    :temas.map((t,i)=>\`
+      <div onclick="toggleTema('\${id}',\${i})" style="display:flex;align-items:center;gap:12px;padding:11px 14px;border-radius:10px;border:1.5px solid \${t.hecho?'var(--accent)':'#eaeaea'};margin-bottom:8px;cursor:pointer;background:\${t.hecho?'var(--accent-bg)':'#fff'};transition:all .2s;user-select:none;">
+        <span style="width:22px;height:22px;border-radius:6px;border:2px solid var(--accent);flex-shrink:0;display:flex;align-items:center;justify-content:center;background:\${t.hecho?'var(--accent)':'transparent'};transition:all .2s;">
+          \${t.hecho?'<span style=\"color:#fff;font-size:13px;font-weight:700;\">✓</span>':''}
+        </span>
+        <span style="flex:1;font-size:.9rem;font-weight:600;color:var(--text-main);text-decoration:\${t.hecho?'line-through':''};opacity:\${t.hecho?.7:1};">\${t.nombre}</span>
+        <span onclick="event.stopPropagation();deleteTema('\${id}',\${i})" style="color:#ccc;font-size:1rem;padding:2px 6px;cursor:pointer;transition:.15s;" onmouseover="this.style.color='#ef4444'" onmouseout="this.style.color='#ccc'">✕</span>
+      </div>\`).join('');
 
-  // ===== POST-IT SECTION =====
-  const postitSection=`
-    <div style="padding:18px 24px;border-bottom:1px solid #eaeaea;background:#fffdf5;">
-      <div style="font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--text-muted);margin-bottom:10px;">📌 Post-it rápido</div>
-      <textarea id="postitArea" onchange="savePostit('${id}')" oninput="savePostit('${id}')"
-        placeholder="Anotá algo rápido: fechas clave, lo que dijo el profe, fórmulas importantes..."
-        style="width:100%;min-height:90px;padding:12px 14px;border-radius:10px;border:1.5px solid #e8d98a;font-family:'Poppins',sans-serif;font-size:.88rem;color:var(--text-main);background:#fffdf0;resize:vertical;outline:none;box-sizing:border-box;line-height:1.6;transition:border-color .2s;"
-        onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='#e8d98a'">${subj._postit||''}</textarea>
-      <div style="display:flex;gap:10px;margin-top:12px;flex-wrap:wrap;align-items:center;">
-        <button onclick="generateAI('${id}','flashcards')"
-          style="padding:9px 18px;border-radius:8px;border:none;background:var(--accent);color:#fff;font-family:'Poppins',sans-serif;font-weight:600;font-size:.82rem;cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:6px;"
-          onmouseover="this.style.opacity='.85'" onmouseout="this.style.opacity='1'">
-          ⚡ Generar flashcards
-        </button>
-        <button onclick="generateAI('${id}','resumen')"
-          style="padding:9px 18px;border-radius:8px;border:1.5px solid var(--accent);color:var(--accent);background:transparent;font-family:'Poppins',sans-serif;font-weight:600;font-size:.82rem;cursor:pointer;transition:all .2s;"
-          onmouseover="this.style.background='var(--accent-bg)'" onmouseout="this.style.background='transparent'">
-          📋 Resumir notas
-        </button>
-        <span id="aiLoadingIndicator" style="display:none;font-size:.8rem;color:var(--text-muted);font-style:italic;">⏳ Generando con IA...</span>
-      </div>
-      <div id="aiOutput" style="display:none;margin-top:14px;background:#f8f0ff;border:1.5px solid var(--accent-light);border-radius:12px;padding:16px;font-size:.87rem;line-height:1.75;color:var(--text-main);white-space:pre-wrap;word-break:break-word;"></div>
-    </div>`;
+  detail.innerHTML=\`
+    <div class="notes-detail" style="background:#fff;border-radius:18px;overflow:hidden;box-shadow:0 6px 24px rgba(0,0,0,.06);border:1px solid #eaeaea;">
 
-  // ===== CATEGORIAS CON CHECKBOXES =====
-  const catsHtml=NOTE_CATS.map(cat=>{
-    const items=subj[cat.id]||[];
-    const done=items.filter(n=>n.checked).length;
-    const pct=items.length>0?Math.round((done/items.length)*100):0;
-
-    const progressBar=items.length>0?`
-      <div style="height:5px;background:#eee;border-radius:3px;margin:2px 0 8px;overflow:hidden;">
-        <div style="height:100%;width:${pct}%;background:var(--accent);border-radius:3px;transition:width .4s;"></div>
-      </div>
-      <div style="font-size:.72rem;color:var(--text-muted);margin-bottom:12px;font-weight:500;">${done} de ${items.length} revisado${items.length!==1?'s':''}</div>`:'';
-
-    const itemsHtml=items.length
-      ? items.map((n,i)=>`
-          <div class="note-item" style="opacity:${n.checked?.75:1};transition:opacity .2s;">
-            <span
-              onclick="toggleCheck('${id}','${cat.id}',${i})"
-              title="${n.checked?'Marcar como no revisado':'Marcar como revisado'}"
-              style="width:22px;height:22px;border-radius:6px;border:2px solid var(--accent);flex-shrink:0;display:flex;align-items:center;justify-content:center;cursor:pointer;background:${n.checked?'var(--accent)':'transparent'};transition:all .2s;">
-              ${n.checked?'<span style="color:#fff;font-size:13px;line-height:1;font-weight:700;">✓</span>':''}
-            </span>
-            <div class="note-item-info">
-              <div class="note-item-name" style="${n.checked?'text-decoration:line-through;color:var(--text-muted);':''}">${n.name}</div>
-              ${n.url?`<div class="note-item-url">${n.url}</div>`:''}
-            </div>
-            <div class="note-item-actions">
-              ${n.url?`<a href="${n.url}" target="_blank" class="note-open-btn">Abrir →</a>`:''}
-              <span class="note-item-del" onclick="deleteNoteInCat('${id}','${cat.id}',${i})">✕</span>
-            </div>
-          </div>`).join('')
-      : `<div class="nc-empty">No hay recursos agregados en esta categoría todavía.</div>`;
-
-    return`<div class="notes-category">
-      <div class="nc-header" onclick="toggleCat('cat-${cat.id}')">
-        <div class="nc-title"><span class="nc-title-icon">${cat.icon}</span>${cat.label}${items.length?` <span class="nc-count-badge">${items.length}</span>`:''}</div>
-        <span class="nc-chevron open" id="chev-cat-${cat.id}">▼</span>
-      </div>
-      <div class="nc-body" id="cat-${cat.id}">
-        ${progressBar}
-        ${itemsHtml}
-        <div class="nc-add-form">
-          <input type="text" id="nn-${cat.id}" placeholder="Nombre del recurso (Ej: Resumen Primer Parcial)">
-          <input type="url" id="nu-${cat.id}" placeholder="Link del documento o video (opcional)">
-          <button class="nc-add-btn" onclick="addNoteInCat('${id}','${cat.id}')">+ Agregar recurso</button>
-        </div>
-      </div>
-    </div>`;
-  }).join('');
-
-  detail.innerHTML=`
-    <div class="notes-detail">
       <div class="notes-detail-header">
-        <button class="ndh-back" onclick="renderNotesTab()">← Volver a materias</button>
-        <div class="ndh-title">${name}</div>
-        <div class="ndh-links">${headerLinks}</div>
+        <button class="ndh-back" onclick="renderNotesTab()">← Volver</button>
+        <div class="ndh-title">\${name}</div>
       </div>
-      ${addLinkRow}
-      ${postitSection}
-      ${catsHtml}
-    </div>`;
+
+      <!-- BLOC DE NOTAS -->
+      <div style="padding:20px 24px;border-bottom:1px solid #eaeaea;">
+        <div style="font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--text-muted);margin-bottom:10px;">📝 Mis notas</div>
+        <textarea id="notaArea" oninput="saveNota('\${id}')"
+          placeholder="Anotá lo que quieras: resúmenes, fórmulas, lo que dijo el profe, dudas para preguntar..."
+          style="width:100%;min-height:180px;padding:14px 16px;border-radius:12px;border:1.5px solid #eaeaea;font-family:'Poppins',sans-serif;font-size:.9rem;color:var(--text-main);background:#fafafa;resize:vertical;outline:none;box-sizing:border-box;line-height:1.7;transition:border-color .2s;"
+          onfocus="this.style.borderColor='var(--accent)';this.style.background='#fff';"
+          onblur="this.style.borderColor='#eaeaea';this.style.background='#fafafa';">\${subj._nota||''}</textarea>
+      </div>
+
+      <!-- TRACKER DE TEMAS -->
+      <div style="padding:20px 24px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:8px;">
+          <div style="font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--text-muted);">📚 Temas del programa</div>
+          \${temas.length>0?\`<span style="font-size:.78rem;font-weight:600;color:var(--accent);">\${temasHechos}/\${temas.length} estudiados (\${pct}%)</span>\`:''}
+        </div>
+
+        \${temas.length>0?\`
+          <div style="height:6px;background:#eee;border-radius:3px;margin-bottom:16px;overflow:hidden;">
+            <div style="height:100%;width:\${pct}%;background:var(--accent);border-radius:3px;transition:width .4s;"></div>
+          </div>\`:''}
+
+        \${temasHtml}
+
+        <div style="display:flex;gap:10px;margin-top:14px;">
+          <input type="text" id="nuevoTemaInput"
+            placeholder="Nombre del tema (Ej: Unidad 3 - Derivadas)"
+            onkeydown="if(event.key==='Enter')agregarTema('\${id}')"
+            style="flex:1;padding:11px 14px;border-radius:10px;border:1.5px solid #ddd;font-family:'Poppins',sans-serif;font-size:.88rem;color:var(--text-main);background:#fff;outline:none;transition:border-color .2s;"
+            onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='#ddd'">
+          <button onclick="agregarTema('\${id}')"
+            style="padding:11px 18px;border-radius:10px;border:none;background:var(--accent);color:#fff;font-family:'Poppins',sans-serif;font-weight:600;font-size:.88rem;cursor:pointer;white-space:nowrap;transition:opacity .2s;"
+            onmouseover="this.style.opacity='.85'" onmouseout="this.style.opacity='1'">
+            + Agregar
+          </button>
+        </div>
+        \${temas.length>1?\`<button onclick="marcarTodos('\${id}')" style="margin-top:10px;padding:8px 14px;border-radius:8px;border:1.5px solid #ddd;background:transparent;color:var(--text-muted);font-family:'Poppins',sans-serif;font-size:.78rem;font-weight:600;cursor:pointer;transition:.2s;" onmouseover="this.style.borderColor='var(--accent)';this.style.color='var(--accent)'" onmouseout="this.style.borderColor='#ddd';this.style.color='var(--text-muted)'">
+          \${temasHechos===temas.length?'↺ Desmarcar todos':'✓ Marcar todos como estudiados'}
+        </button>\`:''}
+      </div>
+    </div>\`;
 }
 
-// ==================== POSTIT SAVE ====================
-function savePostit(id){
-  if(!apuntesData[id]||Array.isArray(apuntesData[id]))apuntesData[id]={_campus:'',_drive:'',_postit:''};
-  const ta=document.getElementById('postitArea');
-  if(ta)apuntesData[id]._postit=ta.value;
+// ==================== FUNCIONES DE NOTAS ====================
+function saveNota(id){
+  if(!apuntesData[id]||Array.isArray(apuntesData[id]))apuntesData[id]={_nota:'',_temas:[]};
+  const ta=document.getElementById('notaArea');
+  if(ta)apuntesData[id]._nota=ta.value;
   _saveApuntes();
 }
 
-// ==================== TOGGLE CHECKBOX ====================
-function toggleCheck(subjectId,catId,idx){
-  if(!apuntesData[subjectId]||!apuntesData[subjectId][catId])return;
-  apuntesData[subjectId][catId][idx].checked=!apuntesData[subjectId][catId][idx].checked;
-  _saveApuntes();
-  const nameEl=document.querySelector('.ndh-title');
-  renderNotesDetail(subjectId,nameEl?.textContent||subjectId);
-}
-
-// ==================== GENERAR IA ====================
-async function generateAI(id,mode){
-  const ta=document.getElementById('postitArea');
-  const text=ta?ta.value.trim():'';
-  const out=document.getElementById('aiOutput');
-  const loader=document.getElementById('aiLoadingIndicator');
-  if(!out)return;
-  if(!text){
-    alert('Primero escribí algo en el Post-it para que la IA lo analice.');
-    return;
-  }
-  const subjName=document.querySelector('.ndh-title')?.textContent||'la materia';
-  const prompt=mode==='flashcards'
-    ?`Sos un tutor universitario experto. A partir de estas notas de la materia "${subjName}", generá exactamente 5 flashcards de estudio en español argentino. Formato:\n\nP: [pregunta clara y concreta]\nR: [respuesta corta y precisa]\n\n(repetí el formato para cada una)\n\nNotas del alumno:\n${text}`
-    :`Sos un tutor universitario experto. A partir de estas notas de la materia "${subjName}", hacé un resumen claro y organizado en español argentino. Destacá los conceptos clave, usá viñetas cuando ayude a la claridad. Sé conciso pero completo.\n\nNotas del alumno:\n${text}`;
-
-  if(loader)loader.style.display='inline';
-  out.style.display='none';
-
-  try{
-    const res=await fetch('https://api.anthropic.com/v1/messages',{
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({
-        model:'claude-sonnet-4-20250514',
-        max_tokens:1000,
-        messages:[{role:'user',content:prompt}]
-      })
-    });
-    const data=await res.json();
-    const answer=data.content?.[0]?.text||'No se pudo generar la respuesta.';
-    const label=mode==='flashcards'?'⚡ Flashcards generadas:':'📋 Resumen generado:';
-    out.style.display='block';
-    out.innerHTML=`<strong style="display:block;margin-bottom:10px;color:var(--accent-dark);font-size:.9rem;">${label}</strong>${answer.replace(/\n/g,'<br>')}`;
-  }catch(e){
-    out.style.display='block';
-    out.textContent='❌ Error al conectar con la IA. Revisá tu conexión e intentá de nuevo.';
-  }finally{
-    if(loader)loader.style.display='none';
-  }
-}
-
-// ==================== MODAL CREAR DRIVE ====================
-function openCreateDriveModal(subjectName) {
-  const input = document.getElementById('driveFolderName');
-  if(input) input.value = subjectName || '';
-  openModal('createDriveModal');
-  setTimeout(() => {
-    if(input) { input.focus(); input.select(); }
-  }, 150);
-}
-
-function confirmCreateDrive() {
-  const folderName = document.getElementById('driveFolderName').value.trim();
-  if(!folderName) { alert('Escribí un nombre para la carpeta.'); return; }
-  window.open(`https://drive.google.com/drive/my-drive`, '_blank');
-  closeModal('createDriveModal');
-  setTimeout(() => {
-    const row = document.getElementById('ndh-link-row');
-    if(row && !row.classList.contains('show')) {
-      row.classList.add('show');
-      const driveInput = document.getElementById('ndh-drive-input');
-      if(driveInput) {
-        driveInput.focus();
-        driveInput.placeholder = `Pegá acá el link de la carpeta "${folderName}" que acabás de crear`;
-        driveInput.style.borderColor = 'var(--accent)';
-        driveInput.style.background = '#fffbf0';
-        setTimeout(() => {
-          driveInput.style.borderColor = '';
-          driveInput.style.background = '';
-          driveInput.placeholder = 'Link Google Drive (https://...)';
-        }, 5000);
-      }
-    }
-    showToast(`📂 Creá la carpeta "${folderName}" en Drive, luego pegá el link acá con ⚙️ Editar Links`);
-  }, 400);
-}
-
-function showToast(msg) {
-  let t = document.getElementById('app-toast');
-  if(!t) {
-    t = document.createElement('div');
-    t.id = 'app-toast';
-    t.style.cssText = 'position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);background:#1a1a1a;color:#fff;padding:12px 20px;border-radius:12px;font-size:.85rem;font-weight:600;z-index:9999;opacity:0;transition:all .35s;max-width:90%;text-align:center;box-shadow:0 6px 20px rgba(0,0,0,0.25);font-family:Poppins,sans-serif;';
-    document.body.appendChild(t);
-  }
-  t.textContent = msg;
-  t.style.opacity = '1';
-  t.style.transform = 'translateX(-50%) translateY(0)';
-  clearTimeout(t._timeout);
-  t._timeout = setTimeout(() => {
-    t.style.opacity = '0';
-    t.style.transform = 'translateX(-50%) translateY(20px)';
-  }, 5000);
-}
-
-function toggleAddLinkRow(){
-  const row=document.getElementById('ndh-link-row');
-  if(row)row.classList.toggle('show');
-}
-
-function saveQuickLinks(id){
-  if(!apuntesData[id]||Array.isArray(apuntesData[id]))apuntesData[id]={_campus:'',_drive:'',_postit:''};
-  apuntesData[id]._campus=document.getElementById('ndh-campus-input')?.value.trim()||'';
-  apuntesData[id]._drive=document.getElementById('ndh-drive-input')?.value.trim()||'';
-  _saveApuntes();
-  const nameEl = document.querySelector('.ndh-title');
-  renderNotesDetail(id, nameEl?.textContent || id);
-}
-
-function toggleCat(catBodyId){
-  const body=document.getElementById(catBodyId);
-  const chev=document.getElementById('chev-'+catBodyId);
-  if(!body)return;
-  const isOpen=body.style.display!=='none';
-  body.style.display=isOpen?'none':'block';
-  if(chev)chev.classList.toggle('open',!isOpen);
-}
-
-function addNoteInCat(subjectId,catId){
-  const name=document.getElementById(`nn-${catId}`)?.value.trim();
-  const url=document.getElementById(`nu-${catId}`)?.value.trim();
-  if(!name){alert('Escribí un nombre para el recurso.');return;}
-  if(!apuntesData[subjectId]||Array.isArray(apuntesData[subjectId]))apuntesData[subjectId]={_campus:'',_drive:'',_postit:''};
-  if(!apuntesData[subjectId][catId])apuntesData[subjectId][catId]=[];
-  apuntesData[subjectId][catId].push({name,url,checked:false});
+function agregarTema(id){
+  const input=document.getElementById('nuevoTemaInput');
+  if(!input)return;
+  const nombre=input.value.trim();
+  if(!nombre)return;
+  if(!apuntesData[id]||Array.isArray(apuntesData[id]))apuntesData[id]={_nota:'',_temas:[]};
+  if(!apuntesData[id]._temas)apuntesData[id]._temas=[];
+  apuntesData[id]._temas.push({nombre,hecho:false});
   _saveApuntes();
   const nameEl=document.querySelector('.ndh-title');
-  renderNotesDetail(subjectId,nameEl?.textContent||subjectId);
+  renderNotesDetail(id,nameEl?.textContent||id);
+  // re-focus input
+  setTimeout(()=>{const el=document.getElementById('nuevoTemaInput');if(el)el.focus();},50);
 }
 
-function deleteNoteInCat(subjectId,catId,idx){
-  if(!confirm('¿Estás seguro de que querés borrar este recurso?'))return;
-  apuntesData[subjectId][catId].splice(idx,1);
+function toggleTema(id,idx){
+  if(!apuntesData[id]||!apuntesData[id]._temas)return;
+  apuntesData[id]._temas[idx].hecho=!apuntesData[id]._temas[idx].hecho;
   _saveApuntes();
   const nameEl=document.querySelector('.ndh-title');
-  renderNotesDetail(subjectId,nameEl?.textContent||subjectId);
+  renderNotesDetail(id,nameEl?.textContent||id);
+}
+
+function deleteTema(id,idx){
+  if(!apuntesData[id]||!apuntesData[id]._temas)return;
+  apuntesData[id]._temas.splice(idx,1);
+  _saveApuntes();
+  const nameEl=document.querySelector('.ndh-title');
+  renderNotesDetail(id,nameEl?.textContent||id);
+}
+
+function marcarTodos(id){
+  if(!apuntesData[id]||!apuntesData[id]._temas)return;
+  const temas=apuntesData[id]._temas;
+  const todosHechos=temas.every(t=>t.hecho);
+  temas.forEach(t=>t.hecho=!todosHechos);
+  _saveApuntes();
+  const nameEl=document.querySelector('.ndh-title');
+  renderNotesDetail(id,nameEl?.textContent||id);
 }
 
 function _saveApuntes(){
   try{localStorage.setItem('apuntes',JSON.stringify(apuntesData));}catch(e){}
   if(window.syncCloud)window.syncCloud();
 }
-
-function addNote(){}
-function deleteNote(){}
 
 // ==================== INITAPP ====================
 window.initApp=function(){
