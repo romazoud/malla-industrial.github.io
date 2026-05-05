@@ -132,19 +132,19 @@
 
   <style>
     :root{
-      --accent:#820065;
-      --accent-dark:#820065;
-      --accent-light:#e8b4f5;
-      --accent-bg:#f7d9fc;
-      --text-main: #222222;
-      --text-muted: #555555;
+      --accent:#084734;
+      --accent-dark:#084734;
+      --accent-light:#a8d5c2;
+      --accent-bg:#cdedb3;
+      --text-main: #1a2e24;
+      --text-muted: #4a6b58;
     }
     *{box-sizing:border-box;}
-    body{font-family:'Poppins',sans-serif;background:var(--accent-bg);color:var(--text-main);margin:0;padding:0;overflow-x:hidden;transition:background-color .5s;}
+    body{font-family:'Poppins',sans-serif;background:#e7e7e7;color:var(--text-main);margin:0;padding:0;overflow-x:hidden;transition:background-color .5s;}
     h1,h2,h3{font-family:'Lora',serif;margin:10px 0;font-weight:700;}
 
     /* ===== ONBOARDING ===== */
-    #onboardingScreen{min-height:100vh;display:none;align-items:center;justify-content:center;padding:2rem 1rem;background:var(--accent-bg);position:relative;overflow:hidden;}
+    #onboardingScreen{min-height:100vh;display:none;align-items:center;justify-content:center;padding:2rem 1rem;background:#e7e7e7;position:relative;overflow:hidden;}
     #onboardingScreen.visible{display:flex;}
     .ob-card{background:#fff;border-radius:24px;padding:2.5rem 2rem;width:100%;max-width:540px;position:relative;z-index:1;box-shadow:0 30px 80px rgba(0,0,0,.15);animation:slideUp .5s ease;}
     @keyframes slideUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
@@ -166,11 +166,11 @@
     .theme-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:1.5rem;}
     .theme-card{border:2px solid #e5e5e5;border-radius:12px;padding:12px 8px;cursor:pointer;transition:all .2s;text-align:center;background:#fff;}
     .theme-card:hover{transform:translateY(-2px);border-color:#ccc;}
-    .theme-card.selected{border-color:var(--accent);box-shadow:0 0 0 3px rgba(var(--accent-rgb),0.15);}
+    .theme-card.selected{border-color:var(--accent);box-shadow:0 0 0 3px rgba(8,71,52,0.15);}
     .theme-swatch{height:40px;border-radius:8px;margin-bottom:8px;}
     .theme-name{font-size:12px;font-weight:700;color:#1a1a1a;} .theme-desc{font-size:10px;color:#888;margin-top:2px;}
     .ob-upload{border:2px dashed #ddd;border-radius:14px;padding:1.8rem 1rem;text-align:center;cursor:pointer;transition:all .2s;background:#fafafa;position:relative;margin-bottom:1rem;}
-    .ob-upload:hover{border-color:var(--accent);background:#fff5f8;}
+    .ob-upload:hover{border-color:var(--accent);background:#f0faf5;}
     .ob-upload input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;}
     .ob-upload-icon{font-size:28px;margin-bottom:.4rem;}
     .ob-upload-title{font-size:14px;font-weight:600;color:#333;margin-bottom:3px;}
@@ -179,9 +179,9 @@
     .ob-file-preview.show{display:flex;}
     .ob-file-name{font-size:13px;font-weight:600;color:#166534;flex:1;}
     .ob-file-remove{cursor:pointer;color:#999;font-size:16px;}
-    .ob-ai-analyzing{display:none;text-align:center;padding:1.5rem;background:#fdf2f8;border-radius:14px;margin-bottom:1rem;border:1.5px solid #fce7f3;}
+    .ob-ai-analyzing{display:none;text-align:center;padding:1.5rem;background:#f0faf5;border-radius:14px;margin-bottom:1rem;border:1.5px solid #a8d5c2;}
     .ob-ai-analyzing.show{display:block;}
-    .ob-spinner{width:36px;height:36px;border:3px solid #fce7f3;border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 1rem;}
+    .ob-spinner{width:36px;height:36px;border:3px solid #a8d5c2;border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 1rem;}
     @keyframes spin{to{transform:rotate(360deg)}}
     .ob-ai-text{font-size:13px;color:#666;}
     .ob-ai-error{display:none;background:#fff1f2;border:1.5px solid #fda4af;border-radius:10px;padding:12px 16px;font-size:13px;color:#9f1239;margin-bottom:1rem;}
@@ -208,9 +208,9 @@
     .logo-area .career-name{font-family:'Lora',serif;font-size:1.1rem;font-weight:700;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:280px;}
     .logo-area .uni-name{font-size:.75rem;color:rgba(255,255,255,.7);font-weight:400;white-space:nowrap;}
     .tabs-container{display:flex;align-items:center;gap:6px;flex-wrap:wrap;}
-    .tab-btn{padding:8px 14px;border:none;border-radius:18px;font-size:.85rem;font-weight:500;cursor:pointer;transition:all .25s;background:transparent;color:rgba(255,255,255,.7);font-family:'Poppins',sans-serif;}
+    .tab-btn{padding:8px 14px;border:none;border-radius:18px;font-size:.85rem;font-weight:500;cursor:pointer;transition:all .25s;background:transparent;color:rgba(255,255,255,.85);font-family:'Poppins',sans-serif;}
     .tab-btn:hover{opacity:1;background:rgba(255,255,255,.1);}
-    .tab-btn.active{background:var(--accent);color:#fff;font-weight:600;box-shadow:0 2px 8px rgba(0,0,0,0.2);}
+    .tab-btn.active{background:rgba(255,255,255,.2);color:#fff;font-weight:600;box-shadow:0 2px 8px rgba(0,0,0,0.2);}
     .btn-auth{border:1.5px solid rgba(255,255,255,.3);opacity:1;color:#fff;}
     .btn-logout{background:rgba(255,255,255,.08);display:none;}
     
@@ -219,7 +219,7 @@
     .view-section.active{display:block;}
     @keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
     
-    .panel-box{background:#fff;color:var(--text-main);padding:28px;border-radius:18px;border:1px solid #eaeaea;box-shadow:0 8px 24px rgba(0,0,0,.04);margin-bottom:28px;box-sizing:border-box;}
+    .panel-box{background:#fff;color:var(--text-main);padding:28px;border-radius:18px;border:1px solid #d8d8d8;box-shadow:0 8px 24px rgba(0,0,0,.04);margin-bottom:28px;box-sizing:border-box;}
     
     .section-header{margin-bottom:24px;}
     .section-header h2{font-size:1.7rem;margin:0 0 5px;color:var(--accent-dark);}
@@ -238,7 +238,7 @@
       text-align:left;font-size:0.78rem;font-weight:600;position:relative;
       cursor:not-allowed;transition:all 0.3s;line-height:1.2;overflow:hidden;
       white-space:normal;box-sizing:border-box;gap:6px;
-      background:#e8e8e8;color:#888;
+      background:#e0e0e0;color:#888;
       border:1.5px solid #ccc;opacity:.7;
     }
     .course-name{flex:1;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;}
@@ -261,7 +261,7 @@
       box-shadow:0 4px 12px rgba(0,0,0,.15);
     }
     .course.completed .course-name{text-decoration:line-through;opacity:.9;}
-    .course.completed::after{content:'★';position:absolute;top:4px;right:28px;background:var(--accent-dark);color:#fff;border-radius:50%;width:18px;height:18px;font-size:10px;line-height:18px;text-align:center;}
+    .course.completed::after{content:'★';position:absolute;top:4px;right:28px;background:rgba(255,255,255,.2);color:#fff;border-radius:50%;width:18px;height:18px;font-size:10px;line-height:18px;text-align:center;}
     
     .course-grade-badge{flex-shrink:0;width:26px;height:26px;border-radius:50%;font-size:.65rem;font-weight:700;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .2s;position:relative;}
     .course:not(.completed) .course-grade-badge{display:none;}
@@ -270,23 +270,22 @@
     .course.completed .course-grade-badge:hover{transform:scale(1.15);}
     
     .electiva-counter{font-size:10px;color:var(--accent-dark);opacity:.85;margin-top:-6px;margin-bottom:4px;font-weight:600;}
-    .map-hint{display:inline-block;font-size:.85rem;background:#fff;color:var(--text-muted);padding:8px 18px;border-radius:8px;margin-bottom:16px; border: 1px solid #ddd; box-shadow: 0 2px 6px rgba(0,0,0,0.05);}
+    .map-hint{display:inline-block;font-size:.85rem;background:#fff;color:var(--text-muted);padding:8px 18px;border-radius:8px;margin-bottom:16px; border: 1px solid #d8d8d8; box-shadow: 0 2px 6px rgba(0,0,0,0.05);}
 
     /* ===== CALENDARIO ===== */
     #view-calendar{max-width:1100px;margin:0 auto 50px;}
-    .cal-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;background:#fff;padding:15px 25px;border-radius:15px;border:1px solid #eaeaea;box-shadow: 0 4px 12px rgba(0,0,0,0.03);flex-wrap:wrap;gap:10px;}
+    .cal-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;background:#fff;padding:15px 25px;border-radius:15px;border:1px solid #d8d8d8;box-shadow: 0 4px 12px rgba(0,0,0,0.03);flex-wrap:wrap;gap:10px;}
     .cal-header h3{color:var(--accent-dark);margin:0;}
     .cal-nav{display:flex;align-items:center;gap:15px;}
     .cal-nav-btn{background:var(--accent);color:#fff;border:none;padding:8px 15px;border-radius:8px;font-weight:bold;cursor:pointer;font-size:1.1rem;}
     .cal-month-display{font-size:1.1rem;font-weight:700;color:var(--text-main);min-width:150px;text-align:center;}
 
-    /* Toggles de vista */
     .cal-view-toggle{display:flex;gap:0;border:1.5px solid var(--accent);border-radius:10px;overflow:hidden;}
     .cal-view-btn{padding:7px 18px;border:none;background:transparent;color:var(--accent);font-family:'Poppins',sans-serif;font-size:.8rem;font-weight:700;cursor:pointer;transition:.2s;}
     .cal-view-btn.active{background:var(--accent);color:#fff;}
-    .cal-view-btn:hover:not(.active){background:rgba(var(--accent-rgb),.08);}
+    .cal-view-btn:hover:not(.active){background:rgba(8,71,52,.08);}
 
-    .calendar-container{background:#fff;border-radius:20px;padding:20px;border:1px solid #eaeaea;box-shadow: 0 4px 15px rgba(0,0,0,0.04);}
+    .calendar-container{background:#fff;border-radius:20px;padding:20px;border:1px solid #d8d8d8;box-shadow: 0 4px 15px rgba(0,0,0,0.04);}
     .cal-weekdays{display:grid;grid-template-columns:repeat(7,1fr);gap:5px;margin-bottom:10px;text-align:center;font-weight:700;color:var(--text-muted);font-size:.85rem;}
     .cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:5px;}
     .cal-day{min-height:90px;border:1px solid #eee;border-radius:10px;padding:5px;background:#fafafa;cursor:pointer;transition:.2s;display:flex;flex-direction:column;}
@@ -296,34 +295,38 @@
     .cal-day.today .cal-date-num{color:var(--accent);font-size:.95rem;}
     .cal-event-pill{font-size:.72rem;padding:4px 6px;border-radius:4px;margin-bottom:3px;color:#fff;font-weight:600;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;}
 
-    /* ===== VISTA SEMANA DEL CALENDARIO ===== */
-    .week-view-container{background:#fff;border-radius:20px;border:1px solid #eaeaea;box-shadow:0 4px 15px rgba(0,0,0,.04);overflow:hidden;}
-    .week-days-header{display:grid;grid-template-columns:60px repeat(7,1fr);background:var(--accent-dark);border-bottom:2px solid rgba(255,255,255,.15);}
-    .week-hour-col-header{padding:12px 0;}
-    .week-day-header{padding:12px 8px;text-align:center;border-left:1px solid rgba(255,255,255,.1);}
-    .week-day-header .wdh-name{font-size:.75rem;font-weight:700;color:rgba(255,255,255,.7);text-transform:uppercase;letter-spacing:.8px;}
-    .week-day-header .wdh-date{font-size:1.2rem;font-weight:900;color:#fff;line-height:1.1;margin-top:2px;}
-    .week-day-header.is-today .wdh-date{background:rgba(255,255,255,.2);border-radius:8px;width:36px;height:36px;display:flex;align-items:center;justify-content:center;margin:2px auto 0;}
-    .week-body{display:grid;grid-template-columns:60px repeat(7,1fr);max-height:520px;overflow-y:auto;}
-    .week-hour-labels{display:flex;flex-direction:column;}
-    .week-hour-label{height:64px;display:flex;align-items:flex-start;justify-content:center;padding-top:6px;font-size:.7rem;font-weight:700;color:var(--text-muted);border-bottom:1px solid #f0f0f0;background:#fafafa;}
-    .week-day-col{display:flex;flex-direction:column;border-left:1px solid #f0f0f0;}
-    .week-cell{height:64px;border-bottom:1px solid #f0f0f0;padding:4px 5px;cursor:pointer;transition:background .15s;position:relative;}
-    .week-cell:hover{background:#fdf7ff;}
-    .week-event{background:var(--accent);color:#fff;border-radius:6px;padding:3px 7px;font-size:.72rem;font-weight:700;height:100%;display:flex;align-items:center;cursor:pointer;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;box-shadow:0 2px 6px rgba(0,0,0,.12);}
-    .week-event-empty{height:100%;}
-    .week-today-col{background:rgba(var(--accent-rgb),.03);}
-    .week-no-events{padding:40px;text-align:center;color:var(--text-muted);font-size:.9rem;opacity:.6;}
+    /* ===== VISTA SEMANA SIMPLIFICADA ===== */
+    .week-simple-container{background:#fff;border-radius:20px;border:1px solid #d8d8d8;box-shadow:0 4px 15px rgba(0,0,0,.04);overflow:hidden;}
+    .week-simple-days{display:flex;flex-direction:column;gap:0;}
+    .week-simple-day{border-bottom:1px solid #f0f0f0;}
+    .week-simple-day:last-child{border-bottom:none;}
+    .week-simple-day-header{display:flex;align-items:center;gap:12px;padding:12px 20px;background:#f8f9f8;border-bottom:1px solid #f0f0f0;cursor:pointer;}
+    .week-simple-day-header.is-today{background:#e8f5ee;}
+    .wsdc-name{font-size:.8rem;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--text-muted);min-width:40px;}
+    .wsdc-date{font-size:1.1rem;font-weight:900;color:var(--accent-dark);min-width:32px;}
+    .week-simple-day-header.is-today .wsdc-date{background:var(--accent);color:#fff;border-radius:8px;width:32px;height:32px;display:flex;align-items:center;justify-content:center;font-size:.95rem;}
+    .wsdc-events-preview{font-size:.78rem;color:var(--text-muted);flex:1;}
+    .wsdc-add{font-size:.75rem;color:var(--accent);font-weight:600;padding:4px 10px;border-radius:6px;border:1px solid var(--accent);background:transparent;cursor:pointer;font-family:'Poppins',sans-serif;transition:.15s;}
+    .wsdc-add:hover{background:var(--accent);color:#fff;}
+    .week-simple-events{padding:8px 20px 12px 20px;}
+    .week-simple-event{display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:8px;margin-bottom:6px;background:#f8f9f8;border:1px solid #eee;}
+    .week-simple-event:last-child{margin-bottom:0;}
+    .wse-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;}
+    .wse-time{font-size:.75rem;font-weight:700;color:var(--text-muted);min-width:60px;}
+    .wse-title{font-size:.85rem;font-weight:600;flex:1;}
+    .wse-del{cursor:pointer;color:#bbb;font-size:.9rem;padding:2px 6px;transition:.15s;}
+    .wse-del:hover{color:#ef4444;}
+    .week-no-events{padding:10px 20px 14px;font-size:.82rem;color:#bbb;font-style:italic;}
 
     /* ===== HORARIO ===== */
     #view-schedule{max-width:1100px;margin:0 auto;padding-bottom:50px;}
     .schedule-grid{display:flex;gap:15px;overflow-x:auto;padding-bottom:10px;}
-    .day-column{flex:1;min-width:150px;display:flex;flex-direction:column;border-radius:12px;border:1px solid #eaeaea;overflow:hidden;background:#fff; box-shadow: 0 4px 10px rgba(0,0,0,0.03);}
+    .day-column{flex:1;min-width:150px;display:flex;flex-direction:column;border-radius:12px;border:1px solid #d8d8d8;overflow:hidden;background:#fff; box-shadow: 0 4px 10px rgba(0,0,0,0.03);}
     .day-header{background:var(--accent-dark);color:#fff;text-align:center;padding:12px;font-weight:700;font-family:'Lora',serif;font-size:1rem;}
     .hour-cell{display:flex;border-top:1px solid #eee;min-height:50px;}
     .hour-label{background:#f9f9f9;color:var(--text-muted);font-weight:700;font-size:.75rem;width:50px;display:flex;align-items:center;justify-content:center;border-right:1px solid #eee;flex-shrink:0;}
     .hour-cell textarea{flex:1;border:none;outline:none;background:transparent;padding:6px;text-align:center;color:var(--text-main);resize:none;font-size:.8rem;font-weight:600;font-family:'Poppins',sans-serif;box-sizing:border-box;}
-    .hour-cell textarea:focus{background:#fff9fa;}
+    .hour-cell textarea:focus{background:#f0faf5;}
     .hour-cell textarea.occupied-cell{background-color:var(--accent) !important;color:#fff !important;}
 
     /* ===== PRÓXIMA CLASE ===== */
@@ -341,7 +344,7 @@
     .progress-circle-inner{width:78%;height:78%;background:#fff;border-radius:50%;display:flex;flex-direction:column;justify-content:center;align-items:center;color:var(--text-main);}
     .pc-percentage{font-size:1.8rem;font-weight:700;color:var(--accent-dark);}
     .pc-label{font-size:.72rem;letter-spacing:1px;opacity:.7;}
-    .stat-card{background:#fff;color:var(--text-main);padding:18px;border-radius:14px;min-width:120px;text-align:center;display:flex;flex-direction:column;justify-content:center;box-shadow:0 5px 15px rgba(0,0,0,.05); border: 1px solid #eaeaea;}
+    .stat-card{background:#fff;color:var(--text-main);padding:18px;border-radius:14px;min-width:120px;text-align:center;display:flex;flex-direction:column;justify-content:center;box-shadow:0 5px 15px rgba(0,0,0,.05); border: 1px solid #d8d8d8;}
     .stat-card.dark{background:var(--accent-dark);color:#fff;}
     .stat-card:not(.dark) .stat-val { color: var(--accent); }
     .stat-val{font-size:2.2rem;font-weight:700;}
@@ -349,14 +352,14 @@
 
     .grades-in-stats{width:100%;}
     .completed-row{display:flex;align-items:center;gap:12px;padding:11px 16px;border-bottom:1px solid #eee;transition:background .15s;}
-    .completed-row:hover{background:#fafafa;}
+    .completed-row:hover{background:#f8f9f8;}
     .completed-row:last-child{border-bottom:none;}
     .cr-name{flex:1;font-size:.88rem;font-weight:600;color:var(--text-main);}
     .cr-input{width:72px;padding:7px 10px;border:1.5px solid #ddd;border-radius:8px;text-align:center;font-weight:700;color:var(--accent-dark);font-size:.95rem;outline:none;background:#fff;font-family:'Poppins',sans-serif;}
     .cr-input:focus{border-color:var(--accent);}
 
     .study-stats-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px;margin-top:4px;}
-    .study-stat-pill{background:#fff;border:1px solid #eaeaea;border-radius:12px;padding:14px;text-align:center; box-shadow: 0 2px 8px rgba(0,0,0,0.03);}
+    .study-stat-pill{background:#fff;border:1px solid #d8d8d8;border-radius:12px;padding:14px;text-align:center; box-shadow: 0 2px 8px rgba(0,0,0,0.03);}
     .study-stat-pill .sp-name{font-size:.75rem;font-weight:600;color:var(--text-muted);margin-bottom:4px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;}
     .study-stat-pill .sp-time{font-size:1.2rem;font-weight:700;color:var(--accent-dark);}
 
@@ -371,15 +374,17 @@
     .pom-btn.primary:hover{opacity:.9; transform: translateY(-2px);}
     .pom-btn.secondary{background:#fff;color:var(--text-muted);border:1px solid #ddd;}
     .pom-btn.secondary:hover{background:#f5f5f5;}
+    .pom-btn.danger{background:#fff;color:#ef4444;border:1.5px solid #ef4444;}
+    .pom-btn.danger:hover{background:#ef4444;color:#fff;}
     .pom-subject-select{width:100%;padding:14px 16px;border-radius:10px;border:2px solid #ddd;font-family:'Poppins',sans-serif;font-size:.9rem;color:var(--text-main);background:#fff;outline:none;margin-bottom:16px;}
     .pom-subject-select:focus { border-color: var(--accent); }
     .pom-session-log{margin-top:16px;}
-    .pom-log-item{display:flex;justify-content:space-between;align-items:center;padding:10px 14px;border-radius:8px;background:#f5f5f5;margin-bottom:8px;font-size:.85rem;color:var(--text-main); border:1px solid #eaeaea;}
+    .pom-log-item{display:flex;justify-content:space-between;align-items:center;padding:10px 14px;border-radius:8px;background:#f5f5f5;margin-bottom:8px;font-size:.85rem;color:var(--text-main); border:1px solid #d8d8d8;}
 
     /* ===== APUNTES ===== */
     #view-notes{max-width:1000px;margin:0 auto;padding-bottom:60px;}
     
-    .notes-search-bar { width: 100%; max-width: 400px; padding: 12px 16px; border-radius: 10px; border: 2px solid #eaeaea; margin-top: 15px; outline: none; font-family: 'Poppins', sans-serif; font-size: 0.9rem; transition: border-color 0.2s;}
+    .notes-search-bar { width: 100%; max-width: 400px; padding: 12px 16px; border-radius: 10px; border: 2px solid #d8d8d8; margin-top: 15px; outline: none; font-family: 'Poppins', sans-serif; font-size: 0.9rem; transition: border-color 0.2s; background:#fff;}
     .notes-search-bar:focus { border-color: var(--accent); }
 
     .notes-subjects-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:16px;margin-top:20px;}
@@ -390,7 +395,7 @@
     .nsc-name{font-size:.95rem;font-weight:700;color:var(--accent-dark);line-height:1.3;margin-bottom:6px;}
     .nsc-count{font-size:.75rem;color:var(--text-muted);font-weight:500;}
     .nsc-count b{color:var(--accent); font-weight: 700;}
-    .notes-detail{background:#fff;border-radius:18px;overflow:hidden;box-shadow:0 6px 24px rgba(0,0,0,.06); border:1px solid #eaeaea;}
+    .notes-detail{background:#fff;border-radius:18px;overflow:hidden;box-shadow:0 6px 24px rgba(0,0,0,.06); border:1px solid #d8d8d8;}
     .notes-detail-header{background:var(--accent-dark);padding:20px 24px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;}
     .ndh-back{background:rgba(255,255,255,.15);border:none;color:#fff;border-radius:8px;padding:8px 14px;cursor:pointer;font-size:.85rem;font-weight:700;font-family:'Poppins',sans-serif;transition:.18s;flex-shrink:0;}
     .ndh-back:hover{background:rgba(255,255,255,.25);}
@@ -446,11 +451,8 @@
     .dash-mini-stats{display:flex;gap:18px;}
     .dash-mini-stat .val{font-size:1.4rem;font-weight:700;color:#fff;display:block;}
     .dash-mini-stat .lbl{font-size:.65rem;opacity:.7;text-transform:uppercase;letter-spacing:.5px;color:#fff;}
-    .dash-card{background:#fff;border-radius:18px;padding:24px;border:1px solid #eaeaea;color:var(--text-main); box-shadow: 0 4px 15px rgba(0,0,0,0.03);}
+    .dash-card{background:#fff;border-radius:18px;padding:24px;border:1px solid #d8d8d8;color:var(--text-main); box-shadow: 0 4px 15px rgba(0,0,0,0.03);}
     .dash-card h4{margin:0 0 16px;font-size:.9rem;color:var(--accent-dark); font-family:'Poppins',sans-serif;font-weight:700;}
-    .dash-available{grid-column:1/-1;}
-    .avail-chips{display:flex;flex-wrap:wrap;gap:10px;}
-    .avail-chip{padding:6px 14px;border-radius:20px;background:#f5f5f5;color:var(--text-muted);font-size:.8rem;font-weight:500;border:1px solid #ddd;}
     .upcoming-item{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid #f0f0f0;}
     .upcoming-item:last-child{border-bottom:none;}
     .upcoming-days{font-size:.75rem;font-weight:700;color:var(--accent);min-width:60px; background: rgba(0,0,0,0.05); padding: 4px 8px; border-radius: 6px; text-align: center;}
@@ -458,12 +460,12 @@
 
     /* ===== PERFIL ===== */
     #view-profile{max-width:680px;margin:0 auto;padding-bottom:50px;}
-    .profile-section{background:#fff;color:var(--text-main);border-radius:18px;border:1px solid #eaeaea; box-shadow: 0 4px 15px rgba(0,0,0,0.03); padding:26px 30px;margin-bottom:24px;}
+    .profile-section{background:#fff;color:var(--text-main);border-radius:18px;border:1px solid #d8d8d8; box-shadow: 0 4px 15px rgba(0,0,0,0.03); padding:26px 30px;margin-bottom:24px;}
     .profile-section h3{margin-top:0;font-size:1.1rem;color:var(--accent-dark); border-bottom: 2px solid #f0f0f0; padding-bottom: 10px; margin-bottom: 15px;}
     .profile-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:15px;margin-top:16px;}
     .profile-theme-card{border:2px solid #eaeaea;border-radius:12px;padding:14px 10px;cursor:pointer;transition:all .2s;text-align:center;background:#fff;}
     .profile-theme-card:hover{transform:translateY(-3px); box-shadow: 0 4px 10px rgba(0,0,0,0.05);}
-    .profile-theme-card.selected{border-color:var(--accent);box-shadow:0 0 0 3px rgba(var(--accent-rgb),0.15);}
+    .profile-theme-card.selected{border-color:var(--accent);box-shadow:0 0 0 3px rgba(8,71,52,0.15);}
     .profile-save-btn{margin-top:20px;width:100%;padding:13px;border-radius:10px;border:none;background:var(--accent);color:#fff;font-family:'Poppins',sans-serif;font-weight:600;font-size:14px;cursor:pointer;transition:.2s;}
     .profile-save-btn:hover{opacity:.9; transform: translateY(-2px);}
     .profile-info-row{display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid #f0f0f0;font-size:14px;}
@@ -513,8 +515,6 @@
       .stats-header{flex-direction:column;align-items:center;gap:16px;}
       .pom-circle{width:180px;height:180px;}
       .pom-time{font-size:2.8rem;}
-      .week-days-header,.week-body{grid-template-columns:44px repeat(7,1fr);}
-      .week-hour-label{font-size:.6rem;}
     }
   </style>
 </head>
@@ -570,9 +570,9 @@
       <div class="ob-step-title">Elegí tu tema 🎨</div>
       <div class="ob-step-sub">El color principal de toda tu malla. Lo podés cambiar después desde Perfil.</div>
       <div class="theme-grid">
-        <div class="theme-card selected" data-accent="#820065" data-dark="#820065" data-light="#e8b4f5" data-bg="#f7d9fc" data-label="Púrpura" onclick="obSelectTheme(this)"><div class="theme-swatch" style="background:linear-gradient(135deg,#820065,#5a0046)"></div><div class="theme-name">Púrpura</div></div>
+        <div class="theme-card" data-accent="#820065" data-dark="#820065" data-light="#e8b4f5" data-bg="#f7d9fc" data-label="Púrpura" onclick="obSelectTheme(this)"><div class="theme-swatch" style="background:linear-gradient(135deg,#820065,#5a0046)"></div><div class="theme-name">Púrpura</div></div>
         <div class="theme-card" data-accent="#1B2CC1" data-dark="#091540" data-light="#7692FF" data-bg="#abd2fa" data-label="Azul" onclick="obSelectTheme(this)"><div class="theme-swatch" style="background:linear-gradient(135deg,#1B2CC1,#091540)"></div><div class="theme-name">Azul</div></div>
-        <div class="theme-card" data-accent="#47622A" data-dark="#243313" data-light="#9FB878" data-bg="#f9f9fc" data-label="Verde" onclick="obSelectTheme(this)"><div class="theme-swatch" style="background:linear-gradient(135deg,#47622A,#243313)"></div><div class="theme-name">Verde</div></div>
+        <div class="theme-card selected" data-accent="#084734" data-dark="#084734" data-light="#a8d5c2" data-bg="#cdedb3" data-label="Verde" onclick="obSelectTheme(this)"><div class="theme-swatch" style="background:linear-gradient(135deg,#084734,#042b1f)"></div><div class="theme-name">Verde</div></div>
         <div class="theme-card" data-accent="#d1868f" data-dark="#b06068" data-light="#fbe0e5" data-bg="#fbcad9" data-label="Rosa" onclick="obSelectTheme(this)"><div class="theme-swatch" style="background:linear-gradient(135deg,#d1868f,#b06068)"></div><div class="theme-name">Rosa</div></div>
         <div class="theme-card" data-accent="#B31B1B" data-dark="#660f0f" data-light="#E57373" data-bg="#f9f9fc" data-label="Rojo" onclick="obSelectTheme(this)"><div class="theme-swatch" style="background:linear-gradient(135deg,#B31B1B,#660f0f)"></div><div class="theme-name">Rojo</div></div>
         <div class="theme-card" data-accent="#565656" data-dark="#2B2B2B" data-light="#B3B3B3" data-bg="#f9f9fc" data-label="Gris" onclick="obSelectTheme(this)"><div class="theme-swatch" style="background:linear-gradient(135deg,#565656,#2B2B2B)"></div><div class="theme-name">Gris</div></div>
@@ -597,9 +597,6 @@
     </div>
   </div>
 </div>
-
-<!-- ===== MODAL CREAR CARPETA EN DRIVE ===== -->
-<!-- REMOVED - replaced with inline Drive creation flow -->
 
 <div id="scheduleModal" class="modal-overlay">
   <div class="modal-box">
@@ -633,7 +630,14 @@
     <label>¿Qué tenés que hacer?</label><input type="text" id="calTitle" placeholder="Ej: Estudiar Física" autocomplete="off">
     <label>Horario (opcional):</label><input type="text" id="calTime" placeholder="Ej: 14:00 o Todo el día" autocomplete="off">
     <label>Color de etiqueta:</label>
-    <select id="calColor"><option value="#820065">Púrpura</option><option value="#1B2CC1">Azul</option><option value="#47622A">Verde</option><option value="#d1868f">Rosa</option><option value="#B31B1B">Rojo</option><option value="#565656">Gris</option></select>
+    <select id="calColor">
+      <option value="#084734">Verde</option>
+      <option value="#1B2CC1">Azul</option>
+      <option value="#820065">Púrpura</option>
+      <option value="#d1868f">Rosa</option>
+      <option value="#B31B1B">Rojo</option>
+      <option value="#565656">Gris</option>
+    </select>
     <button class="btn-add" style="width:100%;margin-top:10px" onclick="saveCalEvent(false)">✔️ Guardar</button>
     <button class="btn-goog" onclick="saveCalEvent(true)">☁️ Guardar y abrir Google Calendar</button>
     <button class="btn-close-modal" onclick="closeModal('calModal')">Cancelar</button>
@@ -735,10 +739,6 @@
           <h4>🗓️ Próximos 7 días</h4>
           <div id="upcomingContent"><span style="opacity:.6;font-size:.85rem">Sin eventos próximos.</span></div>
         </div>
-        <div class="dash-card dash-available">
-          <h4>✅ Podés cursar ahora</h4>
-          <div class="avail-chips" id="dashAvailChips"><span style="opacity:.6;font-size:.85rem;font-style:italic">Cargando...</span></div>
-        </div>
       </div>
     </div>
 
@@ -753,7 +753,6 @@
       <div class="mapa-scroll-wrapper"><div class="year-row" id="mallaContainer"></div></div>
     </div>
 
-    <!-- ===== CALENDARIO con toggle Mes/Semana ===== -->
     <div id="view-calendar" class="view-section">
       <div class="section-header">
         <h2>🗓️ Calendario</h2>
@@ -762,7 +761,6 @@
       <div class="cal-header">
         <h3 id="calHeaderTitle">Mis fechas importantes</h3>
         <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
-          <!-- Toggle Mes / Semana -->
           <div class="cal-view-toggle">
             <button class="cal-view-btn active" id="btnViewMonth" onclick="setCalView('month')">📅 Mes</button>
             <button class="cal-view-btn" id="btnViewWeek" onclick="setCalView('week')">📆 Semana</button>
@@ -774,9 +772,7 @@
           </div>
         </div>
       </div>
-      <div class="calendar-container" id="calendarContainer">
-        <!-- Se renderiza dinámicamente -->
-      </div>
+      <div class="calendar-container" id="calendarContainer"></div>
     </div>
 
     <div id="view-schedule" class="view-section">
@@ -816,7 +812,7 @@
       </div>
       <div class="panel-box">
         <h3 style="margin-top:0;">⏱️ Tiempo de estudio por materia</h3>
-        <p style="font-size:.85rem;color:var(--text-muted);margin:0 0 16px">Horas registradas usando el temporizador Pomodoro.</p>
+        <p style="font-size:.85rem;color:var(--text-muted);margin:0 0 16px">Horas registradas usando el temporizador.</p>
         <div class="study-stats-grid" id="studyStatsGrid"></div>
       </div>
     </div>
@@ -824,16 +820,16 @@
     <div id="view-pomodoro" class="view-section">
       <div class="section-header">
         <h2>⏱️ Modo estudio</h2>
-        <p>25 minutos de estudio, 5 de descanso. Elegí la materia y dale play. El tiempo queda guardado en tu Progreso.</p>
+        <p>Configurá el tiempo que quieras, elegí una materia (opcional) y dale play. El tiempo queda guardado en tu Progreso.</p>
       </div>
-      <label style="display:block;font-size:.8rem;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--text-main);margin-bottom:8px;text-align:center">¿Qué vas a estudiar ahora?</label>
-      <select class="pom-subject-select" id="pomSubject"><option value="">— Elegí una materia —</option></select>
+      <label style="display:block;font-size:.8rem;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--text-main);margin-bottom:8px;text-align:center">¿Qué vas a estudiar ahora? (opcional)</label>
+      <select class="pom-subject-select" id="pomSubject"><option value="">— Sin materia específica —</option></select>
       <div style="display:flex;gap:15px;justify-content:center;margin-bottom:24px;flex-wrap:wrap">
-        <div style="background:#fff;border-radius:12px;padding:12px 16px;text-align:center;border:1px solid #ddd;box-shadow: 0 2px 6px rgba(0,0,0,0.03)">
+        <div style="background:#fff;border-radius:12px;padding:12px 16px;text-align:center;border:1px solid #d8d8d8;box-shadow: 0 2px 6px rgba(0,0,0,0.03)">
           <label style="display:block;font-size:.7rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:.8px;margin-bottom:6px">Estudio (min)</label>
           <input type="number" id="pomWorkMin" value="25" min="1" max="90" onchange="pomApplyConfig()" style="width:65px;padding:8px 10px;border-radius:8px;border:1.5px solid #ccc;background:#fafafa;color:var(--text-main);font-family:'Poppins',sans-serif;font-weight:700;font-size:1.1rem;text-align:center;outline:none;">
         </div>
-        <div style="background:#fff;border-radius:12px;padding:12px 16px;text-align:center;border:1px solid #ddd;box-shadow: 0 2px 6px rgba(0,0,0,0.03)">
+        <div style="background:#fff;border-radius:12px;padding:12px 16px;text-align:center;border:1px solid #d8d8d8;box-shadow: 0 2px 6px rgba(0,0,0,0.03)">
           <label style="display:block;font-size:.7rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:.8px;margin-bottom:6px">Descanso (min)</label>
           <input type="number" id="pomBreakMin" value="5" min="1" max="30" onchange="pomApplyConfig()" style="width:65px;padding:8px 10px;border-radius:8px;border:1.5px solid #ccc;background:#fafafa;color:var(--text-main);font-family:'Poppins',sans-serif;font-weight:700;font-size:1.1rem;text-align:center;outline:none;">
         </div>
@@ -843,8 +839,9 @@
         <div class="pom-mode" id="pomMode">ESTUDIO</div>
       </div>
       <div class="pom-controls">
-        <button class="pom-btn primary" id="pomPlayBtn" onclick="pomToggle()">▶ Iniciar Sesión</button>
+        <button class="pom-btn primary" id="pomPlayBtn" onclick="pomToggle()">▶ Iniciar</button>
         <button class="pom-btn secondary" onclick="pomReset()">↺ Reiniciar</button>
+        <button class="pom-btn danger" id="pomFinishBtn" onclick="pomFinishEarly()" style="display:none">⏹ Finalizar</button>
       </div>
       <div style="text-align:center;margin-bottom:24px">
         <span style="font-size:.85rem;font-weight:600;color:var(--text-muted)" id="pomSessionCount">Sesiones completadas: 0</span>
@@ -881,7 +878,7 @@
         <div class="profile-grid" id="profileThemeGrid">
           <div class="profile-theme-card" data-accent="#820065" data-dark="#820065" data-light="#e8b4f5" data-bg="#f7d9fc" data-label="Púrpura" onclick="profileSelectTheme(this)"><div class="theme-swatch" style="background:linear-gradient(135deg,#820065,#5a0046)"></div><div class="theme-name">Púrpura</div></div>
           <div class="profile-theme-card" data-accent="#1B2CC1" data-dark="#091540" data-light="#7692FF" data-bg="#abd2fa" data-label="Azul" onclick="profileSelectTheme(this)"><div class="theme-swatch" style="background:linear-gradient(135deg,#1B2CC1,#091540)"></div><div class="theme-name">Azul</div></div>
-          <div class="profile-theme-card" data-accent="#47622A" data-dark="#243313" data-light="#9FB878" data-bg="#f9f9fc" data-label="Verde" onclick="profileSelectTheme(this)"><div class="theme-swatch" style="background:linear-gradient(135deg,#47622A,#243313)"></div><div class="theme-name">Verde</div></div>
+          <div class="profile-theme-card" data-accent="#084734" data-dark="#084734" data-light="#a8d5c2" data-bg="#cdedb3" data-label="Verde" onclick="profileSelectTheme(this)"><div class="theme-swatch" style="background:linear-gradient(135deg,#084734,#042b1f)"></div><div class="theme-name">Verde</div></div>
           <div class="profile-theme-card" data-accent="#d1868f" data-dark="#b06068" data-light="#fbe0e5" data-bg="#fbcad9" data-label="Rosa" onclick="profileSelectTheme(this)"><div class="theme-swatch" style="background:linear-gradient(135deg,#d1868f,#b06068)"></div><div class="theme-name">Rosa</div></div>
           <div class="profile-theme-card" data-accent="#B31B1B" data-dark="#660f0f" data-light="#E57373" data-bg="#f9f9fc" data-label="Rojo" onclick="profileSelectTheme(this)"><div class="theme-swatch" style="background:linear-gradient(135deg,#B31B1B,#660f0f)"></div><div class="theme-name">Rojo</div></div>
           <div class="profile-theme-card" data-accent="#565656" data-dark="#2B2B2B" data-light="#B3B3B3" data-bg="#f9f9fc" data-label="Gris" onclick="profileSelectTheme(this)"><div class="theme-swatch" style="background:linear-gradient(135deg,#565656,#2B2B2B)"></div><div class="theme-name">Gris</div></div>
@@ -893,9 +890,36 @@
   </main>
 </div>
 
+<!-- Audio para alarma de pomodoro -->
+<audio id="pomAudio" preload="auto">
+  <source src="data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFhYmNkpWYmpuamZiXlpWVlZWWl5iZmpucnJ2dnZ2cm5qZmJeWlpWVlZaXmJmanJ2enp6enp6dnJuamZiXlpaVlZWWl5iZmpucnZ6en5+fnp2cm5qZmJeWlpWVlZaXmJmanJ2enp+foKCfn56dnJuamZiXlpaVlZWWl5iZmpucnZ6fn6CgoKCfnp2cm5qZmJeWlpWVlZaXmJmanJ2enp+foKChoaGhoKCfnp2cm5qZmJeWlpWVlZaXmJmanJ2enp+foKChoqKioqGgoJ+enZ2cm5qZmJeWlpaVlZaXmJmanJ2enp+goKGioqOjo6KioaGgn56dnJuamZiXlpaVlZaXmJmanJ2en5+goaGio6OkpKSko6OioqGgn56dnJuamZiXlpaVlZWWl5iZmpucnZ6fn6ChoaKjo6SkpKSko6OioqGgn56dnJuamZiXlpaVlZWWl5iZmpucnZ6fn6ChoaKjo6Sk" type="audio/wav">
+</audio>
+
 <script>
+// ==================== SONIDO POMODORO ====================
+function playPomSound(){
+  try {
+    // Generar sonido con Web Audio API
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const frequencies = [523, 659, 784, 1047]; // Do, Mi, Sol, Do
+    frequencies.forEach((freq, i) => {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.type = 'sine';
+      osc.frequency.value = freq;
+      gain.gain.setValueAtTime(0, ctx.currentTime + i * 0.18);
+      gain.gain.linearRampToValueAtTime(0.3, ctx.currentTime + i * 0.18 + 0.05);
+      gain.gain.linearRampToValueAtTime(0, ctx.currentTime + i * 0.18 + 0.35);
+      osc.start(ctx.currentTime + i * 0.18);
+      osc.stop(ctx.currentTime + i * 0.18 + 0.4);
+    });
+  } catch(e) { console.log('Audio no disponible'); }
+}
+
 // ==================== ESTADO ====================
-let obState={career:'',uni:'',years:'',theme:'Púrpura',accent:'#820065',dark:'#820065',light:'#e8b4f5',bg:'#f7d9fc',materias:[]};
+let obState={career:'',uni:'',years:'',theme:'Verde',accent:'#084734',dark:'#084734',light:'#a8d5c2',bg:'#cdedb3',materias:[]};
 let profileSelectedTheme=null;
 let tableData={},gradesData={},calendarData={},apuntesData={},pomodoroStats={},horarioExtraData={};
 let authMode='registro';
@@ -1045,12 +1069,12 @@ function aplicarTema(t){
   document.documentElement.style.setProperty('--accent-dark',t.dark);
   document.documentElement.style.setProperty('--accent-light',t.light);
   document.documentElement.style.setProperty('--accent-bg',t.bg);
-  document.body.style.backgroundColor=t.bg;
-  let hex = t.accent.replace('#','');
-  let r = parseInt(hex.substring(0,2), 16);
-  let g = parseInt(hex.substring(2,4), 16);
-  let b = parseInt(hex.substring(4,6), 16);
-  document.documentElement.style.setProperty('--accent-rgb', `${r}, ${g}, ${b}`);
+  document.body.style.backgroundColor='#e7e7e7';
+  let hex=t.accent.replace('#','');
+  let r=parseInt(hex.substring(0,2),16);
+  let g=parseInt(hex.substring(2,4),16);
+  let b=parseInt(hex.substring(4,6),16);
+  document.documentElement.style.setProperty('--accent-rgb',`${r}, ${g}, ${b}`);
 }
 function marcarTemaActivo(t){
   if(!t)return;
@@ -1105,14 +1129,21 @@ function asignarEventosMaterias(){
     }
     c.addEventListener('click',()=>{
       if(!c.classList.contains('enabled'))return;
+      const wasCompleted=c.classList.contains('completed');
       c.classList.toggle('completed');
-      if(c.classList.contains('completed')){
-        confetti({origin:{y:.7},colors:[cfg.theme?.accent||'#820065', '#ffffff']});
+      if(!wasCompleted){
+        // Recién aprobada: mostrar modal de nota
+        confetti({origin:{y:.7},colors:[cfg.theme?.accent||'#084734','#ffffff']});
+        saveProgress();updateStates();renderGradesInStats();renderDashboard();
+        // Abrir modal de nota automáticamente
+        setTimeout(()=>{
+          openGradeModal(c.dataset.id,c.querySelector('.course-name')?.textContent||'Materia');
+        },400);
       } else {
         delete gradesData[c.dataset.id];
         try{localStorage.setItem('materiasNotas',JSON.stringify(gradesData));}catch(e){}
+        actualizarBadge(c);saveProgress();updateStates();renderGradesInStats();renderDashboard();
       }
-      actualizarBadge(c);saveProgress();updateStates();renderGradesInStats();renderDashboard();
     });
     actualizarBadge(c);
   });
@@ -1211,13 +1242,6 @@ function renderDashboard(){
   const grades=Object.values(gradesData).map(x=>parseFloat(x)).filter(x=>!isNaN(x));
   const avg=grades.length>0?(grades.reduce((a,b)=>a+b,0)/grades.length).toFixed(2):null;
   const dah=document.getElementById('dashAvgHome');if(dah)dah.textContent=avg!==null?avg:'—';
-  const chips=document.getElementById('dashAvailChips');
-  if(chips){
-    const avail=Array.from(getCourses()).filter(c=>c.classList.contains('enabled')&&!c.classList.contains('completed'));
-    chips.innerHTML=avail.length===0
-      ?'<span style="opacity:.6;font-size:.85rem;font-style:italic">No hay materias disponibles o ya aprobaste todas 🎉</span>'
-      :avail.map(c=>`<span class="avail-chip">${c.querySelector('.course-name')?.textContent||c.textContent}</span>`).join('');
-  }
   renderNextClass();renderUpcoming();
 }
 
@@ -1251,18 +1275,18 @@ function renderNextClass(){
       }
     });
   }
-  if(!found){cont.innerHTML='<span style="opacity:.6;font-size:.85rem">No encontré clases en tu horario. Podes completarlo en la pestaña Horario.</span>';return;}
+  if(!found){cont.innerHTML='<span style="opacity:.6;font-size:.85rem;color:var(--text-muted)">No encontré clases en tu horario. Podés completarlo en la pestaña Horario.</span>';return;}
   const iconMod=found.modalidad==='virtual'?'💻':'🏫';
   const detalle=found.modalidad==='virtual'&&found.link
-    ?`<a href="${found.link}" target="_blank" style="color:#fff;text-decoration:underline;font-size:.78rem;font-weight:600">Entrar a la clase →</a>`
-    :found.salon?`<span style="font-size:.85rem;opacity:.8">${found.salon}</span>`:'';
+    ?`<a href="${found.link}" target="_blank" style="color:var(--accent);text-decoration:underline;font-size:.78rem;font-weight:600">Entrar a la clase →</a>`
+    :found.salon?`<span style="font-size:.85rem;color:var(--text-muted)">${found.salon}</span>`:'';
   const diaLabel=found.dia?` (${found.dia})`:'';
   cont.innerHTML=`
     <div style="display:flex;align-items:flex-start;gap:12px">
       <span style="font-size:2rem">${iconMod}</span>
       <div>
-        <div style="font-size:1.05rem;font-weight:700;color:#fff">${found.materia}</div>
-        <div style="font-size:.85rem;opacity:.7;margin-top:2px">${found.hora}${diaLabel}</div>
+        <div style="font-size:1.05rem;font-weight:700;color:var(--text-main)">${found.materia}</div>
+        <div style="font-size:.85rem;color:var(--text-muted);margin-top:2px">${found.hora}${diaLabel}</div>
         ${detalle?'<div style="margin-top:6px">'+detalle+'</div>':''}
       </div>
     </div>`;
@@ -1382,21 +1406,19 @@ function saveExtraInfo(){
 function openModal(id){document.getElementById(id).classList.add('open');}
 function closeModal(id){document.getElementById(id).classList.remove('open');}
 
-// ==================== CALENDARIO (MES + SEMANA) ====================
+// ==================== CALENDARIO (MES + SEMANA SIMPLE) ====================
 const monthNames=["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"];
 const dayNamesShort=["Dom","Lun","Mar","Mié","Jue","Vie","Sáb"];
-const dayNamesFull=["Domingo","Lunes","Martes","Miércoles","Jueves","Viernes","Sábado"];
 
 let currentMonth=new Date().getMonth();
 let currentYear=new Date().getFullYear();
-let currentWeekStart=null; // lunes de la semana actual
-let calView='month'; // 'month' | 'week'
+let currentWeekStart=null;
+let calView='month';
 
-// Inicializar semana: lunes de la semana actual
 function initWeekStart(){
   const now=new Date();
-  const day=now.getDay(); // 0=dom
-  const diff=day===0?-6:1-day; // ajustar a lunes
+  const day=now.getDay();
+  const diff=day===0?-6:1-day;
   currentWeekStart=new Date(now);
   currentWeekStart.setDate(now.getDate()+diff);
   currentWeekStart.setHours(0,0,0,0);
@@ -1419,17 +1441,16 @@ function calNavNext(){
   else{currentWeekStart.setDate(currentWeekStart.getDate()+7);}
   renderCalendarView();
 }
-// Compatibilidad con funciones antiguas
 window.changeMonth=(offset)=>{calView='month';setCalView('month');if(offset>0)calNavNext();else calNavPrev();};
 
 function renderCalendarView(){
   if(!currentWeekStart)initWeekStart();
   if(calView==='month')renderMonthView();
-  else renderWeekView();
+  else renderWeekSimpleView();
 }
 
 /* ---- VISTA MES ---- */
-function renderCalendar(){ renderMonthView(); } // alias
+function renderCalendar(){ renderMonthView(); }
 function renderMonthView(){
   const cont=document.getElementById('calendarContainer');if(!cont)return;
   document.getElementById('monthYearDisplay').textContent=`${monthNames[currentMonth]} ${currentYear}`;
@@ -1452,87 +1473,67 @@ function renderMonthView(){
   cont.innerHTML=html;
 }
 
-/* ---- VISTA SEMANA ---- */
-function renderWeekView(){
+/* ---- VISTA SEMANA SIMPLE (lista por días) ---- */
+function renderWeekSimpleView(){
   const cont=document.getElementById('calendarContainer');if(!cont)return;
   const ws=new Date(currentWeekStart);
   const we=new Date(ws);we.setDate(ws.getDate()+6);
-  // Formatear rango
   const fmt=(d)=>`${d.getDate()} ${monthNames[d.getMonth()].slice(0,3)}`;
   document.getElementById('monthYearDisplay').textContent=`${fmt(ws)} – ${fmt(we)} ${we.getFullYear()}`;
 
   const now=new Date();
   const todayStr=`${now.getFullYear()}-${now.getMonth()}-${now.getDate()}`;
 
-  // Construir 7 días de la semana
   const weekDays=[];
   for(let i=0;i<7;i++){
     const d=new Date(ws);d.setDate(ws.getDate()+i);
     weekDays.push(d);
   }
 
-  // Encabezado días
-  let headerHtml=`<div class="week-days-header">
-    <div class="week-hour-col-header"></div>`;
-  weekDays.forEach(d=>{
-    const dStr=`${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
-    const isToday=dStr===todayStr;
-    headerHtml+=`<div class="week-day-header${isToday?' is-today':''}">
-      <div class="wdh-name">${dayNamesShort[d.getDay()]}</div>
-      <div class="wdh-date">${d.getDate()}</div>
-    </div>`;
-  });
-  headerHtml+='</div>';
-
-  // Horas de 8:00 a 23:00
-  const weekHoras=["08:00","09:00","10:00","11:00","12:00","13:00","14:00","15:00","16:00","17:00","18:00","19:00","20:00","21:00","22:00","23:00"];
-
-  // Cuerpo
-  let bodyHtml='<div class="week-body"><div class="week-hour-labels">';
-  weekHoras.forEach(h=>{bodyHtml+=`<div class="week-hour-label">${h}</div>`;});
-  bodyHtml+='</div>';
-
+  let html='<div class="week-simple-container"><div class="week-simple-days">';
   weekDays.forEach((d,di)=>{
     const dStr=`${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
     const isToday=dStr===todayStr;
-    bodyHtml+=`<div class="week-day-col${isToday?' week-today-col':''}">`;
-    weekHoras.forEach(h=>{
-      const calKey=dStr;
-      // Buscar eventos del calendario para esa fecha y hora aproximada
-      const evs=(calendarData[calKey]||[]).filter(ev=>{
-        return ev.time&&ev.time.startsWith(h.substring(0,2));
+    const events=calendarData[dStr]||[];
+    const previewText=events.length?`${events.length} evento${events.length>1?'s':''}`:' ';
+
+    html+=`<div class="week-simple-day">
+      <div class="week-simple-day-header${isToday?' is-today':''}" onclick="toggleWeekDay('wday-${di}')">
+        <span class="wsdc-name">${dayNamesShort[d.getDay()]}</span>
+        <span class="wsdc-date">${d.getDate()}</span>
+        <span class="wsdc-events-preview">${events.length?`<span style="color:var(--accent);font-weight:600">${events.length} evento${events.length>1?'s':''}</span>`:'<span style="color:#ccc">Sin eventos</span>'}</span>
+        <button class="wsdc-add" onclick="event.stopPropagation();openCalModal('${dStr}',${d.getDate()})">+ Agregar</button>
+      </div>
+      <div id="wday-${di}" style="display:${isToday||events.length?'block':'none'}">`;
+
+    if(events.length){
+      html+='<div class="week-simple-events">';
+      events.forEach((ev,idx)=>{
+        html+=`<div class="week-simple-event">
+          <span class="wse-dot" style="background:${ev.color}"></span>
+          <span class="wse-time">${ev.time||'Todo el día'}</span>
+          <span class="wse-title">${ev.title}</span>
+          <span class="wse-del" onclick="deleteCalEvent('${dStr}',${idx},event)" title="Borrar">✕</span>
+        </div>`;
       });
-      let cellContent='';
-      if(evs.length){
-        cellContent=evs.map((ev,i)=>{
-          const idx=(calendarData[calKey]||[]).findIndex(e=>e===ev);
-          return`<div class="week-event" style="background:${ev.color}" onclick="deleteCalEvent('${calKey}',${idx},event)" title="${ev.title}">${ev.title}</div>`;
-        }).join('');
-      } else {
-        cellContent='<div class="week-event-empty"></div>';
-      }
-      bodyHtml+=`<div class="week-cell" onclick="openCalModal('${calKey}',${d.getDate()})" title="Agregar evento">${cellContent}</div>`;
-    });
-    bodyHtml+='</div>';
+      html+='</div>';
+    } else {
+      html+=`<div class="week-no-events">No hay eventos este día.</div>`;
+    }
+
+    html+=`</div></div>`;
   });
-  bodyHtml+='</div>';
-
-  cont.innerHTML=headerHtml+bodyHtml;
-
-  // Scroll al horario actual si es la semana presente
-  const nowH=now.getHours();
-  if(nowH>=8&&nowH<=23){
-    const idx=nowH-8;
-    setTimeout(()=>{
-      const body=cont.querySelector('.week-body');
-      if(body)body.scrollTop=Math.max(0,(idx-1)*64);
-    },50);
-  }
+  html+='</div></div>';
+  cont.innerHTML=html;
 }
+
+window.toggleWeekDay=(id)=>{
+  const el=document.getElementById(id);
+  if(el)el.style.display=el.style.display==='none'?'block':'none';
+};
 
 window.openCalModal=(key,day)=>{
   document.getElementById('calDateKey').value=key;
-  // Parsear key para mostrar fecha legible
   const parts=key.split('-');
   const y=parseInt(parts[0]),m=parseInt(parts[1]),d=parseInt(parts[2]);
   document.getElementById('calModalDateDisplay').textContent=`${d} de ${monthNames[m]} de ${y}`;
@@ -1597,10 +1598,27 @@ window.updateGradeInStats=(el)=>{
   const dah=document.getElementById('dashAvgHome');if(dah)dah.textContent=avg!=='—'?avg:'—';
 };
 
-// ==================== POMODORO ====================
+// ==================== POMODORO (con Web Worker para tiempo real) ====================
 let pomInterval=null,pomSeconds=25*60,pomMode='work',pomRunning=false,pomSessions=0;
 let POM_WORK=25*60,POM_BREAK=5*60;
 let pomTodayLog=[];
+let pomStartTime=null,pomStartSeconds=null;
+// Usar worker inline para que no se pause al cambiar de pestaña
+let pomWorker=null;
+
+function createPomWorker(){
+  const blob=new Blob([`
+    let t=null;
+    self.onmessage=function(e){
+      if(e.data==='start'){
+        t=setInterval(()=>{self.postMessage('tick');},1000);
+      } else if(e.data==='stop'){
+        clearInterval(t);t=null;
+      }
+    };
+  `],{type:'application/javascript'});
+  return new Worker(URL.createObjectURL(blob));
+}
 
 function pomApplyConfig(){
   if(pomRunning)return;
@@ -1615,9 +1633,10 @@ function pomApplyConfig(){
 
 function renderPomSubjectSelect(){
   const sel=document.getElementById('pomSubject');if(!sel)return;
-  sel.innerHTML='<option value="">— Elegí una materia —</option>';
-  const all=Array.from(getCourses()).filter(c=>c.classList.contains('enabled'));
-  all.forEach(c=>{sel.innerHTML+=`<option value="${c.dataset.id}">${c.querySelector('.course-name')?.textContent||c.textContent}</option>`;});
+  sel.innerHTML='<option value="">— Sin materia específica —</option>';
+  // Solo materias habilitadas y NO completadas (para cursar)
+  const available=Array.from(getCourses()).filter(c=>c.classList.contains('enabled')&&!c.classList.contains('completed'));
+  available.forEach(c=>{sel.innerHTML+=`<option value="${c.dataset.id}">${c.querySelector('.course-name')?.textContent||c.textContent}</option>`;});
 }
 
 function pomUpdateDisplay(){
@@ -1627,42 +1646,93 @@ function pomUpdateDisplay(){
 }
 
 function pomToggle(){
-  if(pomRunning){clearInterval(pomInterval);pomRunning=false;document.getElementById('pomPlayBtn').textContent='▶ Continuar';}
-  else{
-    const subj=document.getElementById('pomSubject').value;
-    if(pomMode==='work'&&!subj){alert('Elegí una materia primero.');return;}
-    pomRunning=true;document.getElementById('pomPlayBtn').textContent='⏸ Pausar';
-    pomInterval=setInterval(()=>{
-      pomSeconds--;pomUpdateDisplay();
-      if(pomSeconds<=0){
-        clearInterval(pomInterval);pomRunning=false;
-        if(pomMode==='work'){
-          const subjName=document.getElementById('pomSubject').options[document.getElementById('pomSubject').selectedIndex]?.text||'—';
-          const sid=document.getElementById('pomSubject').value;
-          pomSessions++;
-          const workMin=parseInt(document.getElementById('pomWorkMin')?.value)||25;
-          pomTodayLog.unshift({subject:subjName,time:new Date().toLocaleTimeString('es-AR',{hour:'2-digit',minute:'2-digit'})});
-          if(!pomodoroStats[sid])pomodoroStats[sid]={name:subjName,minutes:0};
-          pomodoroStats[sid].minutes+=workMin;
-          try{localStorage.setItem('pomodoroStats',JSON.stringify(pomodoroStats));}catch(e){}
-          if(window.syncCloud)window.syncCloud();
-          renderPomLog();renderStudyStats();
-          document.getElementById('pomSessionCount').textContent='Sesiones completadas: '+pomSessions;
-          pomMode='break';pomSeconds=POM_BREAK;
-          alert(`✅ ${workMin} minutos completados! Tomá un descanso.`);
-        } else {
-          pomMode='work';pomSeconds=POM_WORK;
-          alert('⏰ ¡Descanso terminado! Listo para seguir estudiando.');
+  if(pomRunning){
+    // Pausar
+    if(pomWorker){pomWorker.postMessage('stop');}
+    pomRunning=false;
+    document.getElementById('pomPlayBtn').textContent='▶ Continuar';
+  } else {
+    pomRunning=true;
+    document.getElementById('pomPlayBtn').textContent='⏸ Pausar';
+    document.getElementById('pomFinishBtn').style.display='inline-block';
+    if(!pomWorker){
+      pomWorker=createPomWorker();
+      pomWorker.onmessage=function(){
+        if(!pomRunning)return;
+        pomSeconds--;
+        pomUpdateDisplay();
+        if(pomSeconds<=0){
+          pomWorker.postMessage('stop');
+          pomRunning=false;
+          document.getElementById('pomPlayBtn').textContent='▶ Iniciar';
+          document.getElementById('pomFinishBtn').style.display='none';
+          playPomSound();
+          if(pomMode==='work'){
+            const subjSelect=document.getElementById('pomSubject');
+            const sid=subjSelect.value;
+            const subjName=sid?subjSelect.options[subjSelect.selectedIndex]?.text:'Sin materia';
+            const workMin=parseInt(document.getElementById('pomWorkMin')?.value)||25;
+            pomSessions++;
+            pomTodayLog.unshift({subject:subjName,time:new Date().toLocaleTimeString('es-AR',{hour:'2-digit',minute:'2-digit'})});
+            if(sid){
+              if(!pomodoroStats[sid])pomodoroStats[sid]={name:subjName,minutes:0};
+              pomodoroStats[sid].minutes+=workMin;
+              try{localStorage.setItem('pomodoroStats',JSON.stringify(pomodoroStats));}catch(e){}
+              if(window.syncCloud)window.syncCloud();
+            }
+            renderPomLog();renderStudyStats();
+            document.getElementById('pomSessionCount').textContent='Sesiones completadas: '+pomSessions;
+            pomMode='break';pomSeconds=POM_BREAK;
+            alert(`✅ ¡Tiempo completado! Tomá un descanso.`);
+          } else {
+            pomMode='work';pomSeconds=POM_WORK;
+            alert('⏰ ¡Descanso terminado! Listo para seguir estudiando.');
+          }
+          pomUpdateDisplay();
+          pomWorker.terminate();pomWorker=null;
         }
-        pomUpdateDisplay();document.getElementById('pomPlayBtn').textContent='▶ Iniciar Sesión';
-      }
-    },1000);
+      };
+    }
+    pomWorker.postMessage('start');
   }
 }
 
+function pomFinishEarly(){
+  if(!pomRunning&&pomSeconds===POM_WORK)return;
+  if(!confirm('¿Finalizar la sesión antes de tiempo?'))return;
+  if(pomWorker){pomWorker.postMessage('stop');pomWorker.terminate();pomWorker=null;}
+  pomRunning=false;
+  document.getElementById('pomPlayBtn').textContent='▶ Iniciar';
+  document.getElementById('pomFinishBtn').style.display='none';
+  playPomSound();
+  if(pomMode==='work'){
+    const elapsed=Math.floor((POM_WORK-pomSeconds)/60);
+    if(elapsed>0){
+      const subjSelect=document.getElementById('pomSubject');
+      const sid=subjSelect.value;
+      const subjName=sid?subjSelect.options[subjSelect.selectedIndex]?.text:'Sin materia';
+      pomSessions++;
+      pomTodayLog.unshift({subject:subjName+` (${elapsed}m)`,time:new Date().toLocaleTimeString('es-AR',{hour:'2-digit',minute:'2-digit'})});
+      if(sid){
+        if(!pomodoroStats[sid])pomodoroStats[sid]={name:subjName,minutes:0};
+        pomodoroStats[sid].minutes+=elapsed;
+        try{localStorage.setItem('pomodoroStats',JSON.stringify(pomodoroStats));}catch(e){}
+        if(window.syncCloud)window.syncCloud();
+      }
+      document.getElementById('pomSessionCount').textContent='Sesiones completadas: '+pomSessions;
+      renderPomLog();renderStudyStats();
+    }
+  }
+  pomMode='work';pomSeconds=POM_WORK;
+  pomUpdateDisplay();
+}
+
 function pomReset(){
-  clearInterval(pomInterval);pomRunning=false;pomSeconds=POM_WORK;pomMode='work';
-  pomUpdateDisplay();document.getElementById('pomPlayBtn').textContent='▶ Iniciar Sesión';
+  if(pomWorker){pomWorker.postMessage('stop');pomWorker.terminate();pomWorker=null;}
+  pomRunning=false;pomSeconds=POM_WORK;pomMode='work';
+  pomUpdateDisplay();
+  document.getElementById('pomPlayBtn').textContent='▶ Iniciar';
+  document.getElementById('pomFinishBtn').style.display='none';
 }
 
 function renderPomLog(){
@@ -1677,7 +1747,7 @@ function renderStudyStats(){
   const total=entries.reduce((s,e)=>s+e.minutes,0);
   const ts=document.getElementById('statsTotalStudy');
   if(ts)ts.textContent=total>=60?Math.floor(total/60)+'h '+(total%60)+'m':total+'m';
-  if(!entries.length){grid.innerHTML='<span style="opacity:.6;font-size:.85rem;font-style:italic">Usá el Pomodoro para medir tu tiempo de estudio.</span>';return;}
+  if(!entries.length){grid.innerHTML='<span style="opacity:.6;font-size:.85rem;font-style:italic">Usá el temporizador para medir tu tiempo de estudio.</span>';return;}
   grid.innerHTML=entries.sort((a,b)=>b.minutes-a.minutes).map(e=>{
     const t=e.minutes>=60?Math.floor(e.minutes/60)+'h '+(e.minutes%60)+'m':e.minutes+'m';
     return`<div class="study-stat-pill"><div class="sp-name" title="${e.name}">${e.name}</div><div class="sp-time">${t}</div></div>`;
@@ -1700,8 +1770,8 @@ function renderNotesTab(){
   grid.style.display='grid';
   detail.style.display='none';
   _notesActiveSubject=null;
-  const searchInput = document.getElementById('notesSearchInput');
-  if(searchInput) searchInput.value = '';
+  const searchInput=document.getElementById('notesSearchInput');
+  if(searchInput)searchInput.value='';
   const enabled=Array.from(getCourses()).filter(c=>c.classList.contains('enabled')||c.classList.contains('completed'));
   if(!enabled.length){
     grid.innerHTML='<span style="color:var(--text-muted);font-size:.9rem">Habilitá materias en el Plan de estudios para ver sus apuntes.</span>';
@@ -1724,11 +1794,11 @@ function renderNotesTab(){
   }).join('');
 }
 
-window.filterNotes = () => {
-  const query = document.getElementById('notesSearchInput').value.toLowerCase();
-  document.querySelectorAll('.notes-subject-card').forEach(card => {
-    const name = card.querySelector('.nsc-name').textContent.toLowerCase();
-    card.style.display = name.includes(query) ? 'block' : 'none';
+window.filterNotes=()=>{
+  const query=document.getElementById('notesSearchInput').value.toLowerCase();
+  document.querySelectorAll('.notes-subject-card').forEach(card=>{
+    const name=card.querySelector('.nsc-name').textContent.toLowerCase();
+    card.style.display=name.includes(query)?'block':'none';
   });
 };
 
@@ -1750,7 +1820,7 @@ function renderNotesDetail(id,name){
   const subj=apuntesData[id];
   const campus=subj._campus||'';
   const drive=subj._drive||'';
-  const nameEscaped = name.replace(/\\/g,'\\\\').replace(/'/g,"\\'").replace(/"/g,'&quot;');
+  const nameEscaped=name.replace(/\\/g,'\\\\').replace(/'/g,"\\'").replace(/"/g,'&quot;');
 
   const headerLinks=`
     ${campus?`<a href="${campus}" target="_blank" class="ndh-link-btn">🖥️ Campus Virtual</a>`:''}
@@ -1810,42 +1880,25 @@ function renderNotesDetail(id,name){
     </div>`;
 }
 
-// ==================== CREAR CARPETA DRIVE DIRECTAMENTE ====================
-// Google Drive permite crear carpeta directamente via API Apps Script o via la URL de "new folder"
-// La solución más directa: copiar el nombre al portapapeles y abrir drive.google.com/drive/folders/create
-// Pero la URL que realmente pre-llena el nombre es via Google Apps Script web app.
-// Usamos la mejor alternativa disponible sin backend: 
-// 1. Copiamos el nombre al clipboard
-// 2. Abrimos Drive en el directorio raíz con un mensaje instructivo
-// 3. Mostramos un panel para pegar el link una vez creada
+let _driveCreateSubjectId=null;
+let _driveCreateSubjectName=null;
 
-let _driveCreateSubjectId = null;
-let _driveCreateSubjectName = null;
-
-function crearCarpetaDrive(name, subjectId) {
-  _driveCreateSubjectId = subjectId;
-  _driveCreateSubjectName = name;
-  
-  // Copiar el nombre al portapapeles
+function crearCarpetaDrive(name,subjectId){
+  _driveCreateSubjectId=subjectId;
+  _driveCreateSubjectName=name;
   navigator.clipboard.writeText(name).catch(()=>{});
-  
-  // Abrir Google Drive en la vista "nueva carpeta"
-  // Esta URL abre Drive con el diálogo de nueva carpeta listo para usar
-  window.open('https://drive.google.com/drive/folders/new', '_blank');
-
-  // Mostrar panel para pegar el link después de crear
-  showDriveLinkPanel(name, subjectId);
+  window.open('https://drive.google.com/drive/folders/new','_blank');
+  showDriveLinkPanel(name,subjectId);
 }
 
-function showDriveLinkPanel(name, subjectId){
-  // Mostrar el row de editar links con mensaje destacado
-  const row = document.getElementById('ndh-link-row');
+function showDriveLinkPanel(name,subjectId){
+  const row=document.getElementById('ndh-link-row');
   if(row){
     row.classList.add('show');
-    const driveInput = document.getElementById('ndh-drive-input');
+    const driveInput=document.getElementById('ndh-drive-input');
     if(driveInput){
       driveInput.focus();
-      driveInput.placeholder = `Pegá acá el link de la carpeta "${name}"`;
+      driveInput.placeholder=`Pegá acá el link de la carpeta "${name}"`;
       driveInput.style.borderColor='var(--accent)';
       driveInput.style.background='#fffbf0';
       setTimeout(()=>{
@@ -1855,27 +1908,25 @@ function showDriveLinkPanel(name, subjectId){
       },6000);
     }
   }
-  
-  // Toast informativo
   showToast(`📂 "${name}" copiado al portapapeles. Creá la carpeta en Drive y pegá el link acá.`);
 }
 
-function showToast(msg) {
-  let t = document.getElementById('app-toast');
-  if(!t) {
-    t = document.createElement('div');
-    t.id = 'app-toast';
-    t.style.cssText = 'position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);background:#1a1a1a;color:#fff;padding:12px 20px;border-radius:12px;font-size:.85rem;font-weight:600;z-index:9999;opacity:0;transition:all .35s;max-width:90%;text-align:center;box-shadow:0 6px 20px rgba(0,0,0,0.25);font-family:Poppins,sans-serif;';
+function showToast(msg){
+  let t=document.getElementById('app-toast');
+  if(!t){
+    t=document.createElement('div');
+    t.id='app-toast';
+    t.style.cssText='position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);background:#1a1a1a;color:#fff;padding:12px 20px;border-radius:12px;font-size:.85rem;font-weight:600;z-index:9999;opacity:0;transition:all .35s;max-width:90%;text-align:center;box-shadow:0 6px 20px rgba(0,0,0,0.25);font-family:Poppins,sans-serif;';
     document.body.appendChild(t);
   }
-  t.textContent = msg;
-  t.style.opacity = '1';
-  t.style.transform = 'translateX(-50%) translateY(0)';
+  t.textContent=msg;
+  t.style.opacity='1';
+  t.style.transform='translateX(-50%) translateY(0)';
   clearTimeout(t._timeout);
-  t._timeout = setTimeout(() => {
-    t.style.opacity = '0';
-    t.style.transform = 'translateX(-50%) translateY(20px)';
-  }, 6000);
+  t._timeout=setTimeout(()=>{
+    t.style.opacity='0';
+    t.style.transform='translateX(-50%) translateY(20px)';
+  },6000);
 }
 
 function toggleAddLinkRow(){
@@ -1888,8 +1939,8 @@ function saveQuickLinks(id){
   apuntesData[id]._campus=document.getElementById('ndh-campus-input')?.value.trim()||'';
   apuntesData[id]._drive=document.getElementById('ndh-drive-input')?.value.trim()||'';
   _saveApuntes();
-  const nameEl = document.querySelector('.ndh-title');
-  renderNotesDetail(id, nameEl?.textContent || id);
+  const nameEl=document.querySelector('.ndh-title');
+  renderNotesDetail(id,nameEl?.textContent||id);
 }
 
 function toggleCat(catBodyId){
