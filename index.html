@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -48,7 +49,7 @@
       try {
         const userCredential = await createUserWithEmailAndPassword(auth, email, pass);
         await sendEmailVerification(userCredential.user);
-        alert("¡Cuenta creada! Te enviamos un link de verificación a tu correo.");
+        alert("¡Cuenta creada! Te enviamos un link de verificación a tu correo. Revisá tu bandeja de entrada (o spam) para verificar tu cuenta antes de ingresar.");
         await signOut(auth);
         if(window.switchAuthTab) window.switchAuthTab('login');
         return false;
@@ -77,7 +78,7 @@
     function mostrarErrorAuth(msg){const el=document.getElementById('auth-error');el.textContent=msg;el.style.display='block';}
     window.logout = async()=>{
       await signOut(auth);
-      ['materiasAprobadas','materiasNotas','materiasPlanificadas','materiasTabla','indCalendar','userConfig','apuntes','pomodoroStats','horarioExtra','habitos','habitStreak'].forEach(k=>localStorage.removeItem(k));
+      ['materiasAprobadas','materiasNotas','materiasPlanificadas','materiasTabla','indCalendar','userConfig','apuntes','pomodoroStats','horarioExtra'].forEach(k=>localStorage.removeItem(k));
       location.reload();
     };
     onAuthStateChanged(auth, async(user)=>{
@@ -106,9 +107,7 @@
         userConfig:JSON.parse(localStorage.getItem('userConfig')||'{}'),
         apuntes:JSON.parse(localStorage.getItem('apuntes')||'{}'),
         pomodoroStats:JSON.parse(localStorage.getItem('pomodoroStats')||'{}'),
-        horarioExtra:JSON.parse(localStorage.getItem('horarioExtra')||'{}'),
-        habitos:JSON.parse(localStorage.getItem('habitos')||'[]'),
-        habitStreak:JSON.parse(localStorage.getItem('habitStreak')||'{}')
+        horarioExtra:JSON.parse(localStorage.getItem('horarioExtra')||'{}')
       };
       await setDoc(doc(db,'users',user.uid),data);
     }
@@ -125,8 +124,6 @@
         localStorage.setItem('apuntes',JSON.stringify(d.apuntes||{}));
         localStorage.setItem('pomodoroStats',JSON.stringify(d.pomodoroStats||{}));
         localStorage.setItem('horarioExtra',JSON.stringify(d.horarioExtra||{}));
-        localStorage.setItem('habitos',JSON.stringify(d.habitos||[]));
-        localStorage.setItem('habitStreak',JSON.stringify(d.habitStreak||{}));
       } else {await saveToCloud();}
       if(window.initApp)window.initApp();
     }
@@ -146,17 +143,13 @@
     body{font-family:'Poppins',sans-serif;background:#e7e7e7;color:var(--text-main);margin:0;padding:0;overflow-x:hidden;transition:background-color .4s, color .4s;}
     h1,h2,h3{font-family:'Lora',serif;margin:10px 0;font-weight:700;}
 
-    /* ===== DARK MODE - QUATIC STYLE ===== */
+    /* ===== DARK MODE ===== */
     body.dark-mode {
-      background: #08080f !important;
-      --text-main: #e8eef5;
-      --text-muted: #7a8fa8;
+      background: #0d1a12 !important;
+      --text-main: #dceee5;
+      --text-muted: #7aaa90;
     }
-    body.dark-mode header {
-      background: linear-gradient(135deg, #0d0d1a 0%, #0a0a12 100%) !important;
-      border-bottom: 1px solid rgba(255,255,255,0.06) !important;
-      box-shadow: 0 1px 0 rgba(255,255,255,0.04), 0 4px 24px rgba(0,0,0,0.4) !important;
-    }
+    body.dark-mode header { background: #071209 !important; }
     body.dark-mode .panel-box,
     body.dark-mode .dash-card,
     body.dark-mode .profile-section,
@@ -166,92 +159,55 @@
     body.dark-mode .study-stat-pill,
     body.dark-mode .stat-card:not(.dark),
     body.dark-mode .map-hint {
-      background: #111118 !important;
-      border-color: #1e1e2e !important;
+      background: #142010 !important;
+      border-color: #243c28 !important;
       color: var(--text-main) !important;
     }
     body.dark-mode .calendar-container,
-    body.dark-mode .week-timeline-container { 
-      background: #111118 !important; 
-      border-color: #1e1e2e !important; 
-    }
-    body.dark-mode .cal-day { background: #161623; border-color: #1e1e2e; }
-    body.dark-mode .cal-day.today { background: #1a1a2e; border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent), 0 0 12px rgba(var(--accent-rgb,8,71,52),0.3); }
-    body.dark-mode .cal-day:hover { background: #1e1e30; }
-    body.dark-mode .week-tl-day-header { background: #161623; border-color: #1e1e2e; }
-    body.dark-mode .week-tl-col { background: #111118; border-color: #1e1e2e; }
-    body.dark-mode .week-tl-hour-row { border-color: #1a1a28; }
-    body.dark-mode .week-tl-hour-label { color: #3a4a6a; }
-    body.dark-mode .ob-card { background: #111118 !important; border: 1px solid #1e1e2e; }
+    body.dark-mode .week-simple-container { background: #142010 !important; border-color: #243c28 !important; }
+    body.dark-mode .cal-day { background: #1a2e1c; border-color: #243c28; }
+    body.dark-mode .cal-day.today { background: #1e3a22; border-color: var(--accent); }
+    body.dark-mode .week-simple-day-header { background: #1a2e1c; border-color: #243c28; }
+    body.dark-mode .week-simple-day { border-color: #243c28; }
+    body.dark-mode .week-simple-event { background: #0d1a12; border-color: #243c28; }
+    body.dark-mode .ob-card { background: #142010 !important; }
     body.dark-mode .ob-input,
     body.dark-mode .modal-box select,
     body.dark-mode .modal-box input[type=text],
     body.dark-mode .modal-box input[type=number],
     body.dark-mode .pom-subject-select,
-    body.dark-mode .cr-input { background: #0d0d1a !important; border-color: #1e1e2e !important; color: var(--text-main) !important; }
-    body.dark-mode .nc-add-form input { background: #0d0d1a !important; border-color: #1e1e2e !important; color: var(--text-main) !important; }
-    body.dark-mode .nc-add-form { background: #0d0d1a !important; border-color: #1e1e2e !important; }
-    body.dark-mode .nc-header:hover { background: #161623; }
-    body.dark-mode .hour-cell { background: #161623; border-color: #1e1e2e; }
-    body.dark-mode .hour-label { background: #0d0d1a; border-color: #1e1e2e; color: var(--text-muted); }
+    body.dark-mode .cr-input { background: #0d1a12 !important; border-color: #243c28 !important; color: var(--text-main) !important; }
+    body.dark-mode .nc-add-form input { background: #0d1a12 !important; border-color: #243c28 !important; color: var(--text-main) !important; }
+    body.dark-mode .nc-add-form { background: #0d1a12 !important; border-color: #243c28 !important; }
+    body.dark-mode .nc-header:hover { background: #1a2e1c; }
+    body.dark-mode .hour-cell { background: #1a2e1c; border-color: #243c28; }
+    body.dark-mode .hour-label { background: #0d1a12; border-color: #243c28; color: var(--text-muted); }
     body.dark-mode .hour-cell textarea { color: var(--text-main); }
-    body.dark-mode .day-column { background: #111118; border-color: #1e1e2e; }
-    body.dark-mode .profile-theme-card { background: #161623; border-color: #1e1e2e; }
-    body.dark-mode .completed-row:hover { background: #161623; }
-    body.dark-mode .note-item { background: #0d0d1a; border-color: #1e1e2e; }
-    body.dark-mode .note-item:hover { border-color: var(--accent); box-shadow: 0 0 12px rgba(0,0,0,0.3); }
-    body.dark-mode .ndh-add-link-row { background: #111118; border-color: #1e1e2e; }
+    body.dark-mode .day-column { background: #142010; border-color: #243c28; }
+    body.dark-mode .profile-theme-card { background: #1a2e1c; border-color: #243c28; }
+    body.dark-mode .completed-row:hover { background: #1a2e1c; }
+    body.dark-mode .note-item { background: #0d1a12; border-color: #243c28; }
+    body.dark-mode .note-item:hover { border-color: var(--accent); }
+    body.dark-mode .ndh-add-link-row { background: #142010; border-color: #243c28; }
     body.dark-mode .ndh-add-link-row input,
-    body.dark-mode .ndh-add-link-row select { background: #0d0d1a; border-color: #1e1e2e; color: var(--text-main); }
-    body.dark-mode .notes-detail { background: #111118; border-color: #1e1e2e; }
-    body.dark-mode .notes-category { border-color: #1e1e2e; }
-    body.dark-mode .course.enabled { background: #161623; border-color: var(--accent); }
-    body.dark-mode .course:not(.enabled):not(.completed) { background: #111118; border-color: #1e1e2e; color: #3a4a6a; }
-    body.dark-mode .ob-upload { background: #0d0d1a; border-color: #1e1e2e; }
-    body.dark-mode .auth-tabs { border-color: #1e1e2e; }
-    body.dark-mode .ob-btn-back { border-color: #1e1e2e; color: var(--text-muted); }
-    body.dark-mode .ob-btn-back:hover { background: #161623; }
-    body.dark-mode .pom-btn.secondary { background: #161623; color: var(--text-muted); border-color: #1e1e2e; }
-    body.dark-mode .pom-btn.danger { background: #161623; }
-    body.dark-mode .upcoming-days { background: rgba(255,255,255,0.04); }
-    body.dark-mode .grade-star-btn { background: #161623; border-color: #1e1e2e; color: var(--text-muted); }
-    body.dark-mode .profile-logout-btn { border-color: #1e1e2e; color: var(--text-muted); }
-    body.dark-mode .profile-logout-btn:hover { background: #1e1e2e; color: var(--text-main); }
-    body.dark-mode .ob-ai-analyzing { background: #161623; border-color: #1e1e2e; }
-    body.dark-mode .ob-ai-result { background: #161623; border-color: #1e1e2e; }
-    body.dark-mode .progress-circle-container { background: #111118; box-shadow: 0 5px 15px rgba(0,0,0,.5); }
-    body.dark-mode .progress-circle-inner { background: #111118; }
-    body.dark-mode .notes-canvas-card { background: #111118; border-color: #1e1e2e; }
-    body.dark-mode .notes-canvas-card.has-notes { border-color: var(--accent); }
-    body.dark-mode .ncc-body { background: #111118; }
-    body.dark-mode .notes-search-bar { background: #111118; border-color: #1e1e2e; color: var(--text-main); }
-    body.dark-mode .notes-detail-new { background: #111118; border-color: #1e1e2e; }
-    body.dark-mode .profile-section h3 { border-color: #1e1e2e; }
-    body.dark-mode .profile-info-row { border-color: #1e1e2e; }
-    body.dark-mode .btn-close-modal { background: #161623; border-color: #1e1e2e; color: var(--text-muted); }
-    body.dark-mode .dash-progress-card { background: linear-gradient(135deg, #0f0f1e 0%, #1a1a2e 100%) !important; border: 1px solid #2a2a4a !important; }
-    body.dark-mode .day-header { background: linear-gradient(135deg, #161623, #1e1e2e) !important; }
-    body.dark-mode .section-header h2 { color: #e8eef5; }
-    body.dark-mode .year-column h2 { color: var(--accent-light); border-color: var(--accent); }
-    body.dark-mode .map-hint { color: var(--text-muted); }
-    /* Hab tracker dark */
-    body.dark-mode .habit-card { background: #111118; border-color: #1e1e2e; }
-    body.dark-mode .habit-card:hover { border-color: var(--accent); box-shadow: 0 0 20px rgba(0,0,0,0.4); }
-    body.dark-mode .habit-area-filter { background: #111118; border-color: #1e1e2e; color: var(--text-muted); }
-    body.dark-mode .habit-area-filter.active { background: var(--accent); color: #fff; border-color: var(--accent); }
-    body.dark-mode .habit-add-form { background: #111118; border-color: #1e1e2e; }
-    body.dark-mode .habit-add-form input, body.dark-mode .habit-add-form select { background: #0d0d1a; border-color: #1e1e2e; color: var(--text-main); }
-    body.dark-mode .routine-box { background: #161623; border-color: #1e1e2e; }
-    body.dark-mode .routine-box h4 { color: var(--text-main); }
-    body.dark-mode .routine-item { background: #1e1e2e; color: var(--text-main); }
-    body.dark-mode .week-tl-event-block { box-shadow: 0 2px 8px rgba(0,0,0,0.4); }
-    body.dark-mode .week-tl-event-class { opacity: 0.9; }
-    body.dark-mode .cal-weekdays { color: #5a6a8a; }
-    body.dark-mode .cal-day .cal-date-num { color: #5a6a8a; }
-    body.dark-mode .cal-day.today .cal-date-num { color: var(--accent-light); }
-    body.dark-mode .schedule-cell-delete { background: rgba(239,68,68,0.15); color: #ef4444; }
-    body.dark-mode .schedule-cell-delete:hover { background: #ef4444; color: #fff; }
-    body.dark-mode .hour-cell:hover .schedule-cell-delete { opacity: 1; }
+    body.dark-mode .ndh-add-link-row select { background: #0d1a12; border-color: #243c28; color: var(--text-main); }
+    body.dark-mode .notes-detail { background: #142010; border-color: #243c28; }
+    body.dark-mode .notes-category { border-color: #243c28; }
+    body.dark-mode .course.enabled { background: #142010; border-color: var(--accent); }
+    body.dark-mode .ob-upload { background: #0d1a12; border-color: #243c28; }
+    body.dark-mode .auth-tabs { border-color: #243c28; }
+    body.dark-mode .ob-btn-back { border-color: #243c28; color: var(--text-muted); }
+    body.dark-mode .ob-btn-back:hover { background: #1a2e1c; }
+    body.dark-mode .pom-btn.secondary { background: #142010; color: var(--text-muted); border-color: #243c28; }
+    body.dark-mode .pom-btn.danger { background: #142010; }
+    body.dark-mode .upcoming-days { background: rgba(255,255,255,0.05); }
+    body.dark-mode .grade-star-btn { background: #142010; border-color: #243c28; color: var(--text-muted); }
+    body.dark-mode .profile-logout-btn { border-color: #243c28; color: var(--text-muted); }
+    body.dark-mode .profile-logout-btn:hover { background: #243c28; color: var(--text-main); }
+    body.dark-mode .ob-ai-analyzing { background: #1a2e1c; border-color: #243c28; }
+    body.dark-mode .ob-ai-result { background: #1a2e1c; border-color: #243c28; }
+    body.dark-mode .progress-circle-container { background: #142010; box-shadow: 0 5px 15px rgba(0,0,0,.3); }
+    body.dark-mode .progress-circle-inner { background: #142010; }
 
     /* Dark mode toggle button */
     .dark-toggle-btn {
@@ -384,6 +340,7 @@
     .course.completed .course-grade-badge:hover{transform:scale(1.15);}
     .electiva-counter{font-size:10px;color:var(--accent-dark);opacity:.85;margin-top:-6px;margin-bottom:4px;font-weight:600;}
     .map-hint{display:inline-block;font-size:.85rem;background:#fff;color:var(--text-muted);padding:8px 18px;border-radius:8px;margin-bottom:16px; border: 1px solid #d8d8d8; box-shadow: 0 2px 6px rgba(0,0,0,0.05);transition:background .4s,border-color .4s;}
+    body.dark-mode .course:not(.enabled):not(.completed){background:#1a2e1c;border-color:#243c28;color:#4a7a55;}
 
     /* ===== CALENDARIO ===== */
     #view-calendar{max-width:1100px;margin:0 auto 50px;}
@@ -405,219 +362,47 @@
     .cal-date-num{font-weight:700;color:var(--text-muted);margin-bottom:4px;text-align:right;font-size:.85rem;}
     .cal-day.today .cal-date-num{color:var(--accent);font-size:.95rem;}
     .cal-event-pill{font-size:.72rem;padding:4px 6px;border-radius:4px;margin-bottom:3px;color:#fff;font-weight:600;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;}
-    .cal-event-pill.class-event{opacity:0.8;border-left:2px solid rgba(255,255,255,0.5);}
 
-    /* ===== TIMELINE WEEK VIEW ===== */
-    .week-timeline-container {
-      background: #fff;
-      border-radius: 20px;
-      border: 1px solid #d8d8d8;
-      box-shadow: 0 4px 15px rgba(0,0,0,.04);
-      overflow: hidden;
-      transition: background .4s;
-    }
-    .week-tl-header {
-      display: grid;
-      border-bottom: 1px solid #eee;
-      position: sticky;
-      top: 0;
-      z-index: 10;
-      background: inherit;
-    }
-    .week-tl-corner {
-      width: 52px;
-      background: inherit;
-      border-right: 1px solid #eee;
-      flex-shrink: 0;
-    }
-    .week-tl-day-header {
-      padding: 12px 8px;
-      text-align: center;
-      background: #fafafa;
-      border-right: 1px solid #eee;
-      transition: background .4s;
-    }
-    .week-tl-day-header:last-child { border-right: none; }
-    .week-tl-day-name {
-      font-size: .7rem;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: .8px;
-      color: var(--text-muted);
-    }
-    .week-tl-day-num {
-      font-size: 1.4rem;
-      font-weight: 900;
-      color: var(--text-main);
-      line-height: 1.1;
-    }
-    .week-tl-day-header.is-today .week-tl-day-num {
-      background: var(--accent);
-      color: #fff;
-      border-radius: 50%;
-      width: 38px;
-      height: 38px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin: 2px auto 0;
-      font-size: 1.1rem;
-    }
-    .week-tl-add-btn {
-      font-size: .65rem;
-      padding: 3px 8px;
-      border-radius: 6px;
-      border: 1px solid var(--accent);
-      background: transparent;
-      color: var(--accent);
-      cursor: pointer;
-      font-family: 'Poppins', sans-serif;
-      font-weight: 600;
-      margin-top: 4px;
-      transition: .15s;
-    }
-    .week-tl-add-btn:hover { background: var(--accent); color: #fff; }
-    .week-tl-body {
-      display: flex;
-      overflow-y: auto;
-      max-height: 620px;
-      position: relative;
-    }
-    .week-tl-hours {
-      width: 52px;
-      flex-shrink: 0;
-      border-right: 1px solid #eee;
-    }
-    .week-tl-hour-label {
-      height: 56px;
-      display: flex;
-      align-items: flex-start;
-      justify-content: center;
-      padding-top: 4px;
-      font-size: .65rem;
-      font-weight: 700;
-      color: var(--text-muted);
-      border-bottom: 1px solid transparent;
-    }
-    .week-tl-cols {
-      flex: 1;
-      display: grid;
-      position: relative;
-    }
-    .week-tl-col {
-      border-right: 1px solid #f0f0f0;
-      position: relative;
-      transition: background .4s;
-    }
-    .week-tl-col:last-child { border-right: none; }
-    .week-tl-hour-row {
-      height: 56px;
-      border-bottom: 1px solid #f5f5f5;
-      transition: border-color .4s;
-    }
-    .week-tl-event-block {
-      position: absolute;
-      left: 3px;
-      right: 3px;
-      border-radius: 8px;
-      padding: 4px 8px;
-      overflow: hidden;
-      cursor: pointer;
-      transition: all .2s;
-      z-index: 2;
-      box-shadow: 0 2px 8px rgba(0,0,0,.12);
-    }
-    .week-tl-event-block:hover { transform: scale(1.02); box-shadow: 0 4px 16px rgba(0,0,0,.2); }
-    .week-tl-event-title {
-      font-size: .72rem;
-      font-weight: 700;
-      color: #fff;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      line-height: 1.3;
-    }
-    .week-tl-event-time {
-      font-size: .62rem;
-      color: rgba(255,255,255,0.8);
-      font-weight: 500;
-    }
-    .week-tl-event-class {
-      background: var(--accent) !important;
-      border-left: 3px solid rgba(255,255,255,0.4);
-    }
-    .week-tl-now-line {
-      position: absolute;
-      left: 0;
-      right: 0;
-      height: 2px;
-      background: #ef4444;
-      z-index: 5;
-      pointer-events: none;
-    }
-    .week-tl-now-line::before {
-      content: '';
-      position: absolute;
-      left: -4px;
-      top: -4px;
-      width: 10px;
-      height: 10px;
-      background: #ef4444;
-      border-radius: 50%;
-    }
+    /* ===== VISTA SEMANA ===== */
+    .week-simple-container{background:#fff;border-radius:20px;border:1px solid #d8d8d8;box-shadow:0 4px 15px rgba(0,0,0,.04);overflow:hidden;transition:background .4s;}
+    .week-simple-days{display:flex;flex-direction:column;gap:0;}
+    .week-simple-day{border-bottom:1px solid #f0f0f0;}
+    .week-simple-day:last-child{border-bottom:none;}
+    .week-simple-day-header{display:flex;align-items:center;gap:12px;padding:12px 20px;background:#f8f9f8;border-bottom:1px solid #f0f0f0;cursor:pointer;transition:background .4s;}
+    .week-simple-day-header.is-today{background:#e8f5ee;}
+    .wsdc-name{font-size:.8rem;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--text-muted);min-width:40px;}
+    .wsdc-date{font-size:1.1rem;font-weight:900;color:var(--accent-dark);min-width:32px;}
+    .week-simple-day-header.is-today .wsdc-date{background:var(--accent);color:#fff;border-radius:8px;width:32px;height:32px;display:flex;align-items:center;justify-content:center;font-size:.95rem;}
+    .wsdc-events-preview{font-size:.78rem;color:var(--text-muted);flex:1;}
+    .wsdc-add{font-size:.75rem;color:var(--accent);font-weight:600;padding:4px 10px;border-radius:6px;border:1px solid var(--accent);background:transparent;cursor:pointer;font-family:'Poppins',sans-serif;transition:.15s;}
+    .wsdc-add:hover{background:var(--accent);color:#fff;}
+    .week-simple-events{padding:8px 20px 12px 20px;}
+    .week-simple-event{display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:8px;margin-bottom:6px;background:#f8f9f8;border:1px solid #eee;transition:background .4s;}
+    .week-simple-event:last-child{margin-bottom:0;}
+    .wse-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;}
+    .wse-time{font-size:.75rem;font-weight:700;color:var(--text-muted);min-width:60px;}
+    .wse-title{font-size:.85rem;font-weight:600;flex:1;}
+    .wse-del{cursor:pointer;color:#bbb;font-size:.9rem;padding:2px 6px;transition:.15s;}
+    .wse-del:hover{color:#ef4444;}
+    .week-no-events{padding:10px 20px 14px;font-size:.82rem;color:#bbb;font-style:italic;}
 
     /* ===== HORARIO ===== */
     #view-schedule{max-width:1100px;margin:0 auto;padding-bottom:50px;}
     .schedule-grid{display:flex;gap:15px;overflow-x:auto;padding-bottom:10px;}
     .day-column{flex:1;min-width:150px;display:flex;flex-direction:column;border-radius:12px;border:1px solid #d8d8d8;overflow:hidden;background:#fff; box-shadow: 0 4px 10px rgba(0,0,0,0.03);transition:background .4s;}
     .day-header{background:var(--accent-dark);color:#fff;text-align:center;padding:12px;font-weight:700;font-family:'Lora',serif;font-size:1rem;}
-    .hour-cell{display:flex;border-top:1px solid #eee;min-height:50px;transition:background .4s;position:relative;}
+    .hour-cell{display:flex;border-top:1px solid #eee;min-height:50px;transition:background .4s;}
     .hour-label{background:#f9f9f9;color:var(--text-muted);font-weight:700;font-size:.75rem;width:50px;display:flex;align-items:center;justify-content:center;border-right:1px solid #eee;flex-shrink:0;transition:background .4s;}
     .hour-cell textarea{flex:1;border:none;outline:none;background:transparent;padding:6px;text-align:center;color:var(--text-main);resize:none;font-size:.8rem;font-weight:600;font-family:'Poppins',sans-serif;box-sizing:border-box;}
     .hour-cell textarea:focus{background:#f0faf5;}
     .hour-cell textarea.occupied-cell{background-color:var(--accent) !important;color:#fff !important;}
-    /* Delete button for schedule cells */
-    .schedule-cell-delete {
-      position: absolute;
-      right: 2px;
-      top: 50%;
-      transform: translateY(-50%);
-      width: 20px;
-      height: 20px;
-      border-radius: 50%;
-      border: none;
-      background: rgba(239,68,68,0.1);
-      color: #ef4444;
-      font-size: .7rem;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      opacity: 0;
-      transition: all .2s;
-      z-index: 5;
-    }
-    .hour-cell:hover .schedule-cell-delete { opacity: 1; }
-    .schedule-cell-delete:hover { background: #ef4444 !important; color: #fff !important; transform: translateY(-50%) scale(1.15); }
-    /* Edit info button */
-    .schedule-cell-edit {
-      position: absolute;
-      right: 24px;
-      top: 50%;
-      transform: translateY(-50%);
-      font-size: .65rem;
-      opacity: 0;
-      cursor: pointer;
-      transition: opacity .2s;
-      background: none;
-      border: none;
-      padding: 2px 4px;
-    }
-    .hour-cell:hover .schedule-cell-edit { opacity: .5; }
-    .schedule-cell-edit:hover { opacity: 1 !important; }
 
     /* ===== PRÓXIMA CLASE ===== */
     .next-class-card{background:var(--accent-dark);border-radius:16px;padding:20px 24px;border:none;display:flex;align-items:center;gap:18px; box-shadow: 0 6px 15px rgba(0,0,0,0.1);}
+    .next-class-icon{font-size:2rem;flex-shrink:0;}
+    .next-class-info .label{font-size:.7rem;text-transform:uppercase;letter-spacing:1px;color:rgba(255,255,255,.6);margin-bottom:3px;}
+    .next-class-info .subject{font-size:1.05rem;font-weight:700;color:#fff;}
+    .next-class-info .detail{font-size:.8rem;color:rgba(255,255,255,.8);margin-top:3px;}
 
     /* ===== PROGRESO ===== */
     #view-stats{max-width:960px;margin:0 auto;padding-bottom:50px;}
@@ -662,208 +447,14 @@
     .pom-session-log{margin-top:16px;}
     .pom-log-item{display:flex;justify-content:space-between;align-items:center;padding:10px 14px;border-radius:8px;background:#f5f5f5;margin-bottom:8px;font-size:.85rem;color:var(--text-main); border:1px solid #d8d8d8;transition:background .4s;}
 
-    /* ===== HABIT TRACKER ===== */
-    #view-habits { max-width: 960px; margin: 0 auto; padding-bottom: 60px; }
-    .habits-layout { display: grid; grid-template-columns: 1fr 340px; gap: 24px; align-items: start; }
-    @media(max-width:900px){ .habits-layout { grid-template-columns: 1fr; } }
-    
-    .habit-area-filters {
-      display: flex;
-      gap: 8px;
-      flex-wrap: wrap;
-      margin-bottom: 20px;
-    }
-    .habit-area-filter {
-      padding: 6px 14px;
-      border-radius: 20px;
-      border: 1.5px solid #d8d8d8;
-      background: #fff;
-      color: var(--text-muted);
-      font-size: .78rem;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all .2s;
-      font-family: 'Poppins', sans-serif;
-    }
-    .habit-area-filter:hover { border-color: var(--accent); color: var(--accent); }
-    .habit-area-filter.active { background: var(--accent); color: #fff; border-color: var(--accent); }
-    
-    .habit-card {
-      background: #fff;
-      border: 1.5px solid #e8e8e8;
-      border-radius: 16px;
-      padding: 16px 18px;
-      margin-bottom: 12px;
-      display: flex;
-      align-items: center;
-      gap: 14px;
-      transition: all .2s;
-      position: relative;
-      overflow: hidden;
-    }
-    .habit-card::before {
-      content: '';
-      position: absolute;
-      left: 0; top: 0; bottom: 0;
-      width: 4px;
-      background: var(--accent);
-      border-radius: 4px 0 0 4px;
-    }
-    .habit-card:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,0,0,.08); border-color: var(--accent); }
-    .habit-card.done-today { border-color: var(--accent); background: #f0faf5; }
-    body.dark-mode .habit-card.done-today { background: #0d1a12; }
-    .habit-icon-wrap {
-      width: 46px; height: 46px;
-      border-radius: 14px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 1.4rem;
-      flex-shrink: 0;
-      background: var(--accent-bg);
-    }
-    .habit-info { flex: 1; min-width: 0; }
-    .habit-name { font-size: .95rem; font-weight: 700; color: var(--text-main); }
-    .habit-meta { font-size: .75rem; color: var(--text-muted); margin-top: 2px; display: flex; gap: 10px; flex-wrap: wrap; }
-    .habit-meta-tag { display: inline-flex; align-items: center; gap: 3px; }
-    .habit-streak { 
-      background: linear-gradient(135deg, #f59e0b, #ef4444);
-      color: #fff;
-      padding: 3px 10px;
-      border-radius: 20px;
-      font-size: .7rem;
-      font-weight: 700;
-      flex-shrink: 0;
-    }
-    .habit-check-btn {
-      width: 34px; height: 34px;
-      border-radius: 50%;
-      border: 2px solid #d8d8d8;
-      background: transparent;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 1rem;
-      transition: all .2s;
-      flex-shrink: 0;
-    }
-    .habit-check-btn:hover { border-color: var(--accent); background: var(--accent-bg); }
-    .habit-check-btn.done { background: var(--accent); border-color: var(--accent); color: #fff; }
-    .habit-del-btn {
-      width: 28px; height: 28px;
-      border-radius: 50%;
-      border: none;
-      background: transparent;
-      color: #ddd;
-      cursor: pointer;
-      font-size: .9rem;
-      display: flex; align-items: center; justify-content: center;
-      transition: all .15s;
-      flex-shrink: 0;
-    }
-    .habit-del-btn:hover { color: #ef4444; background: #fff1f2; }
-    
-    /* Habit tracker daily */
-    .habit-tracker-panel {
-      background: #fff;
-      border: 1.5px solid #e8e8e8;
-      border-radius: 18px;
-      overflow: hidden;
-      transition: background .4s, border-color .4s;
-    }
-    body.dark-mode .habit-tracker-panel { background: #111118; border-color: #1e1e2e; }
-    .htp-header {
-      background: var(--accent-dark);
-      padding: 18px 20px;
-      color: #fff;
-    }
-    .htp-title { font-size: 1rem; font-weight: 700; font-family: 'Lora', serif; }
-    .htp-date { font-size: .75rem; opacity: .7; margin-top: 2px; }
-    .htp-list { padding: 12px 0; }
-    .htp-item {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      padding: 10px 20px;
-      border-bottom: 1px solid #f0f0f0;
-      transition: background .15s;
-      cursor: pointer;
-    }
-    body.dark-mode .htp-item { border-color: #1e1e2e; }
-    .htp-item:hover { background: #f8f9f8; }
-    body.dark-mode .htp-item:hover { background: #161623; }
-    .htp-item:last-child { border-bottom: none; }
-    .htp-checkbox {
-      width: 22px; height: 22px;
-      border-radius: 6px;
-      border: 2px solid #d8d8d8;
-      background: transparent;
-      flex-shrink: 0;
-      display: flex; align-items: center; justify-content: center;
-      font-size: .85rem;
-      transition: all .2s;
-    }
-    .htp-item.done .htp-checkbox { background: var(--accent); border-color: var(--accent); }
-    .htp-item-name { flex: 1; font-size: .85rem; font-weight: 600; color: var(--text-main); }
-    .htp-item.done .htp-item-name { text-decoration: line-through; color: var(--text-muted); }
-    .htp-item-num { font-size: .8rem; font-weight: 700; color: var(--text-muted); background: #f0f0f0; width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-    body.dark-mode .htp-item-num { background: #1e1e2e; }
-    
-    /* Routines */
-    .routine-boxes { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 16px; }
-    .routine-box {
-      background: #f8f9f8;
-      border: 1px solid #e8e8e8;
-      border-radius: 12px;
-      padding: 14px;
-      transition: background .4s;
-    }
-    .routine-box h4 { margin: 0 0 10px; font-size: .8rem; font-weight: 700; text-transform: uppercase; letter-spacing: .8px; color: var(--text-muted); }
-    .routine-item {
-      background: #fff;
-      border-radius: 8px;
-      padding: 6px 10px;
-      font-size: .78rem;
-      font-weight: 600;
-      color: var(--text-main);
-      margin-bottom: 5px;
-      border: 1px solid #eee;
-    }
-    .routine-item:last-child { margin-bottom: 0; }
-    
-    /* Add habit form */
-    .habit-add-form {
-      background: #fafafa;
-      border: 1.5px dashed #d8d8d8;
-      border-radius: 14px;
-      padding: 18px;
-      margin-top: 16px;
-      transition: background .4s;
-    }
-    .habit-add-form h4 { margin: 0 0 14px; font-size: .9rem; color: var(--text-main); }
-    .habit-add-form input,
-    .habit-add-form select {
-      width: 100%;
-      padding: 10px 12px;
-      border-radius: 8px;
-      border: 1.5px solid #ddd;
-      font-family: 'Poppins', sans-serif;
-      font-size: .85rem;
-      color: var(--text-main);
-      background: #fff;
-      margin-bottom: 10px;
-      outline: none;
-      transition: border-color .2s;
-    }
-    .habit-add-form input:focus,
-    .habit-add-form select:focus { border-color: var(--accent); }
-    .habit-form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-
     /* ===== APUNTES - CANVAS STYLE ===== */
     #view-notes{max-width:1100px;margin:0 auto;padding-bottom:60px;}
+    
     .notes-search-bar { width: 100%; max-width: 400px; padding: 12px 16px; border-radius: 10px; border: 2px solid #d8d8d8; margin-top: 15px; outline: none; font-family: 'Poppins', sans-serif; font-size: 0.9rem; transition: border-color 0.2s, background .4s; background:#fff; color: var(--text-main);}
     .notes-search-bar:focus { border-color: var(--accent); }
+    body.dark-mode .notes-search-bar { background: #142010; border-color: #243c28; color: var(--text-main); }
+
+    /* CANVAS GRID - estilo con cover tipo Canvas/LMS */
     .notes-canvas-grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
@@ -884,28 +475,127 @@
       animation: cardIn .35s ease both;
     }
     @keyframes cardIn { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
+    .notes-canvas-card:nth-child(1){animation-delay:.03s}
+    .notes-canvas-card:nth-child(2){animation-delay:.06s}
+    .notes-canvas-card:nth-child(3){animation-delay:.09s}
+    .notes-canvas-card:nth-child(4){animation-delay:.12s}
+    .notes-canvas-card:nth-child(5){animation-delay:.15s}
+    .notes-canvas-card:nth-child(6){animation-delay:.18s}
     .notes-canvas-card:hover {
       transform: translateY(-6px) scale(1.02);
       box-shadow: 0 12px 36px rgba(0,0,0,.18);
       border-color: var(--accent);
     }
     .notes-canvas-card.has-notes { border-color: var(--accent); border-width: 2.5px; }
-    .ncc-cover { height: 110px; background-size: cover; background-position: center; position: relative; flex-shrink: 0; }
-    .ncc-cover-gradient { position: absolute; inset: 0; background: linear-gradient(to bottom, rgba(0,0,0,0.08) 0%, rgba(0,0,0,0.48) 100%); }
-    .ncc-resource-badge { position: absolute; top: 8px; right: 8px; padding: 3px 10px; border-radius: 20px; font-size: .65rem; font-weight: 700; backdrop-filter: blur(6px); letter-spacing: .4px; }
-    .ncc-resource-badge.empty { background: rgba(255,255,255,0.85); color: #555; }
-    .ncc-resource-badge.filled { background: var(--accent); color: #fff; box-shadow: 0 2px 8px rgba(0,0,0,0.2); }
-    .ncc-status-badge { position: absolute; top: 8px; left: 8px; padding: 3px 9px; border-radius: 20px; font-size: .62rem; font-weight: 700; backdrop-filter: blur(6px); }
-    .ncc-status-badge.aprobada { background: rgba(8,71,52,0.85); color: #fff; }
-    .ncc-status-badge.cursando { background: rgba(255,255,255,0.85); color: #444; }
-    .ncc-body { padding: 12px 14px 14px; flex: 1; display: flex; flex-direction: column; gap: 5px; background: inherit; }
-    .ncc-name { font-size: .88rem; font-weight: 700; color: var(--accent-dark); line-height: 1.3; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
-    .ncc-meta-row { display: flex; align-items: center; gap: 6px; margin-top: auto; }
-    .ncc-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--accent); flex-shrink: 0; }
-    .ncc-meta-text { font-size: .7rem; color: var(--text-muted); font-weight: 500; }
-    .ncc-icons-row { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 2px; }
-    .ncc-icon-pill { background: var(--accent-bg); color: var(--accent-dark); font-size: .62rem; font-weight: 700; padding: 2px 7px; border-radius: 8px; letter-spacing: .2px; }
+    body.dark-mode .notes-canvas-card { background: #142010; border-color: #2a3e2c; }
+    body.dark-mode .notes-canvas-card.has-notes { border-color: var(--accent); }
+
+    /* Cover image area */
+    .ncc-cover {
+      height: 110px;
+      background-size: cover;
+      background-position: center;
+      position: relative;
+      flex-shrink: 0;
+    }
+    .ncc-cover-gradient {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to bottom, rgba(0,0,0,0.08) 0%, rgba(0,0,0,0.48) 100%);
+    }
+    /* Badge de recursos en esquina */
+    .ncc-resource-badge {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      padding: 3px 10px;
+      border-radius: 20px;
+      font-size: .65rem;
+      font-weight: 700;
+      backdrop-filter: blur(6px);
+      letter-spacing: .4px;
+    }
+    .ncc-resource-badge.empty {
+      background: rgba(255,255,255,0.85);
+      color: #555;
+    }
+    .ncc-resource-badge.filled {
+      background: var(--accent);
+      color: #fff;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    }
+    /* Estado de la materia badge */
+    .ncc-status-badge {
+      position: absolute;
+      top: 8px;
+      left: 8px;
+      padding: 3px 9px;
+      border-radius: 20px;
+      font-size: .62rem;
+      font-weight: 700;
+      backdrop-filter: blur(6px);
+    }
+    .ncc-status-badge.aprobada {
+      background: rgba(8,71,52,0.85);
+      color: #fff;
+    }
+    .ncc-status-badge.cursando {
+      background: rgba(255,255,255,0.85);
+      color: #444;
+    }
+    /* Body de la card */
+    .ncc-body {
+      padding: 12px 14px 14px;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+      background: inherit;
+    }
+    .ncc-name {
+      font-size: .88rem;
+      font-weight: 700;
+      color: var(--accent-dark);
+      line-height: 1.3;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+    .ncc-meta-row {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: auto;
+    }
+    .ncc-dot {
+      width: 7px; height: 7px; border-radius: 50%;
+      background: var(--accent);
+      flex-shrink: 0;
+    }
+    .ncc-meta-text {
+      font-size: .7rem;
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+    .ncc-icons-row {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+      margin-top: 2px;
+    }
+    .ncc-icon-pill {
+      background: var(--accent-bg);
+      color: var(--accent-dark);
+      font-size: .62rem;
+      font-weight: 700;
+      padding: 2px 7px;
+      border-radius: 8px;
+      letter-spacing: .2px;
+    }
     body.dark-mode .ncc-icon-pill { background: #1a2e1c; color: var(--accent-light); }
+
+    /* Paleta de colores para covers de materias */
     .cover-0{background:linear-gradient(135deg,#f3a4b5 0%,#f9d4db 100%);}
     .cover-1{background:linear-gradient(135deg,#a8d5c2 0%,#c8ead8 100%);}
     .cover-2{background:linear-gradient(135deg,#b8c8f0 0%,#dce6ff 100%);}
@@ -916,26 +606,98 @@
     .cover-7{background:linear-gradient(135deg,#d8f0a8 0%,#edffd4 100%);}
     .cover-8{background:linear-gradient(135deg,#f0a8d8 0%,#ffd4f0 100%);}
     .cover-9{background:linear-gradient(135deg,#a8d8d8 0%,#ccf0f0 100%);}
-    .cover-deco { position: absolute; bottom: 8px; left: 12px; font-size: 1.8rem; opacity: 0.75; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.15)); line-height: 1; }
-    .notes-detail-new { background: #fff; border-radius: 18px; overflow: hidden; box-shadow: 0 6px 24px rgba(0,0,0,.06); border: 1px solid #d8d8d8; transition: background .4s; }
-    .ndn-cover { height: 120px; position: relative; flex-shrink: 0; }
-    .ndn-cover-overlay { position: absolute; inset: 0; background: linear-gradient(to right, rgba(0,0,0,0.65) 0%, rgba(0,0,0,0.2) 80%); display: flex; align-items: center; padding: 0 24px; gap: 14px; }
-    .ndn-back-btn { background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.3); color: #fff; border-radius: 8px; padding: 8px 14px; cursor: pointer; font-size: .85rem; font-weight: 700; font-family: 'Poppins', sans-serif; transition: .18s; flex-shrink: 0; }
+    /* Iconos decorativos en el cover */
+    .cover-deco {
+      position: absolute;
+      bottom: 8px;
+      left: 12px;
+      font-size: 1.8rem;
+      opacity: 0.75;
+      filter: drop-shadow(0 2px 4px rgba(0,0,0,0.15));
+      line-height: 1;
+    }
+
+    /* Detail view del subject */
+    .notes-detail-new {
+      background: #fff;
+      border-radius: 18px;
+      overflow: hidden;
+      box-shadow: 0 6px 24px rgba(0,0,0,.06);
+      border: 1px solid #d8d8d8;
+      transition: background .4s;
+    }
+    body.dark-mode .notes-detail-new { background: #142010; border-color: #243c28; }
+    .ndn-cover {
+      height: 120px;
+      position: relative;
+      flex-shrink: 0;
+    }
+    .ndn-cover-overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to right, rgba(0,0,0,0.65) 0%, rgba(0,0,0,0.2) 80%);
+      display: flex;
+      align-items: center;
+      padding: 0 24px;
+      gap: 14px;
+    }
+    .ndn-back-btn {
+      background: rgba(255,255,255,0.15);
+      border: 1px solid rgba(255,255,255,0.3);
+      color: #fff;
+      border-radius: 8px;
+      padding: 8px 14px;
+      cursor: pointer;
+      font-size: .85rem;
+      font-weight: 700;
+      font-family: 'Poppins', sans-serif;
+      transition: .18s;
+      flex-shrink: 0;
+    }
     .ndn-back-btn:hover { background: rgba(255,255,255,0.28); }
     .ndn-title-wrap { flex: 1; min-width: 0; }
-    .ndn-subject-name { font-size: 1.2rem; font-weight: 700; color: #fff; font-family: 'Lora', serif; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .ndn-subject-name {
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: #fff;
+      font-family: 'Lora', serif;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
     .ndn-subject-meta { font-size: .75rem; color: rgba(255,255,255,.7); margin-top: 2px; }
     .ndn-action-links { display: flex; gap: 8px; flex-wrap: wrap; }
-    .ndn-link-pill { padding: 7px 13px; border-radius: 8px; border: 1px solid rgba(255,255,255,.3); background: transparent; color: #fff; font-size: .75rem; font-weight: 600; font-family: 'Poppins', sans-serif; cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; gap: 5px; transition: .18s; }
+    .ndn-link-pill {
+      padding: 7px 13px;
+      border-radius: 8px;
+      border: 1px solid rgba(255,255,255,.3);
+      background: transparent;
+      color: #fff;
+      font-size: .75rem;
+      font-weight: 600;
+      font-family: 'Poppins', sans-serif;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      transition: .18s;
+    }
     .ndn-link-pill:hover { background: rgba(255,255,255,.18); }
+    /* Add link row */
     .ndh-add-link-row{padding:14px 24px;background:#fafafa;display:none;flex-wrap:wrap;gap:10px;align-items:center;border-bottom:1px solid #eaeaea;transition:background .4s;}
     .ndh-add-link-row.show{display:flex;}
+    body.dark-mode .ndh-add-link-row { background: #1a2e1c; border-color: #243c28; }
     .ndh-add-link-row input,.ndh-add-link-row select{padding:9px 12px;border-radius:8px;border:1px solid #ccc;outline:none;font-family:'Poppins',sans-serif;font-size:.85rem;color:var(--text-main);background:#fff;flex:1;min-width:140px;}
+    body.dark-mode .ndh-add-link-row input { background: #0d1a12; border-color: #243c28; color: var(--text-main); }
     .ndh-add-link-row .nc-add-btn{flex-shrink:0;}
+    /* Categories */
     .notes-category{border-bottom:1px solid #eaeaea;}
     .notes-category:last-child{border-bottom:none;}
+    body.dark-mode .notes-category { border-color: #243c28; }
     .nc-header{display:flex;align-items:center;justify-content:space-between;padding:16px 24px;cursor:pointer;transition:background .15s;user-select:none;}
     .nc-header:hover{background:#f9f9f9;}
+    body.dark-mode .nc-header:hover { background: #1a2e1c; }
     .nc-title{font-size:.85rem;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--accent-dark);display:flex;align-items:center;gap:10px;}
     .nc-title-icon{font-size:1.1rem;}
     .nc-count-badge{background:var(--accent);color:#fff;border-radius:20px;padding:2px 10px;font-size:.7rem;font-weight:700;}
@@ -945,6 +707,7 @@
     .nc-empty{font-size:.85rem;color:#aaa;font-style:italic;padding:8px 0;}
     .note-item{display:flex;align-items:center;gap:12px;padding:12px 16px;border-radius:10px;border:1px solid #eaeaea;margin-bottom:8px;background:#fff;transition:all .15s;}
     .note-item:hover{border-color:var(--accent); box-shadow: 0 2px 8px rgba(0,0,0,0.05);}
+    body.dark-mode .note-item { background: #0d1a12; border-color: #243c28; }
     .note-item-icon{font-size:1.3rem;flex-shrink:0;}
     .note-item-info{flex:1;min-width:0;}
     .note-item-name{font-size:.9rem;font-weight:600;color:var(--text-main);overflow:hidden;white-space:nowrap;text-overflow:ellipsis;}
@@ -955,8 +718,10 @@
     .note-item-del{cursor:pointer;color:#bbb;font-size:1.1rem;padding:2px 6px;transition:.15s;}
     .note-item-del:hover{color:#ef4444;}
     .nc-add-form{background:#fafafa;border-radius:10px;border:1px dashed #ccc;padding:16px;margin-top:12px;transition:background .4s;}
+    body.dark-mode .nc-add-form { background: #0d1a12; border-color: #243c28; }
     .nc-add-form input{width:100%;padding:10px 12px;margin-bottom:10px;border-radius:8px;border:1px solid #ddd;font-family:'Poppins',sans-serif;font-size:.85rem;color:var(--text-main);background:#fff;outline:none;box-sizing:border-box;transition:background .4s;}
     .nc-add-form input:focus{border-color:var(--accent);}
+    body.dark-mode .nc-add-form input { background: #142010; border-color: #243c28; color: var(--text-main); }
     .nc-add-btn{padding:10px 18px;border-radius:8px;border:none;background:var(--accent-dark);color:#fff;font-family:'Poppins',sans-serif;font-weight:600;font-size:.85rem;cursor:pointer;transition:.18s;}
     .nc-add-btn:hover{background:var(--accent);}
 
@@ -987,6 +752,7 @@
     #view-profile{max-width:680px;margin:0 auto;padding-bottom:50px;}
     .profile-section{background:#fff;color:var(--text-main);border-radius:18px;border:1px solid #d8d8d8; box-shadow: 0 4px 15px rgba(0,0,0,0.03); padding:26px 30px;margin-bottom:24px;transition:background .4s,border-color .4s;}
     .profile-section h3{margin-top:0;font-size:1.1rem;color:var(--accent-dark); border-bottom: 2px solid #f0f0f0; padding-bottom: 10px; margin-bottom: 15px;}
+    body.dark-mode .profile-section h3 { border-color: #243c28; }
     .profile-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:15px;margin-top:16px;}
     .profile-theme-card{border:2px solid #eaeaea;border-radius:12px;padding:14px 10px;cursor:pointer;transition:all .2s;text-align:center;background:#fff;}
     .profile-theme-card:hover{transform:translateY(-3px); box-shadow: 0 4px 10px rgba(0,0,0,0.05);}
@@ -994,6 +760,7 @@
     .profile-save-btn{margin-top:20px;width:100%;padding:13px;border-radius:10px;border:none;background:var(--accent);color:#fff;font-family:'Poppins',sans-serif;font-weight:600;font-size:14px;cursor:pointer;transition:.2s;}
     .profile-save-btn:hover{opacity:.9; transform: translateY(-2px);}
     .profile-info-row{display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid #f0f0f0;font-size:14px;}
+    body.dark-mode .profile-info-row { border-color: #243c28; }
     .profile-info-row:last-child{border-bottom:none;}
     .profile-info-label{color:var(--text-muted);font-size:13px;}
     .profile-info-val{font-weight:600;font-size:14px; color: var(--accent-dark);}
@@ -1013,16 +780,12 @@
     .btn-add:hover{opacity:.9; transform: translateY(-2px);}
     .btn-close-modal{display:block;width:100%;margin-top:10px;padding:10px;border-radius:10px;border:1px solid #ddd;background:#f9f9f9;color:var(--text-muted);font-family:'Poppins',sans-serif;font-weight:500;cursor:pointer; transition: 0.2s;}
     .btn-close-modal:hover { background: #eee; }
+    body.dark-mode .btn-close-modal { background: #142010; border-color: #243c28; color: var(--text-muted); }
     .btn-goog{display:block;width:100%;padding:12px;margin-top:8px;border-radius:10px;border:none;background:#4285F4;color:#fff;font-family:'Poppins',sans-serif;font-weight:600;font-size:13px;cursor:pointer;}
     .btn-goog:hover { background: #3367d6; }
     .grade-star-btn{padding:10px 4px;border-radius:8px;border:1px solid #ccc;background:#fafafa;color:var(--text-muted);font-weight:600;font-size:.9rem;cursor:pointer;transition:all .2s;font-family:'Poppins',sans-serif;flex:1;}
     .grade-star-btn:hover,.grade-star-btn.selected{background:var(--accent);color:#fff;border-color:var(--accent-dark);}
     #scheduleExtraModal .modal-box{text-align:left;}
-    /* Checkbox in modal */
-    .modal-checkbox-row { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; cursor: pointer; padding: 10px 12px; background: #f0faf5; border-radius: 8px; border: 1.5px solid var(--accent-light); }
-    .modal-checkbox-row input[type=checkbox] { width: 18px; height: 18px; accent-color: var(--accent); cursor: pointer; flex-shrink: 0; margin: 0; }
-    .modal-checkbox-row span { font-size: 13px; font-weight: 600; color: var(--accent-dark); }
-    body.dark-mode .modal-checkbox-row { background: #0d1a12; border-color: #243c28; }
 
     /* ===== RESPONSIVE ===== */
     @media(max-width:768px){
@@ -1048,8 +811,6 @@
       .pom-time{font-size:2.8rem;}
       .notes-canvas-grid{grid-template-columns:repeat(auto-fill,minmax(155px,1fr));gap:14px;}
       .ncc-cover{height:85px;}
-      .week-tl-body { max-height: 450px; }
-      .habits-layout { grid-template-columns: 1fr; }
     }
   </style>
 </head>
@@ -1078,7 +839,7 @@
         <span style="font-size:12px;color:#bbb;white-space:nowrap">o continuá con</span>
         <div style="flex:1;height:1px;background:#eee"></div>
       </div>
-      <button onclick="loginConGoogle()" style="width:100%;padding:12px 16px;border-radius:10px;border:1px solid #ddd;background:#fff;color:#333;font-family:'Poppins',sans-serif;font-weight:600;font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;transition:all .2s;box-shadow:0 2px 6px rgba(0,0,0,.05);">
+      <button onclick="loginConGoogle()" style="width:100%;padding:12px 16px;border-radius:10px;border:1px solid #ddd;background:#fff;color:#333;font-family:'Poppins',sans-serif;font-weight:600;font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;transition:all .2s;box-shadow:0 2px 6px rgba(0,0,0,.05);" onmouseover="this.style.boxShadow='0 4px 12px rgba(0,0,0,.1)'" onmouseout="this.style.boxShadow='0 2px 6px rgba(0,0,0,.05)'">
         <svg width="18" height="18" viewBox="0 0 18 18" xmlns="http://www.w3.org/2000/svg"><path d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908c1.702-1.567 2.684-3.874 2.684-6.615z" fill="#4285F4"/><path d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 0 0 9 18z" fill="#34A853"/><path d="M3.964 10.71A5.41 5.41 0 0 1 3.682 9c0-.593.102-1.17.282-1.71V4.958H.957A8.996 8.996 0 0 0 0 9c0 1.452.348 2.827.957 4.042l3.007-2.332z" fill="#FBBC05"/><path d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 0 0 .957 4.958L3.964 7.29C4.672 5.163 6.656 3.58 9 3.58z" fill="#EA4335"/></svg>
         Continuar con Google
       </button>
@@ -1153,11 +914,6 @@
       <label>Salón / Sede:</label>
       <input type="text" id="schSalon" placeholder="Ej: Aula 12 - Sede Centro">
     </div>
-    <!-- NEW: Add to calendar checkbox -->
-    <label class="modal-checkbox-row" for="schAddToCalendar">
-      <input type="checkbox" id="schAddToCalendar" checked>
-      <span>🗓️ Agregar también al calendario como evento recurrente</span>
-    </label>
     <button class="btn-add" style="width:100%;" onclick="saveToSchedule()">✔️ Asignar</button>
     <button class="btn-close-modal" onclick="closeModal('scheduleModal')">Cancelar</button>
   </div>
@@ -1239,9 +995,9 @@
       <button class="tab-btn" onclick="switchTab('schedule',event)">📅 Horario</button>
       <button class="tab-btn" onclick="switchTab('stats',event)">📊 Progreso</button>
       <button class="tab-btn" onclick="switchTab('pomodoro',event)">⏱️ Estudiar</button>
-      <button class="tab-btn" onclick="switchTab('habits',event)">✅ Hábitos</button>
       <button class="tab-btn" onclick="switchTab('notes',event)">📂 Apuntes</button>
       <button class="tab-btn" onclick="switchTab('profile',event)">👤 Perfil</button>
+      <!-- DARK MODE TOGGLE -->
       <button class="dark-toggle-btn" id="darkToggleBtn" onclick="toggleDarkMode()" title="Cambiar modo claro/oscuro">
         <span id="darkToggleIcon">🌙</span>
         <span id="darkToggleLabel">Oscuro</span>
@@ -1324,7 +1080,7 @@
     <div id="view-schedule" class="view-section">
       <div class="section-header">
         <h2>📅 Mi horario semanal</h2>
-        <p>Escribí en las celdas o usá el botón para asignar una materia. Pasá el mouse sobre una celda para ver opciones de edición o borrado.</p>
+        <p>Escribí en las celdas o usá el botón para asignar una materia a un horario. Tocá el ✏️ para agregar info de la clase.</p>
       </div>
       <div style="display:flex;justify-content:flex-end;margin-bottom:16px;gap:10px;flex-wrap:wrap">
         <button class="btn-add" onclick="fillScheduleModal();openModal('scheduleModal')">➕ Asignar materia</button>
@@ -1371,7 +1127,7 @@
       <label style="display:block;font-size:.8rem;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--text-main);margin-bottom:8px;text-align:center">¿Qué vas a estudiar ahora? (opcional)</label>
       <select class="pom-subject-select" id="pomSubject"><option value="">— Sin materia específica —</option></select>
       <div style="display:flex;gap:15px;justify-content:center;margin-bottom:24px;flex-wrap:wrap">
-        <div style="background:#fff;border-radius:12px;padding:12px 16px;text-align:center;border:1px solid #d8d8d8;box-shadow: 0 2px 6px rgba(0,0,0,0.03);transition:background .4s">
+        <div style="background:#fff;border-radius:12px;padding:12px 16px;text-align:center;border:1px solid #d8d8d8;box-shadow: 0 2px 6px rgba(0,0,0,0.03);transition:background .4s" class="panel-box" style="margin:0">
           <label style="display:block;font-size:.7rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:.8px;margin-bottom:6px">Estudio (min)</label>
           <input type="number" id="pomWorkMin" value="25" min="1" max="90" onchange="pomApplyConfig()" style="width:65px;padding:8px 10px;border-radius:8px;border:1.5px solid #ccc;background:#fafafa;color:var(--text-main);font-family:'Poppins',sans-serif;font-weight:700;font-size:1.1rem;text-align:center;outline:none;">
         </div>
@@ -1398,89 +1154,7 @@
       </div>
     </div>
 
-    <!-- HABITS -->
-    <div id="view-habits" class="view-section">
-      <div class="section-header">
-        <h2>✅ Habit Tracker</h2>
-        <p>Construí rutinas y llevá la racha diaria de tus hábitos.</p>
-      </div>
-      <div class="habits-layout">
-        <div id="habitsLeft">
-          <!-- Area filters -->
-          <div class="habit-area-filters" id="habitAreaFilters">
-            <button class="habit-area-filter active" data-area="all" onclick="filterHabits('all',this)">Todos</button>
-            <button class="habit-area-filter" data-area="Personal" onclick="filterHabits('Personal',this)">👤 Personal</button>
-            <button class="habit-area-filter" data-area="Fitness" onclick="filterHabits('Fitness',this)">💪 Fitness</button>
-            <button class="habit-area-filter" data-area="Learning" onclick="filterHabits('Learning',this)">📚 Aprendizaje</button>
-            <button class="habit-area-filter" data-area="Health" onclick="filterHabits('Health',this)">❤️ Salud</button>
-            <button class="habit-area-filter" data-area="Finance" onclick="filterHabits('Finance',this)">💰 Finanzas</button>
-          </div>
-          <!-- Habits list -->
-          <div id="habitsList"></div>
-          <!-- Add habit form -->
-          <div class="habit-add-form" id="habitAddForm">
-            <h4>➕ Agregar nuevo hábito</h4>
-            <input type="text" id="habitName" placeholder="Nombre del hábito (ej: Leer 30 min)">
-            <div class="habit-form-row">
-              <select id="habitArea">
-                <option value="Personal">👤 Personal</option>
-                <option value="Fitness">💪 Fitness</option>
-                <option value="Learning">📚 Aprendizaje</option>
-                <option value="Health">❤️ Salud</option>
-                <option value="Finance">💰 Finanzas</option>
-              </select>
-              <select id="habitDifficulty">
-                <option value="Easy">Fácil</option>
-                <option value="Medium">Medio</option>
-                <option value="Hard">Difícil</option>
-              </select>
-            </div>
-            <div class="habit-form-row">
-              <input type="number" id="habitTime" placeholder="Tiempo (minutos)" min="1">
-              <select id="habitRoutine">
-                <option value="none">Sin rutina</option>
-                <option value="morning">🌅 Mañana</option>
-                <option value="evening">🌙 Tarde/Noche</option>
-              </select>
-            </div>
-            <button class="btn-add" style="width:100%;margin-top:4px" onclick="addHabit()">✔️ Crear hábito</button>
-          </div>
-          <!-- Routine -->
-          <div class="panel-box" style="margin-top:24px">
-            <h3 style="margin-top:0;">🌅 Mis rutinas</h3>
-            <div class="routine-boxes" id="routineBoxes">
-              <div class="routine-box">
-                <h4>Mañana</h4>
-                <div id="routineMorning"><span style="font-size:.8rem;color:#aaa;font-style:italic">Sin hábitos de mañana.</span></div>
-              </div>
-              <div class="routine-box">
-                <h4>Tarde / Noche</h4>
-                <div id="routineEvening"><span style="font-size:.8rem;color:#aaa;font-style:italic">Sin hábitos de tarde.</span></div>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div id="habitsRight">
-          <!-- Daily tracker panel -->
-          <div class="habit-tracker-panel">
-            <div class="htp-header">
-              <div class="htp-title">📋 Tracker de hoy</div>
-              <div class="htp-date" id="htpDate"></div>
-            </div>
-            <div class="htp-list" id="htpList">
-              <div style="padding:20px;text-align:center;font-size:.85rem;color:#aaa">Creá hábitos para verlos acá.</div>
-            </div>
-          </div>
-          <!-- Motivational quote -->
-          <div style="margin-top:16px;padding:18px;background:var(--accent);border-radius:14px;color:#fff;text-align:center;">
-            <div style="font-size:.75rem;opacity:.7;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">Recordá</div>
-            <div style="font-size:.9rem;font-weight:600;font-style:italic;line-height:1.5" id="habitQuote">La consistencia es la clave para construir hábitos duraderos.</div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- APUNTES -->
+    <!-- APUNTES - Canvas Style -->
     <div id="view-notes" class="view-section">
       <div class="section-header">
         <h2>📂 Mis Apuntes</h2>
@@ -1522,7 +1196,7 @@
 <audio id="pomAudio" preload="auto"></audio>
 
 <script>
-// ==================== DARK MODE (QUATIC STYLE) ====================
+// ==================== DARK MODE ====================
 function toggleDarkMode(){
   const isDark=document.body.classList.toggle('dark-mode');
   const icon=document.getElementById('darkToggleIcon');
@@ -1542,7 +1216,7 @@ function initDarkMode(){
   }
 }
 
-// ==================== SOUND ====================
+// ==================== SONIDO POMODORO ====================
 function playPomSound(){
   try {
     const ctx = new (window.AudioContext || window.webkitAudioContext)();
@@ -1560,17 +1234,17 @@ function playPomSound(){
       osc.start(ctx.currentTime + i * 0.18);
       osc.stop(ctx.currentTime + i * 0.18 + 0.4);
     });
-  } catch(e) {}
+  } catch(e) { console.log('Audio no disponible'); }
 }
 
-// ==================== STATE ====================
+// ==================== ESTADO ====================
 let obState={career:'',uni:'',years:'',theme:'Verde',accent:'#084734',dark:'#084734',light:'#a8d5c2',bg:'#cdedb3',materias:[]};
 let profileSelectedTheme=null;
 let tableData={},gradesData={},calendarData={},apuntesData={},pomodoroStats={},horarioExtraData={};
-let habitosData=[];
-let habitStreakData={};
 let authMode='registro';
 let _gradeModalCourseId=null;
+
+// Emojis decorativos por cover
 const COVER_DECOS=['📚','✏️','🔬','📐','💡','🧪','📊','🖥️','🧠','🗂️','🎯','⚗️','🔭','📜','🧮'];
 
 // ==================== ONBOARDING ====================
@@ -1639,6 +1313,8 @@ function obSelectTheme(el){
   el.classList.add('selected');
   obState.accent=el.dataset.accent;obState.dark=el.dataset.dark;
   obState.light=el.dataset.light;obState.bg=el.dataset.bg;obState.theme=el.dataset.label;
+  document.getElementById('obProgress').style.background=obState.accent;
+  document.querySelectorAll('.ob-btn-next').forEach(b=>b.style.background=obState.accent);
 }
 
 async function obHandleFile(input){
@@ -1705,7 +1381,7 @@ function obFinish(){
   marcarTemaActivo(config.theme);
   construirMalla(config.materias);
   window.initApp();
-  confetti({particleCount:150,spread:80,origin:{y:.5}});
+  confetti({particleCount:150,spread:80,origin:{y:.5},colors:[obState.accent,'#ffffff']});
 }
 
 // ==================== TEMA ====================
@@ -1829,10 +1505,9 @@ window.switchTab=(name,event)=>{
   if(name==='notes')renderNotesTab();
   if(name==='pomodoro')renderPomSubjectSelect();
   if(name==='calendar')renderCalendarView();
-  if(name==='habits')renderHabitsTab();
 };
 
-// ==================== MODAL NOTA ====================
+// ==================== MODAL DE NOTA ====================
 function openGradeModal(id,nombre){
   _gradeModalCourseId=id;
   document.getElementById('gradeModalName').textContent=nombre;
@@ -1884,7 +1559,7 @@ function renderDashboard(){
   renderNextClass();renderUpcoming();
 }
 
-// ==================== PROXIMA CLASE ====================
+// ==================== PRÓXIMA CLASE ====================
 function renderNextClass(){
   const cont=document.getElementById('nextClassContent');if(!cont)return;
   const now=new Date();
@@ -1920,10 +1595,18 @@ function renderNextClass(){
     ?`<a href="${found.link}" target="_blank" style="color:var(--accent);text-decoration:underline;font-size:.78rem;font-weight:600">Entrar a la clase →</a>`
     :found.salon?`<span style="font-size:.85rem;color:var(--text-muted)">${found.salon}</span>`:'';
   const diaLabel=found.dia?` (${found.dia})`:'';
-  cont.innerHTML=`<div style="display:flex;align-items:flex-start;gap:12px"><span style="font-size:2rem">${iconMod}</span><div><div style="font-size:1.05rem;font-weight:700;color:var(--text-main)">${found.materia}</div><div style="font-size:.85rem;color:var(--text-muted);margin-top:2px">${found.hora}${diaLabel}</div>${detalle?'<div style="margin-top:6px">'+detalle+'</div>':''}</div></div>`;
+  cont.innerHTML=`
+    <div style="display:flex;align-items:flex-start;gap:12px">
+      <span style="font-size:2rem">${iconMod}</span>
+      <div>
+        <div style="font-size:1.05rem;font-weight:700;color:var(--text-main)">${found.materia}</div>
+        <div style="font-size:.85rem;color:var(--text-muted);margin-top:2px">${found.hora}${diaLabel}</div>
+        ${detalle?'<div style="margin-top:6px">'+detalle+'</div>':''}
+      </div>
+    </div>`;
 }
 
-// ==================== PROXIMOS EVENTOS ====================
+// ==================== PRÓXIMOS EVENTOS ====================
 function renderUpcoming(){
   const cont=document.getElementById('upcomingContent');if(!cont)return;
   const now=new Date();now.setHours(0,0,0,0);
@@ -1933,7 +1616,7 @@ function renderUpcoming(){
     const key=`${dt.getFullYear()}-${dt.getMonth()}-${dt.getDate()}`;
     if(calendarData[key]){
       calendarData[key].forEach(ev=>{
-        if(!ev.isClass)items.push({days:d,title:ev.title,time:ev.time,color:ev.color});
+        items.push({days:d,title:ev.title,time:ev.time,color:ev.color});
       });
     }
   }
@@ -1945,26 +1628,19 @@ function renderUpcoming(){
 }
 
 // ==================== HORARIO ====================
-const horas=["07:00","08:00","09:00","10:00","11:00","12:00","13:00","14:00","15:00","16:00","17:00","18:00","19:00","20:00","21:00","22:00","23:00"];
+const horas=["08:00","09:00","10:00","11:00","12:00","13:00","14:00","15:00","16:00","17:00","18:00","19:00","20:00","21:00","22:00","23:00"];
 const dias=["Lunes","Martes","Miercoles","Jueves","Viernes","Sabado"];
-const diasKeys=["lunes","martes","miercoles","jueves","viernes","sabado"];
 let _extraModalKey=null;
 
 function buildSchedule(){
   const wrapper=document.getElementById('scheduleWrapper');if(!wrapper)return;
   let html='<div class="schedule-grid">';
-  dias.forEach((d,di)=>{
-    const dk=diasKeys[di];
+  dias.forEach(d=>{
     html+=`<div class="day-column"><div class="day-header">${d}</div>`;
     horas.forEach(h=>{
-      const id=`${dk}-${h}`;
+      const id=`${d.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'')}-${h}`;
       const val=tableData[id]||'';const cls=val.trim()?' occupied-cell':'';
-      const hasVal=val.trim();
-      html+=`<div class="hour-cell"><div class="hour-label">${h}</div><textarea class="schedule-input${cls}" data-id="${id}" oninput="saveTableCell(this)">${val}</textarea>`;
-      if(hasVal){
-        html+=`<button class="schedule-cell-edit" onclick="openExtraModal('${id}')" title="Info de la clase">✏️</button>`;
-        html+=`<button class="schedule-cell-delete" onclick="deleteScheduleCell('${id}')" title="Borrar">✕</button>`;
-      }
+      html+=`<div class="hour-cell" style="position:relative"><div class="hour-label">${h}</div><textarea class="schedule-input${cls}" data-id="${id}" oninput="saveTableCell(this)">${val}</textarea>${val.trim()?`<span onclick="openExtraModal('${id}')" title="Info de la clase" style="position:absolute;right:3px;top:3px;cursor:pointer;font-size:.65rem;opacity:.5">✏️</span>`:''}`;
       html+=`</div>`;
     });
     html+=`</div>`;
@@ -1972,20 +1648,6 @@ function buildSchedule(){
   html+='</div>';
   wrapper.innerHTML=html;
 }
-
-// NEW: Delete a schedule cell
-window.deleteScheduleCell=(id)=>{
-  if(!confirm('¿Borrar esta clase del horario?'))return;
-  delete tableData[id];
-  delete horarioExtraData[id];
-  try{
-    localStorage.setItem('materiasTabla',JSON.stringify(tableData));
-    localStorage.setItem('horarioExtra',JSON.stringify(horarioExtraData));
-  }catch(e){}
-  if(window.syncCloud)window.syncCloud();
-  buildSchedule();renderNextClass();
-  renderCalendarView();
-};
 
 window.saveTableCell=(el)=>{
   tableData[el.dataset.id]=el.value;
@@ -2008,7 +1670,6 @@ function fillScheduleModal(){
   else enabled.forEach(c=>{sel.innerHTML+=`<option>${c.querySelector('.course-name')?.textContent||c.textContent}</option>`;});
 }
 
-// NEW: saveToSchedule now optionally adds to calendar
 window.saveToSchedule=()=>{
   const subject=document.getElementById('schSubject').value;
   const day=document.getElementById('schDay').value;
@@ -2018,7 +1679,6 @@ window.saveToSchedule=()=>{
   const modalidad=(document.getElementById('schModalidad')?.value)||'presencial';
   const link=(document.getElementById('schLink')?.value||'').trim();
   const salon=(document.getElementById('schSalon')?.value||'').trim();
-  const addToCalendar=document.getElementById('schAddToCalendar')?.checked;
   for(let i=si;i<ei;i++){
     const key=`${day}-${horas[i]}`;
     tableData[key]=subject;
@@ -2028,33 +1688,8 @@ window.saveToSchedule=()=>{
     localStorage.setItem('materiasTabla',JSON.stringify(tableData));
     if(link||salon||modalidad)localStorage.setItem('horarioExtra',JSON.stringify(horarioExtraData));
   }catch(e){}
-  // Add to calendar as class events for next 4 weeks
-  if(addToCalendar){
-    const dayMap={lunes:1,martes:2,miercoles:3,jueves:4,viernes:5,sabado:6,domingo:0};
-    const targetDay=dayMap[day];
-    const now=new Date();
-    const cfg=(()=>{try{return JSON.parse(localStorage.getItem('userConfig')||'{}');}catch{return{};}})();
-    const color=cfg.theme?.accent||'#084734';
-    // Add for next 8 weeks
-    for(let w=0;w<8;w++){
-      const d=new Date(now);
-      const diff=((targetDay-d.getDay())+7)%7+w*7;
-      d.setDate(d.getDate()+diff);
-      const key=`${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
-      if(!calendarData[key])calendarData[key]=[];
-      // Remove existing class event for this subject on same day
-      calendarData[key]=calendarData[key].filter(e=>!(e.isClass&&e.title===subject));
-      calendarData[key].push({
-        title:subject,
-        time:horas[si]+(si+1<horas.length?` - ${horas[ei]||horas[si]}':''),
-        color,
-        isClass:true
-      });
-    }
-    try{localStorage.setItem('indCalendar',JSON.stringify(calendarData));}catch(e){}
-  }
   if(window.syncCloud)window.syncCloud();
-  buildSchedule();closeModal('scheduleModal');renderNextClass();renderCalendarView();
+  buildSchedule();closeModal('scheduleModal');renderNextClass();
   if(document.getElementById('schLink'))document.getElementById('schLink').value='';
   if(document.getElementById('schSalon'))document.getElementById('schSalon').value='';
 };
@@ -2088,7 +1723,6 @@ function closeModal(id){document.getElementById(id).classList.remove('open');}
 // ==================== CALENDARIO ====================
 const monthNames=["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"];
 const dayNamesShort=["Dom","Lun","Mar","Mié","Jue","Vie","Sáb"];
-const dayNamesFull=["Domingo","Lunes","Martes","Miércoles","Jueves","Viernes","Sábado"];
 
 let currentMonth=new Date().getMonth();
 let currentYear=new Date().getFullYear();
@@ -2125,7 +1759,7 @@ function calNavNext(){
 function renderCalendarView(){
   if(!currentWeekStart)initWeekStart();
   if(calView==='month')renderMonthView();
-  else renderWeekTimelineView();
+  else renderWeekSimpleView();
 }
 
 function renderMonthView(){
@@ -2142,8 +1776,7 @@ function renderMonthView(){
     const isToday=(d===todayD&&currentMonth===todayM&&currentYear===todayY);
     let ev='';
     if(calendarData[key])calendarData[key].forEach((e,i)=>{
-      const cls=e.isClass?' class-event':'';
-      ev+=`<div class="cal-event-pill${cls}" style="background:${e.color}" onclick="deleteCalEvent('${key}',${i},event)">${e.time?e.time+' ':''}${e.title}</div>`;
+      ev+=`<div class="cal-event-pill" style="background:${e.color}" onclick="deleteCalEvent('${key}',${i},event)">${e.time} - ${e.title}</div>`;
     });
     html+=`<div class="cal-day${isToday?' today':''}" onclick="openCalModal('${key}',${d})"><div class="cal-date-num">${d}</div>${ev}</div>`;
   }
@@ -2151,8 +1784,7 @@ function renderMonthView(){
   cont.innerHTML=html;
 }
 
-// NEW: Full timeline week view (calendar.me style)
-function renderWeekTimelineView(){
+function renderWeekSimpleView(){
   const cont=document.getElementById('calendarContainer');if(!cont)return;
   const ws=new Date(currentWeekStart);
   const we=new Date(ws);we.setDate(ws.getDate()+6);
@@ -2162,80 +1794,33 @@ function renderWeekTimelineView(){
   const todayStr=`${now.getFullYear()}-${now.getMonth()}-${now.getDate()}`;
   const weekDays=[];
   for(let i=0;i<7;i++){const d=new Date(ws);d.setDate(ws.getDate()+i);weekDays.push(d);}
-
-  // Timeline hours to show (7am - 22pm)
-  const tlHours=[];
-  for(let h=7;h<=22;h++)tlHours.push(h);
-
-  // Build header columns
-  const numCols=7;
-  let headerCols=weekDays.map((d,di)=>{
-    const dStr=`${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
-    const isToday=dStr===todayStr;
-    const numStr=isToday?`<div class="week-tl-day-num" style="background:var(--accent);color:#fff;border-radius:50%;width:38px;height:38px;display:flex;align-items:center;justify-content:center;margin:2px auto 0;font-size:1.1rem;">${d.getDate()}</div>`:
-      `<div class="week-tl-day-num">${d.getDate()}</div>`;
-    return`<div class="week-tl-day-header${isToday?' is-today':''}">
-      <div class="week-tl-day-name">${dayNamesShort[d.getDay()]}</div>
-      ${numStr}
-      <button class="week-tl-add-btn" onclick="openCalModal('${dStr}',${d.getDate()})">+</button>
-    </div>`;
-  }).join('');
-
-  // Build hour rows + events per day
-  let colsHtml='';
+  let html='<div class="week-simple-container"><div class="week-simple-days">';
   weekDays.forEach((d,di)=>{
     const dStr=`${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
-    const dayEvents=calendarData[dStr]||[];
-    // Hour rows as grid background
-    let hoursHtml=tlHours.map(h=>`<div class="week-tl-hour-row"></div>`).join('');
-    
-    // Event blocks
-    let evBlocks='';
-    dayEvents.forEach(ev=>{
-      let startH=7,durationH=1;
-      if(ev.time&&ev.time!=='Todo el día'){
-        const parts=ev.time.split(' - ');
-        const s=parts[0]?parseInt(parts[0].split(':')[0]):7;
-        const e=parts[1]?parseInt(parts[1].split(':')[0]):s+1;
-        startH=Math.max(7,Math.min(22,s));
-        durationH=Math.max(0.5,Math.min(15,e-s));
-      }
-      const topPct=((startH-7)*56)+'px';
-      const heightPct=(durationH*56-3)+'px';
-      const classStr=ev.isClass?' week-tl-event-class':'';
-      evBlocks+=`<div class="week-tl-event-block${classStr}" style="top:${topPct};height:${heightPct};background:${ev.color}" onclick="event.stopPropagation()">
-        <div class="week-tl-event-title">${ev.title}</div>
-        <div class="week-tl-event-time">${ev.time||'Todo el día'}</div>
-      </div>`;
-    });
-    
-    colsHtml+=`<div class="week-tl-col" style="position:relative">${hoursHtml}${evBlocks}</div>`;
-  });
-
-  // Now line
-  const nowH=now.getHours();const nowM=now.getMinutes();
-  const nowTop=((nowH-7)*56+(nowM/60)*56);
-  const todayColIdx=weekDays.findIndex(d=>{
-    return `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`===todayStr;
-  });
-
-  const gridStyle=`grid-template-columns: repeat(${numCols}, 1fr)`;
-
-  cont.innerHTML=`<div class="week-timeline-container">
-    <div class="week-tl-header" style="display:grid;${gridStyle};padding-left:52px">
-      ${headerCols}
-    </div>
-    <div class="week-tl-body">
-      <div class="week-tl-hours">
-        ${tlHours.map(h=>`<div class="week-tl-hour-label">${h}:00</div>`).join('')}
+    const isToday=dStr===todayStr;
+    const events=calendarData[dStr]||[];
+    html+=`<div class="week-simple-day">
+      <div class="week-simple-day-header${isToday?' is-today':''}" onclick="toggleWeekDay('wday-${di}')">
+        <span class="wsdc-name">${dayNamesShort[d.getDay()]}</span>
+        <span class="wsdc-date">${d.getDate()}</span>
+        <span class="wsdc-events-preview">${events.length?`<span style="color:var(--accent);font-weight:600">${events.length} evento${events.length>1?'s':''}</span>`:'<span style="color:#ccc">Sin eventos</span>'}</span>
+        <button class="wsdc-add" onclick="event.stopPropagation();openCalModal('${dStr}',${d.getDate()})">+ Agregar</button>
       </div>
-      <div class="week-tl-cols" style="${gridStyle}">
-        ${colsHtml}
-        ${todayColIdx>=0&&nowH>=7&&nowH<=22?`<div class="week-tl-now-line" style="top:${nowTop}px;left:${(todayColIdx/numCols)*100}%;width:${(1/numCols)*100}%"></div>`:''}
-      </div>
-    </div>
-  </div>`;
+      <div id="wday-${di}" style="display:${isToday||events.length?'block':'none'}">`;
+    if(events.length){
+      html+='<div class="week-simple-events">';
+      events.forEach((ev,idx)=>{
+        html+=`<div class="week-simple-event"><span class="wse-dot" style="background:${ev.color}"></span><span class="wse-time">${ev.time||'Todo el día'}</span><span class="wse-title">${ev.title}</span><span class="wse-del" onclick="deleteCalEvent('${dStr}',${idx},event)">✕</span></div>`;
+      });
+      html+='</div>';
+    } else {html+=`<div class="week-no-events">No hay eventos este día.</div>`;}
+    html+=`</div></div>`;
+  });
+  html+='</div></div>';
+  cont.innerHTML=html;
 }
+
+window.toggleWeekDay=(id)=>{const el=document.getElementById(id);if(el)el.style.display=el.style.display==='none'?'block':'none';};
 
 window.openCalModal=(key,day)=>{
   document.getElementById('calDateKey').value=key;
@@ -2270,7 +1855,7 @@ window.deleteCalEvent=(key,idx,e)=>{
   }
 };
 
-// ==================== PROGRESO ====================
+// ==================== PROGRESO + NOTAS ====================
 function renderGradesInStats(){
   const container=document.getElementById('gradesInStats');if(!container)return;
   const total=getCourses().length,done=document.querySelectorAll('.course.completed').length;
@@ -2437,152 +2022,7 @@ function renderStudyStats(){
   }).join('');
 }
 
-// ==================== HABIT TRACKER ====================
-const HABIT_ICONS={Personal:'👤',Fitness:'💪',Learning:'📚',Health:'❤️',Finance:'💰'};
-const HABIT_QUOTES=[
-  'La consistencia es la clave para construir hábitos duraderos.',
-  'Pequeñas acciones repetidas crean grandes resultados.',
-  'No buscás la motivación, construís la disciplina.',
-  'Cada día que cumplís un hábito, invertís en tu versión futura.',
-  'El éxito es la suma de pequeños esfuerzos repetidos día tras día.',
-];
-let habitFilterArea='all';
-
-function renderHabitsTab(){
-  const now=new Date();
-  const dateEl=document.getElementById('htpDate');
-  if(dateEl)dateEl.textContent=now.toLocaleDateString('es-AR',{weekday:'long',day:'numeric',month:'long'});
-  const quoteEl=document.getElementById('habitQuote');
-  if(quoteEl)quoteEl.textContent=HABIT_QUOTES[now.getDate()%HABIT_QUOTES.length];
-  renderHabitsList();
-  renderHtpList();
-  renderRoutines();
-}
-
-function renderHabitsList(){
-  const cont=document.getElementById('habitsList');if(!cont)return;
-  const filtered=habitFilterArea==='all'?habitosData:habitosData.filter(h=>h.area===habitFilterArea);
-  if(!filtered.length){
-    cont.innerHTML=`<div style="text-align:center;padding:30px;color:var(--text-muted);font-size:.9rem;font-style:italic">No hay hábitos${habitFilterArea!=='all'?' en esta área':''} todavía. ¡Creá uno abajo!</div>`;
-    return;
-  }
-  const todayKey=getTodayKey();
-  cont.innerHTML=filtered.map((h,i)=>{
-    const globalIdx=habitosData.indexOf(h);
-    const streak=habitStreakData[h.id]?.streak||0;
-    const doneToday=(habitStreakData[h.id]?.lastDate===todayKey);
-    const icon=HABIT_ICONS[h.area]||'⭐';
-    const diffColor={Easy:'#10b981',Medium:'#f59e0b',Hard:'#ef4444'}[h.difficulty]||'#888';
-    return`<div class="habit-card${doneToday?' done-today':''}">
-      <div class="habit-icon-wrap">${icon}</div>
-      <div class="habit-info">
-        <div class="habit-name">${h.name}</div>
-        <div class="habit-meta">
-          <span class="habit-meta-tag"><span style="color:${diffColor};font-size:.8rem">●</span> ${h.difficulty}</span>
-          ${h.time?`<span class="habit-meta-tag">⏱ ${h.time} min</span>`:''}
-          <span class="habit-meta-tag" style="color:var(--text-muted)">${h.area}</span>
-        </div>
-      </div>
-      ${streak>0?`<span class="habit-streak">🔥 ${streak}d</span>`:''}
-      <button class="habit-check-btn${doneToday?' done':''}" onclick="toggleHabitToday(${globalIdx})" title="${doneToday?'Marcar como pendiente':'Marcar como completado'}">${doneToday?'✓':''}</button>
-      <button class="habit-del-btn" onclick="deleteHabit(${globalIdx})" title="Eliminar hábito">✕</button>
-    </div>`;
-  }).join('');
-}
-
-function renderHtpList(){
-  const cont=document.getElementById('htpList');if(!cont)return;
-  if(!habitosData.length){
-    cont.innerHTML='<div style="padding:20px;text-align:center;font-size:.85rem;color:#aaa">Creá hábitos para verlos acá.</div>';
-    return;
-  }
-  const todayKey=getTodayKey();
-  cont.innerHTML=habitosData.map((h,i)=>{
-    const done=(habitStreakData[h.id]?.lastDate===todayKey);
-    const streak=habitStreakData[h.id]?.streak||0;
-    return`<div class="htp-item${done?' done':''}" onclick="toggleHabitToday(${i})">
-      <div class="htp-checkbox">${done?'✓':''}</div>
-      <span class="htp-item-name">${h.name}</span>
-      <span class="htp-item-num">${streak}</span>
-    </div>`;
-  }).join('');
-}
-
-function renderRoutines(){
-  const morning=document.getElementById('routineMorning');
-  const evening=document.getElementById('routineEvening');
-  const m=habitosData.filter(h=>h.routine==='morning');
-  const e=habitosData.filter(h=>h.routine==='evening');
-  if(morning)morning.innerHTML=m.length?m.map(h=>`<div class="routine-item">${HABIT_ICONS[h.area]||'⭐'} ${h.name}${h.time?` (${h.time} min)`:''}</div>`).join(''):'<span style="font-size:.8rem;color:#aaa;font-style:italic">Sin hábitos de mañana.</span>';
-  if(evening)evening.innerHTML=e.length?e.map(h=>`<div class="routine-item">${HABIT_ICONS[h.area]||'⭐'} ${h.name}${h.time?` (${h.time} min)`:''}</div>`).join(''):'<span style="font-size:.8rem;color:#aaa;font-style:italic">Sin hábitos de tarde.</span>';
-}
-
-function getTodayKey(){
-  const n=new Date();
-  return`${n.getFullYear()}-${n.getMonth()}-${n.getDate()}`;
-}
-
-function toggleHabitToday(idx){
-  const h=habitosData[idx];if(!h)return;
-  const todayKey=getTodayKey();
-  if(!habitStreakData[h.id])habitStreakData[h.id]={streak:0,lastDate:''};
-  const s=habitStreakData[h.id];
-  const yesterday=new Date();yesterday.setDate(yesterday.getDate()-1);
-  const yesterdayKey=`${yesterday.getFullYear()}-${yesterday.getMonth()}-${yesterday.getDate()}`;
-  if(s.lastDate===todayKey){
-    // undo
-    s.lastDate='';
-    s.streak=Math.max(0,s.streak-1);
-  } else {
-    if(s.lastDate===yesterdayKey)s.streak++;
-    else if(s.lastDate!==todayKey)s.streak=1;
-    s.lastDate=todayKey;
-  }
-  _saveHabitos();
-  renderHabitsList();renderHtpList();
-}
-
-function deleteHabit(idx){
-  if(!confirm('¿Borrar este hábito?'))return;
-  habitosData.splice(idx,1);
-  _saveHabitos();
-  renderHabitsTab();
-}
-
-function addHabit(){
-  const name=document.getElementById('habitName').value.trim();
-  if(!name){alert('Escribí un nombre para el hábito.');return;}
-  const h={
-    id:'h_'+Date.now(),
-    name,
-    area:document.getElementById('habitArea').value,
-    difficulty:document.getElementById('habitDifficulty').value,
-    time:document.getElementById('habitTime').value||'',
-    routine:document.getElementById('habitRoutine').value
-  };
-  habitosData.push(h);
-  _saveHabitos();
-  document.getElementById('habitName').value='';
-  document.getElementById('habitTime').value='';
-  renderHabitsTab();
-}
-
-function filterHabits(area,btn){
-  habitFilterArea=area;
-  document.querySelectorAll('.habit-area-filter').forEach(b=>b.classList.remove('active'));
-  if(btn)btn.classList.add('active');
-  renderHabitsList();
-}
-
-function _saveHabitos(){
-  try{
-    localStorage.setItem('habitos',JSON.stringify(habitosData));
-    localStorage.setItem('habitStreak',JSON.stringify(habitStreakData));
-  }catch(e){}
-  if(window.syncCloud)window.syncCloud();
-}
-
-// ==================== APUNTES ====================
+// ==================== APUNTES - CANVAS STYLE ====================
 let _notesActiveSubject=null;
 const NOTE_CATS=[
   {id:'parciales', label:'Parciales viejos',    icon:'📝'},
@@ -2591,6 +2031,7 @@ const NOTE_CATS=[
   {id:'otros',     label:'Otros archivos',       icon:'📁'},
 ];
 
+// Genera un color de cover y deco persistente por materia
 function getCoverClass(id){
   let hash=0;for(let i=0;i<id.length;i++)hash=(hash<<5)-hash+id.charCodeAt(i);
   return'cover-'+(Math.abs(hash)%10);
@@ -2604,15 +2045,18 @@ function renderNotesTab(){
   const grid=document.getElementById('notesGrid');
   const detail=document.getElementById('notesDetail');
   if(!grid)return;
-  grid.style.display='grid';detail.style.display='none';
+  grid.style.display='grid';
+  detail.style.display='none';
   _notesActiveSubject=null;
   const searchInput=document.getElementById('notesSearchInput');
   if(searchInput)searchInput.value='';
+
   const enabled=Array.from(getCourses()).filter(c=>c.classList.contains('enabled')||c.classList.contains('completed'));
   if(!enabled.length){
     grid.innerHTML='<span style="color:var(--text-muted);font-size:.9rem;grid-column:1/-1">Habilitá materias en el Plan de estudios para ver sus apuntes.</span>';
     return;
   }
+
   grid.innerHTML=enabled.map((c,idx)=>{
     const id=c.dataset.id;
     const name=c.querySelector('.course-name')?.textContent||'';
@@ -2628,12 +2072,15 @@ function renderNotesTab(){
     const deco=getCoverDeco(id);
     const statusLabel=isCompleted?`<span class="ncc-status-badge aprobada">✓ Aprobada${nota?' · '+nota:''}</span>`:`<span class="ncc-status-badge cursando">En curso</span>`;
     const resourceBadge=count>0?`<span class="ncc-resource-badge filled">${count} recurso${count!==1?'s':''}</span>`:`<span class="ncc-resource-badge empty">Sin recursos</span>`;
+
+    // Íconos de categorías que tienen contenido
     let catIcons='';
     if(!Array.isArray(subj)){
       NOTE_CATS.forEach(cat=>{if((subj[cat.id]||[]).length>0)catIcons+=`<span class="ncc-icon-pill">${cat.icon} ${cat.label.split(' ')[0]}</span>`;});
     }
     if(subj._campus)catIcons+=`<span class="ncc-icon-pill">🖥️ Campus</span>`;
     if(subj._drive)catIcons+=`<span class="ncc-icon-pill">📁 Drive</span>`;
+
     return`<div class="notes-canvas-card${hasNotes?' has-notes':''}" onclick="openNotesDetail('${id}','${name.replace(/'/g,"\\'").replace(/"/g,'&quot;')}')" style="animation-delay:${idx*0.04}s">
       <div class="ncc-cover ${coverClass}">
         <div class="ncc-cover-gradient"></div>
@@ -2665,7 +2112,8 @@ function openNotesDetail(id,name){
   _notesActiveSubject=id;
   const grid=document.getElementById('notesGrid');
   const detail=document.getElementById('notesDetail');
-  grid.style.display='none';detail.style.display='block';
+  grid.style.display='none';
+  detail.style.display='block';
   renderNotesDetail(id,name);
 }
 
@@ -2681,16 +2129,23 @@ function renderNotesDetail(id,name){
   const coverClass=getCoverClass(id);
   const deco=getCoverDeco(id);
   const nameEscaped=name.replace(/\\/g,'\\\\').replace(/'/g,"\\'").replace(/"/g,'&quot;');
+
   const actionLinks=`
     ${campus?`<a href="${campus}" target="_blank" class="ndn-link-pill">🖥️ Campus Virtual</a>`:''}
     ${drive?`<a href="${drive}" target="_blank" class="ndn-link-pill">📁 Google Drive</a>`:''}
+    <button class="ndn-link-pill" onclick="crearCarpetaDrive('${nameEscaped}','${id}')">
+      <svg width="13" height="13" viewBox="0 0 87.3 78" xmlns="http://www.w3.org/2000/svg"><path d="m6.6 66.85 3.85 6.65c.8 1.4 1.95 2.5 3.3 3.3l13.75-23.8h-27.5c0 1.55.4 3.1 1.2 4.5z" fill="#0066da"/><path d="m43.65 25-13.75-23.8c-1.35.8-2.5 1.9-3.3 3.3l-25.4 44a9.06 9.06 0 0 0 -1.2 4.5h27.5z" fill="#00ac47"/><path d="m73.55 76.8c1.35-.8 2.5-1.9 3.3-3.3l1.6-2.75 7.65-13.25c.8-1.4 1.2-2.95 1.2-4.5h-27.502l5.852 11.5z" fill="#ea4335"/><path d="m43.65 25 13.75-23.8c-1.35-.8-2.9-1.2-4.5-1.2h-18.5c-1.6 0-3.15.45-4.5 1.2z" fill="#00832d"/><path d="m59.8 53h-32.3l-13.75 23.8c1.35.8 2.9 1.2 4.5 1.2h50.8c1.6 0 3.15-.45 4.5-1.2z" fill="#2684fc"/><path d="m73.4 26.5-12.7-22c-.8-1.4-1.95-2.5-3.3-3.3l-13.75 23.8 16.15 27h27.45c0-1.55-.4-3.1-1.2-4.5z" fill="#ffba00"/></svg>
+      Crear en Drive
+    </button>
     <button class="ndn-link-pill" onclick="toggleAddLinkRow()">⚙️ Editar links</button>`;
+
   const addLinkRow=`
     <div class="ndh-add-link-row" id="ndh-link-row">
       <input type="url" id="ndh-campus-input" placeholder="Link Campus virtual (https://...)" value="${campus}">
       <input type="url" id="ndh-drive-input" placeholder="Link Google Drive (https://...)" value="${drive}">
       <button class="nc-add-btn" onclick="saveQuickLinks('${id}')">Guardar links</button>
     </div>`;
+
   const catsHtml=NOTE_CATS.map(cat=>{
     const items=subj[cat.id]||[];
     const itemsHtml=items.length
@@ -2715,13 +2170,14 @@ function renderNotesDetail(id,name){
       <div class="nc-body" id="cat-${cat.id}">
         ${itemsHtml}
         <div class="nc-add-form">
-          <input type="text" id="nn-${cat.id}" placeholder="Nombre del recurso">
+          <input type="text" id="nn-${cat.id}" placeholder="Nombre del recurso (Ej: Resumen Primer Parcial)">
           <input type="url" id="nu-${cat.id}" placeholder="Link del documento o video (opcional)">
           <button class="nc-add-btn" onclick="addNoteInCat('${id}','${cat.id}')">+ Agregar recurso</button>
         </div>
       </div>
     </div>`;
   }).join('');
+
   detail.innerHTML=`
     <div class="notes-detail-new">
       <div class="ndn-cover ${coverClass}">
@@ -2739,7 +2195,29 @@ function renderNotesDetail(id,name){
     </div>`;
 }
 
+let _driveCreateSubjectId=null;
+function crearCarpetaDrive(name,subjectId){
+  _driveCreateSubjectId=subjectId;
+  navigator.clipboard.writeText(name).catch(()=>{});
+  window.open('https://drive.google.com/drive/folders/new','_blank');
+  const row=document.getElementById('ndh-link-row');
+  if(row){
+    row.classList.add('show');
+    const driveInput=document.getElementById('ndh-drive-input');
+    if(driveInput){driveInput.focus();driveInput.style.borderColor='var(--accent)';}
+  }
+  showToast(`📂 "${name}" copiado al portapapeles. Pegá el link de la carpeta en Drive.`);
+}
+
+function showToast(msg){
+  let t=document.getElementById('app-toast');
+  if(!t){t=document.createElement('div');t.id='app-toast';t.style.cssText='position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);background:#1a1a1a;color:#fff;padding:12px 20px;border-radius:12px;font-size:.85rem;font-weight:600;z-index:9999;opacity:0;transition:all .35s;max-width:90%;text-align:center;box-shadow:0 6px 20px rgba(0,0,0,0.25);font-family:Poppins,sans-serif;';document.body.appendChild(t);}
+  t.textContent=msg;t.style.opacity='1';t.style.transform='translateX(-50%) translateY(0)';
+  clearTimeout(t._timeout);t._timeout=setTimeout(()=>{t.style.opacity='0';t.style.transform='translateX(-50%) translateY(20px)';},6000);
+}
+
 function toggleAddLinkRow(){const row=document.getElementById('ndh-link-row');if(row)row.classList.toggle('show');}
+
 function saveQuickLinks(id){
   if(!apuntesData[id]||Array.isArray(apuntesData[id]))apuntesData[id]={_campus:'',_drive:''};
   apuntesData[id]._campus=document.getElementById('ndh-campus-input')?.value.trim()||'';
@@ -2748,6 +2226,7 @@ function saveQuickLinks(id){
   const nameEl=document.querySelector('.ndn-subject-name');
   renderNotesDetail(id,nameEl?.textContent||id);
 }
+
 function toggleCat(catBodyId){
   const body=document.getElementById(catBodyId);
   const chev=document.getElementById('chev-'+catBodyId);
@@ -2756,6 +2235,7 @@ function toggleCat(catBodyId){
   body.style.display=isOpen?'none':'block';
   if(chev)chev.classList.toggle('open',!isOpen);
 }
+
 function addNoteInCat(subjectId,catId){
   const name=document.getElementById(`nn-${catId}`)?.value.trim();
   const url=document.getElementById(`nu-${catId}`)?.value.trim();
@@ -2767,6 +2247,7 @@ function addNoteInCat(subjectId,catId){
   const nameEl=document.querySelector('.ndn-subject-name');
   renderNotesDetail(subjectId,nameEl?.textContent||subjectId);
 }
+
 function deleteNoteInCat(subjectId,catId,idx){
   if(!confirm('¿Borrar este recurso?'))return;
   apuntesData[subjectId][catId].splice(idx,1);
@@ -2774,16 +2255,10 @@ function deleteNoteInCat(subjectId,catId,idx){
   const nameEl=document.querySelector('.ndn-subject-name');
   renderNotesDetail(subjectId,nameEl?.textContent||subjectId);
 }
+
 function _saveApuntes(){
   try{localStorage.setItem('apuntes',JSON.stringify(apuntesData));}catch(e){}
   if(window.syncCloud)window.syncCloud();
-}
-
-function showToast(msg){
-  let t=document.getElementById('app-toast');
-  if(!t){t=document.createElement('div');t.id='app-toast';t.style.cssText='position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);background:#1a1a1a;color:#fff;padding:12px 20px;border-radius:12px;font-size:.85rem;font-weight:600;z-index:9999;opacity:0;transition:all .35s;max-width:90%;text-align:center;box-shadow:0 6px 20px rgba(0,0,0,0.25);font-family:Poppins,sans-serif;';document.body.appendChild(t);}
-  t.textContent=msg;t.style.opacity='1';t.style.transform='translateX(-50%) translateY(0)';
-  clearTimeout(t._timeout);t._timeout=setTimeout(()=>{t.style.opacity='0';t.style.transform='translateX(-50%) translateY(20px)';},5000);
 }
 
 // ==================== INITAPP ====================
@@ -2811,8 +2286,6 @@ window.initApp=function(){
     apuntesData=JSON.parse(localStorage.getItem('apuntes')||'{}');
     pomodoroStats=JSON.parse(localStorage.getItem('pomodoroStats')||'{}');
     horarioExtraData=JSON.parse(localStorage.getItem('horarioExtra')||'{}');
-    habitosData=JSON.parse(localStorage.getItem('habitos')||'[]');
-    habitStreakData=JSON.parse(localStorage.getItem('habitStreak')||'{}');
   }catch(e){}
   initWeekStart();
   initScheduleModal();loadProgress();updateStates();renderCalendarView();
@@ -2824,11 +2297,11 @@ window.initApp=function(){
 // ==================== REINICIAR ====================
 window.reiniciarCuenta=async()=>{
   if(!confirm('⚠️ ¿Estás seguro de que querés borrar TODO? Esta acción no se puede deshacer.'))return;
-  ['materiasAprobadas','materiasNotas','materiasPlanificadas','materiasTabla','indCalendar','userConfig','apuntes','pomodoroStats','horarioExtra','habitos','habitStreak','darkMode'].forEach(k=>localStorage.removeItem(k));
+  ['materiasAprobadas','materiasNotas','materiasPlanificadas','materiasTabla','indCalendar','userConfig','apuntes','pomodoroStats','horarioExtra','darkMode'].forEach(k=>localStorage.removeItem(k));
   if(window.syncCloud)await window.syncCloud();location.reload();
 };
 
-// ==================== BOOT ====================
+// ==================== ARRANQUE ====================
 window.addEventListener('load',()=>{
   initDarkMode();
   const cfg=(()=>{try{return JSON.parse(localStorage.getItem('userConfig')||'{}');}catch{return{};}})();
