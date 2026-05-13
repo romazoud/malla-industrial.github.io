@@ -180,6 +180,7 @@
     body.dark-mode .modal-box select,
     body.dark-mode .modal-box input[type=text],
     body.dark-mode .modal-box input[type=number],
+    body.dark-mode .modal-box input[type=time],
     body.dark-mode .pom-subject-select,
     body.dark-mode .cr-input { background: #0d1117 !important; border-color: #30363d !important; color: var(--text-main) !important; }
     body.dark-mode .nc-add-form input { background: #0d1117 !important; border-color: #30363d !important; color: var(--text-main) !important; }
@@ -224,7 +225,6 @@
     body.dark-mode .course:not(.enabled):not(.completed){ background:#161b22;border-color:#21262d;color:#4a7a55; }
     body.dark-mode .cal-week-event { filter: brightness(1.15) saturate(1.2); box-shadow: 0 2px 8px rgba(0,0,0,.4); }
     body.dark-mode .cal-month-event { filter: brightness(1.1) saturate(1.15); }
-    /* Dark mode notes cards */
     body.dark-mode .notes-canvas-card { background: #161b22; border-color: #30363d; }
     body.dark-mode .notes-canvas-card:hover { border-color: var(--accent); }
     body.dark-mode .notes-card-icon { background: #21262d; }
@@ -232,6 +232,8 @@
     body.dark-mode .notes-filter-btn.active { background: var(--accent); color: white; }
     body.dark-mode .notes-search-bar { background: #0d1117; border-color: #30363d; color: var(--text-main); }
     body.dark-mode .notes-detail-new { background: #161b22; border-color: #30363d; }
+    body.dark-mode .cal-time-range-row { background: #0d1117; border-color: #30363d; }
+    body.dark-mode .cal-time-input { background: #0d1117 !important; border-color: #30363d !important; color: var(--text-main) !important; }
 
     /* Dark mode toggle */
     .dark-toggle-btn {
@@ -323,14 +325,14 @@
     .tab-btn.active{background:rgba(255,255,255,.18);color:#fff;font-weight:600;}
     .btn-auth{border:1px solid rgba(255,255,255,.25);opacity:1;color:#fff;}
     .btn-logout{background:rgba(255,255,255,.06);display:none;}
-    
+
     .main-content{padding:0 28px 60px;box-sizing:border-box;}
     .view-section{display:none;animation:fadeIn .3s ease;width:100%;box-sizing:border-box;}
     .view-section.active{display:block;}
     @keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
-    
+
     .panel-box{background:var(--surface);color:var(--text-main);padding:24px;border-radius:16px;border:1px solid var(--border);box-shadow:0 2px 12px rgba(0,0,0,.04);margin-bottom:24px;box-sizing:border-box;transition:background .4s,border-color .4s;}
-    
+
     .section-header{margin-bottom:20px;}
     .section-header h2{font-size:1.6rem;margin:0 0 4px;color:var(--accent-dark);}
     .section-header p{margin:0;color:var(--text-muted);font-size:.85rem;font-family:'Poppins',sans-serif;font-weight:500;}
@@ -455,7 +457,7 @@
     .cal-week-event-time { opacity: .85; font-size: .65rem; }
     .cal-week-event-del { position: absolute; top: 3px; right: 4px; cursor: pointer; opacity: .7; font-size: .7rem; }
     .cal-week-event-del:hover { opacity: 1; }
-    .cal-month-view { flex: 1; overflow: auto; padding: 0; }
+    .cal-month-view { flex: 1; overflow: auto; }
     .cal-month-weekdays { display: grid; grid-template-columns: repeat(7, 1fr); border-bottom: 1px solid var(--border); position: sticky; top: 0; background: var(--surface); z-index: 10; }
     .cal-month-weekday { padding: 10px; text-align: center; font-size: .72rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: .5px; }
     .cal-month-grid { display: grid; grid-template-columns: repeat(7, 1fr); }
@@ -468,6 +470,65 @@
     .cal-month-cell.today .cal-month-date { color: var(--accent); font-weight: 700; }
     .cal-month-event { font-size: .68rem; font-weight: 600; color: #fff; padding: 3px 6px; border-radius: 4px; margin-bottom: 2px; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; cursor: pointer; }
     .cal-month-event:hover { filter: brightness(1.08); }
+
+    /* ===== CALENDARIO: SELECTOR DE HORARIO ===== */
+    .cal-time-range-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: var(--surface-2);
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      padding: 10px 12px;
+      margin-bottom: 14px;
+      flex-wrap: wrap;
+    }
+    .cal-time-range-label {
+      font-size: .72rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: .4px;
+      min-width: 56px;
+    }
+    .cal-time-input {
+      flex: 1;
+      min-width: 110px;
+      padding: 8px 10px;
+      border-radius: 8px;
+      border: 1.5px solid var(--border);
+      font-family: 'Poppins', sans-serif;
+      font-size: .85rem;
+      font-weight: 600;
+      color: var(--text-main);
+      background: var(--surface);
+      outline: none;
+      transition: border-color .2s, background .4s;
+    }
+    .cal-time-input:focus { border-color: var(--accent); }
+    .cal-time-separator {
+      font-size: .82rem;
+      font-weight: 700;
+      color: var(--text-muted);
+    }
+    .cal-allday-toggle {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: .78rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      cursor: pointer;
+      padding: 4px 10px;
+      border-radius: 7px;
+      border: 1.5px solid var(--border);
+      background: transparent;
+      transition: .15s;
+      font-family: 'Poppins', sans-serif;
+      white-space: nowrap;
+    }
+    .cal-allday-toggle:hover { border-color: var(--accent); color: var(--accent); }
+    .cal-allday-toggle.active { background: var(--accent-bg); border-color: var(--accent); color: var(--accent-dark); }
 
     /* ===== HORARIO ===== */
     #view-schedule{max-width:1100px;margin:0 auto;padding-bottom:50px;}
@@ -532,163 +593,28 @@
     .pom-subject-select:focus{border-color:var(--accent);}
     .pom-log-item{display:flex;justify-content:space-between;align-items:center;padding:10px 14px;border-radius:8px;background:var(--surface-2);margin-bottom:7px;font-size:.83rem;color:var(--text-main);border:1px solid var(--border);transition:background .4s;}
 
-    /* ===== APUNTES - NUEVO DISEÑO ===== */
+    /* ===== APUNTES ===== */
     #view-notes{max-width:1100px;margin:0 auto;padding-bottom:60px;}
+    .notes-search-top{display:flex;gap:12px;flex-wrap:wrap;align-items:center;margin-top:18px;}
+    .notes-filter-btn{border:none;background:var(--surface);color:var(--text-muted);padding:8px 18px;border-radius:999px;font-family:'Poppins',sans-serif;font-size:.78rem;font-weight:600;cursor:pointer;transition:.2s;border:1.5px solid var(--border);}
+    .notes-filter-btn:hover{background:var(--accent);color:white;border-color:var(--accent);}
+    .notes-filter-btn.active{background:var(--accent);color:white;border-color:var(--accent);}
+    .notes-search-bar{flex:1;min-width:220px;max-width:380px;padding:10px 16px;border-radius:12px;border:2px solid var(--border);outline:none;font-family:'Poppins',sans-serif;font-size:.88rem;background:var(--surface);color:var(--text-main);transition:border-color .2s, background .4s;}
+    .notes-search-bar:focus{border-color:var(--accent);}
+    .notes-canvas-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:22px;margin-top:28px;}
+    .notes-canvas-card{background:var(--surface);border-radius:22px;padding:22px;border:1.5px solid var(--border);transition:all .25s cubic-bezier(.34,1.56,.64,1);cursor:pointer;display:flex;flex-direction:column;gap:14px;min-height:180px;position:relative;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,.04);}
+    .notes-canvas-card:hover{transform:translateY(-5px);border-color:var(--accent);box-shadow:0 14px 32px rgba(0,0,0,.1);}
+    .notes-canvas-card.has-notes{border-color:var(--accent);}
+    .notes-card-icon{width:56px;height:56px;border-radius:16px;background:var(--accent-bg);display:flex;align-items:center;justify-content:center;font-size:1.6rem;flex-shrink:0;}
+    .notes-card-title{font-size:.95rem;font-weight:700;color:var(--text-main);line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+    .notes-card-count{margin-top:auto;font-size:.75rem;color:var(--text-muted);font-weight:600;}
+    .notes-card-arrow{position:absolute;right:18px;bottom:18px;font-size:1.1rem;color:var(--text-muted);transition:.2s;opacity:.5;}
+    .notes-canvas-card:hover .notes-card-arrow{transform:translateX(4px);color:var(--accent);opacity:1;}
+    .notes-card-status{position:absolute;top:14px;right:14px;font-size:.65rem;font-weight:700;padding:3px 9px;border-radius:20px;letter-spacing:.3px;}
+    .notes-card-status.aprobada{background:var(--accent);color:#fff;}
+    .notes-card-status.cursando{background:var(--border);color:var(--text-muted);}
 
-    /* Barra superior de búsqueda y filtros */
-    .notes-search-top{
-      display:flex;
-      gap:12px;
-      flex-wrap:wrap;
-      align-items:center;
-      margin-top:18px;
-    }
-
-    .notes-filter-btn{
-      border:none;
-      background:var(--surface);
-      color:var(--text-muted);
-      padding:8px 18px;
-      border-radius:999px;
-      font-family:'Poppins',sans-serif;
-      font-size:.78rem;
-      font-weight:600;
-      cursor:pointer;
-      transition:.2s;
-      border:1.5px solid var(--border);
-    }
-    .notes-filter-btn:hover{
-      background:var(--accent);
-      color:white;
-      border-color:var(--accent);
-    }
-    .notes-filter-btn.active{
-      background:var(--accent);
-      color:white;
-      border-color:var(--accent);
-    }
-
-    .notes-search-bar{
-      flex:1;
-      min-width:220px;
-      max-width:380px;
-      padding:10px 16px;
-      border-radius:12px;
-      border:2px solid var(--border);
-      outline:none;
-      font-family:'Poppins',sans-serif;
-      font-size:.88rem;
-      background:var(--surface);
-      color:var(--text-main);
-      transition:border-color .2s, background .4s;
-    }
-    .notes-search-bar:focus{
-      border-color:var(--accent);
-    }
-
-    /* Grid de cards */
-    .notes-canvas-grid{
-      display:grid;
-      grid-template-columns:repeat(auto-fill,minmax(260px,1fr));
-      gap:22px;
-      margin-top:28px;
-    }
-
-    /* Card individual - nuevo diseño limpio */
-    .notes-canvas-card{
-      background:var(--surface);
-      border-radius:22px;
-      padding:22px;
-      border:1.5px solid var(--border);
-      transition:all .25s cubic-bezier(.34,1.56,.64,1);
-      cursor:pointer;
-      display:flex;
-      flex-direction:column;
-      gap:14px;
-      min-height:180px;
-      position:relative;
-      overflow:hidden;
-      box-shadow:0 2px 8px rgba(0,0,0,.04);
-    }
-    .notes-canvas-card:hover{
-      transform:translateY(-5px);
-      border-color:var(--accent);
-      box-shadow:0 14px 32px rgba(0,0,0,.1);
-    }
-    .notes-canvas-card.has-notes{
-      border-color:var(--accent);
-    }
-
-    /* Ícono de la card */
-    .notes-card-icon{
-      width:56px;
-      height:56px;
-      border-radius:16px;
-      background:var(--accent-bg);
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      font-size:1.6rem;
-      flex-shrink:0;
-    }
-
-    /* Título */
-    .notes-card-title{
-      font-size:.95rem;
-      font-weight:700;
-      color:var(--text-main);
-      line-height:1.4;
-      display:-webkit-box;
-      -webkit-line-clamp:2;
-      -webkit-box-orient:vertical;
-      overflow:hidden;
-    }
-
-    /* Contador de recursos */
-    .notes-card-count{
-      margin-top:auto;
-      font-size:.75rem;
-      color:var(--text-muted);
-      font-weight:600;
-    }
-
-    /* Flecha decorativa */
-    .notes-card-arrow{
-      position:absolute;
-      right:18px;
-      bottom:18px;
-      font-size:1.1rem;
-      color:var(--text-muted);
-      transition:.2s;
-      opacity:.5;
-    }
-    .notes-canvas-card:hover .notes-card-arrow{
-      transform:translateX(4px);
-      color:var(--accent);
-      opacity:1;
-    }
-
-    /* Badge de estado sobre la card */
-    .notes-card-status{
-      position:absolute;
-      top:14px;
-      right:14px;
-      font-size:.65rem;
-      font-weight:700;
-      padding:3px 9px;
-      border-radius:20px;
-      letter-spacing:.3px;
-    }
-    .notes-card-status.aprobada{
-      background:var(--accent);
-      color:#fff;
-    }
-    .notes-card-status.cursando{
-      background:var(--border);
-      color:var(--text-muted);
-    }
-
-    /* ===== DETALLE DE MATERIA (sin cambios de lógica, mejoras visuales) ===== */
+    /* ===== APUNTES DETALLE ===== */
     .notes-detail-new{background:var(--surface);border-radius:16px;overflow:hidden;box-shadow:0 4px 18px rgba(0,0,0,.06);border:1px solid var(--border);transition:background .4s;}
     .ndn-cover{height:110px;position:relative;flex-shrink:0;}
     .ndn-cover-overlay{position:absolute;inset:0;background:linear-gradient(to right,rgba(0,0,0,.62) 0%,rgba(0,0,0,.18) 80%);display:flex;align-items:center;padding:0 22px;gap:12px;}
@@ -700,6 +626,17 @@
     .ndn-action-links{display:flex;gap:7px;flex-wrap:wrap;}
     .ndn-link-pill{padding:6px 12px;border-radius:7px;border:1px solid rgba(255,255,255,.28);background:transparent;color:#fff;font-size:.72rem;font-weight:600;font-family:'Poppins',sans-serif;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;gap:4px;transition:.16s;}
     .ndn-link-pill:hover{background:rgba(255,255,255,.18);}
+
+    /* ===== DRIVE PILL ===== */
+    .ndn-link-pill.drive-pill {
+      background: rgba(255,255,255,.12);
+      border-color: rgba(255,255,255,.4);
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+    }
+    .ndn-link-pill.drive-pill svg { flex-shrink: 0; }
+
     .ndh-add-link-row{padding:13px 22px;background:var(--surface-2);display:none;flex-wrap:wrap;gap:10px;align-items:center;border-bottom:1px solid var(--border);transition:background .4s;}
     .ndh-add-link-row.show{display:flex;}
     .ndh-add-link-row input,.ndh-add-link-row select{padding:8px 11px;border-radius:8px;border:1px solid var(--border);outline:none;font-family:'Poppins',sans-serif;font-size:.83rem;color:var(--text-main);background:var(--surface);flex:1;min-width:140px;}
@@ -826,7 +763,7 @@
     .modal-overlay.open{display:flex;}
     .modal-box{background:var(--surface);color:var(--text-main);padding:28px;border-radius:18px;max-width:90%;width:400px;text-align:center;box-shadow:0 8px 32px rgba(0,0,0,.18);box-sizing:border-box;transition:background .4s;}
     .modal-box label{display:block;text-align:left;font-size:11px;font-weight:600;color:var(--text-muted);margin-bottom:5px;text-transform:uppercase;letter-spacing:.4px;}
-    .modal-box select,.modal-box input[type=text],.modal-box input[type=number]{width:100%;padding:11px 13px;margin-bottom:14px;border-radius:8px;border:1.5px solid var(--border);font-family:'Poppins',sans-serif;background:var(--surface-2);color:var(--text-main);font-weight:500;outline:none;box-sizing:border-box;font-size:13px;transition:background .4s;}
+    .modal-box select,.modal-box input[type=text],.modal-box input[type=number],.modal-box input[type=time]{width:100%;padding:11px 13px;margin-bottom:14px;border-radius:8px;border:1.5px solid var(--border);font-family:'Poppins',sans-serif;background:var(--surface-2);color:var(--text-main);font-weight:500;outline:none;box-sizing:border-box;font-size:13px;transition:background .4s;}
     .modal-box select:focus,.modal-box input:focus{border-color:var(--accent);}
     .btn-add{background:var(--accent);color:#fff;border:none;padding:11px 22px;border-radius:9px;font-weight:600;font-family:'Poppins',sans-serif;cursor:pointer;transition:.2s;}
     .btn-add:hover{opacity:.9;transform:translateY(-1px);}
@@ -864,6 +801,7 @@
       .calendar-modern { flex-direction: column; }
       .cal-modern-sidebar { width: 100%; border-right: none; border-bottom: 1px solid var(--border); }
       .habit-week-name { min-width: 100px; }
+      .cal-time-range-row { gap: 6px; }
     }
   </style>
 </head>
@@ -976,13 +914,28 @@
   </div>
 </div>
 
+<!-- MODAL CALENDARIO — con selector de horario inicio/fin -->
 <div id="calModal" class="modal-overlay">
-  <div class="modal-box">
+  <div class="modal-box" style="width:440px;">
     <h2 style="color:var(--accent-dark);margin-top:0;font-size:1.15rem">Agregar Actividad</h2>
-    <p id="calModalDateDisplay" style="font-size:.88rem;font-weight:600;color:var(--text-main);text-align:left"></p>
+    <p id="calModalDateDisplay" style="font-size:.88rem;font-weight:600;color:var(--text-main);text-align:left;margin-bottom:14px;"></p>
     <input type="hidden" id="calDateKey">
-    <label>Que tenes que hacer?</label><input type="text" id="calTitle" placeholder="Ej: Estudiar Fisica" autocomplete="off">
-    <label>Horario (opcional):</label><input type="text" id="calTime" placeholder="Ej: 14:00 o Todo el dia" autocomplete="off">
+
+    <label>Que tenes que hacer?</label>
+    <input type="text" id="calTitle" placeholder="Ej: Estudiar Fisica, Parcial de Algebra..." autocomplete="off">
+
+    <!-- Selector de horario con toggle todo el dia -->
+    <label>Horario <span style="font-weight:400;color:var(--text-muted);text-transform:none;letter-spacing:0">(opcional)</span></label>
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
+      <button type="button" class="cal-allday-toggle" id="calAlldayToggle" onclick="toggleAlldayMode()">📅 Todo el dia</button>
+    </div>
+    <div class="cal-time-range-row" id="calTimeRangeRow">
+      <span class="cal-time-range-label">Desde</span>
+      <input type="time" class="cal-time-input" id="calTimeFrom" value="08:00">
+      <span class="cal-time-separator">→</span>
+      <input type="time" class="cal-time-input" id="calTimeTo" value="09:00">
+    </div>
+
     <label>Color:</label>
     <select id="calColor">
       <option value="#084734">Verde</option>
@@ -993,8 +946,14 @@
       <option value="#565656">Gris</option>
       <option value="#d97706">Naranja</option>
     </select>
-    <button class="btn-add" style="width:100%;margin-top:8px" onclick="saveCalEvent(false)">Guardar</button>
-    <button class="btn-goog" onclick="saveCalEvent(true)">Guardar y abrir Google Calendar</button>
+
+    <button class="btn-add" style="width:100%;margin-top:4px" onclick="saveCalEvent(false)">Guardar</button>
+    <button class="btn-goog" onclick="saveCalEvent(true)">
+      <span style="display:flex;align-items:center;justify-content:center;gap:7px;">
+        <svg width="15" height="15" viewBox="0 0 18 18"><path d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908c1.702-1.567 2.684-3.874 2.684-6.615z" fill="#fff"/><path d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 0 0 9 18z" fill="#ddd"/><path d="M3.964 10.71A5.41 5.41 0 0 1 3.682 9c0-.593.102-1.17.282-1.71V4.958H.957A8.996 8.996 0 0 0 0 9c0 1.452.348 2.827.957 4.042l3.007-2.332z" fill="#ccc"/><path d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 0 0 .957 4.958L3.964 7.29C4.672 5.163 6.656 3.58 9 3.58z" fill="#eee"/></svg>
+        Guardar y abrir Google Calendar
+      </span>
+    </button>
     <button class="btn-close-modal" onclick="closeModal('calModal')">Cancelar</button>
   </div>
 </div>
@@ -1235,12 +1194,11 @@
       </div>
     </div>
 
-    <!-- APUNTES - con nuevos filtros -->
+    <!-- APUNTES -->
     <div id="view-notes" class="view-section">
       <div class="section-header">
         <h2>Mis Apuntes</h2>
         <p>Selecciona una materia para ver y cargar tus recursos.</p>
-        <!-- NUEVA barra de filtros y búsqueda -->
         <div class="notes-search-top">
           <button class="notes-filter-btn active" id="filterAll" onclick="setNotesFilter('all',this)">Todas</button>
           <button class="notes-filter-btn" id="filterWith" onclick="setNotesFilter('with',this)">Con apuntes</button>
@@ -1374,10 +1332,7 @@ let tableData={},gradesData={},calendarData={},apuntesData={},pomodoroStats={},h
 let authMode='registro';
 let _gradeModalCourseId=null;
 
-// Íconos para las cards de apuntes (uno por cada tipo de materia)
 const SUBJECT_ICONS=['📚','📖','📝','💡','🔬','📐','💻','🧪','📊','🎯','🏛','⚗️','🧮','📡','🎨','🔭'];
-
-// Filtro activo en apuntes
 let notesCurrentFilter='all';
 
 // ==================== ONBOARDING ====================
@@ -1866,6 +1821,53 @@ function saveExtraInfo(){
 function openModal(id){document.getElementById(id).classList.add('open');}
 function closeModal(id){document.getElementById(id).classList.remove('open');}
 
+// ==================== CALENDARIO MODAL: TOGGLE TODO EL DIA ====================
+let _calAlldayMode = false;
+
+function toggleAlldayMode(){
+  _calAlldayMode = !_calAlldayMode;
+  const btn = document.getElementById('calAlldayToggle');
+  const row = document.getElementById('calTimeRangeRow');
+  if(_calAlldayMode){
+    btn.classList.add('active');
+    btn.textContent = '✓ Todo el dia';
+    row.style.opacity = '.4';
+    row.style.pointerEvents = 'none';
+  } else {
+    btn.classList.remove('active');
+    btn.textContent = '📅 Todo el dia';
+    row.style.opacity = '1';
+    row.style.pointerEvents = '';
+  }
+}
+
+function resetCalModal(){
+  _calAlldayMode = false;
+  const btn = document.getElementById('calAlldayToggle');
+  const row = document.getElementById('calTimeRangeRow');
+  if(btn){ btn.classList.remove('active'); btn.textContent='📅 Todo el dia'; }
+  if(row){ row.style.opacity='1'; row.style.pointerEvents=''; }
+  const tf=document.getElementById('calTimeFrom');if(tf)tf.value='08:00';
+  const tt=document.getElementById('calTimeTo');if(tt)tt.value='09:00';
+}
+
+// Formato de hora para mostrar en eventos: "09:00 - 10:30"
+function buildTimeLabel(){
+  if(_calAlldayMode) return 'Todo el dia';
+  const from = document.getElementById('calTimeFrom')?.value || '';
+  const to   = document.getElementById('calTimeTo')?.value || '';
+  if(!from && !to) return '';
+  if(from && to) return `${from} - ${to}`;
+  return from || to;
+}
+
+// Hora en minutos para posición en vista semana
+function timeToMinutes(t){
+  if(!t) return 0;
+  const [h,m]=(t||'0:0').split(':').map(Number);
+  return h*60+(m||0);
+}
+
 // ==================== CALENDAR MODERN ====================
 const monthNames=["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"];
 const dayNamesShort=["Dom","Lun","Mar","Mie","Jue","Vie","Sab"];
@@ -2030,18 +2032,27 @@ function renderWeekView(cont){
     });
     if(calendarData[dStr]){
       calendarData[dStr].forEach((ev,idx)=>{
-        const timeMatch=ev.time&&ev.time.match(/(\d+):(\d+)/);
+        // Soporte para horario con from/to o formato legacy "HH:MM - HH:MM"
         let topPx=0,heightPx=56;
-        if(timeMatch){
-          const evH=parseInt(timeMatch[1]),evM=parseInt(timeMatch[2]);
-          const startH=8;
-          topPx=(evH-startH)*56+Math.floor(evM/60*56);
-          heightPx=56;
+        const startH=8;
+        if(ev.timeFrom){
+          const fromMin=timeToMinutes(ev.timeFrom);
+          const toMin=ev.timeTo?timeToMinutes(ev.timeTo):fromMin+60;
+          topPx=(fromMin-startH*60)/60*56;
+          heightPx=Math.max(28,(toMin-fromMin)/60*56);
+        } else if(ev.time){
+          const m=ev.time.match(/(\d+):(\d+)/);
+          if(m){
+            const evH=parseInt(m[1]),evM=parseInt(m[2]);
+            topPx=(evH-startH)*56+Math.floor(evM/60*56);
+            heightPx=56;
+          }
         }
+        const timeLabel=ev.timeFrom?(ev.timeTo?`${ev.timeFrom} - ${ev.timeTo}`:ev.timeFrom):(ev.time||'');
         bodyHTML+=`<div class="cal-week-event" style="background:${ev.color};top:${topPx}px;height:${heightPx}px;" onclick="event.stopPropagation();openCalModal('${dStr}',${d.getDate()})">
           <span class="cal-week-event-del" onclick="event.stopPropagation();deleteCalEvent('${dStr}',${idx})">×</span>
           <div class="cal-week-event-title">${ev.title}</div>
-          <div class="cal-week-event-time">${ev.time||''}</div>
+          <div class="cal-week-event-time">${timeLabel}</div>
         </div>`;
       });
     }
@@ -2065,7 +2076,8 @@ function renderMonthView(cont){
     const isToday=(d===todayD&&currentMonth===todayM&&currentYear===todayY);
     let evHtml='';
     if(calendarData[key])calendarData[key].forEach((e,i)=>{
-      evHtml+=`<div class="cal-month-event" style="background:${e.color}" onclick="deleteCalEvent('${key}',${i},event)">${e.time?e.time+' ':''}${e.title}</div>`;
+      const tl=e.timeFrom?(e.timeTo?`${e.timeFrom}-${e.timeTo}`:e.timeFrom):(e.time||'');
+      evHtml+=`<div class="cal-month-event" style="background:${e.color}" onclick="deleteCalEvent('${key}',${i},event)">${tl?tl+' ':''}${e.title}</div>`;
     });
     html+=`<div class="cal-month-cell${isToday?' today':''}" onclick="openCalModal('${key}',${d})">
       <div class="cal-month-date">${d}</div>${evHtml}</div>`;
@@ -2083,10 +2095,12 @@ function renderDayView(cont){
       <span style="font-size:.7rem;font-weight:700;color:var(--text-muted);min-width:46px">${h}</span>
       <div style="flex:1">`;
     if(calendarData[dStr])calendarData[dStr].filter(ev=>{
+      if(ev.timeFrom){const[hh]=ev.timeFrom.split(':').map(Number);return hh===parseInt(h);}
       const tm=ev.time&&ev.time.match(/(\d+)/);return tm&&parseInt(tm[1])===parseInt(h);
     }).forEach((ev,idx)=>{
+      const tl=ev.timeFrom?(ev.timeTo?`${ev.timeFrom} - ${ev.timeTo}`:ev.timeFrom):(ev.time||'');
       html+=`<div style="background:${ev.color};color:#fff;border-radius:7px;padding:5px 10px;font-size:.8rem;font-weight:600;margin-bottom:4px;display:flex;align-items:center;justify-content:space-between;">
-        <span>${ev.title}</span><span style="cursor:pointer;opacity:.8" onclick="event.stopPropagation();deleteCalEvent('${dStr}',${idx})">×</span></div>`;
+        <span>${tl?`<span style='opacity:.8;font-size:.75rem'>${tl}</span> `:''}<span>${ev.title}</span></span><span style="cursor:pointer;opacity:.8" onclick="event.stopPropagation();deleteCalEvent('${dStr}',${idx})">×</span></div>`;
     });
     html+=`</div></div>`;
   });
@@ -2099,25 +2113,42 @@ window.openCalModal=(key,day)=>{
   const parts=key.split('-');
   const y=parseInt(parts[0]),m=parseInt(parts[1]),d=parseInt(parts[2]);
   document.getElementById('calModalDateDisplay').textContent=`${d} de ${monthNames[m]} de ${y}`;
-  document.getElementById('calTitle').value='';document.getElementById('calTime').value='';
+  document.getElementById('calTitle').value='';
+  resetCalModal();
   openModal('calModal');
 };
+
 window.saveCalEvent=(openGoogle)=>{
   const key=document.getElementById('calDateKey').value;
   const title=document.getElementById('calTitle').value.trim();
-  const time=document.getElementById('calTime').value||'Todo el dia';
   const color=document.getElementById('calColor').value;
   if(!title){alert('Escribe que vas a hacer.');return;}
+
+  // Horario: nuevo sistema con timeFrom/timeTo o "Todo el dia"
+  const timeLabel=buildTimeLabel();
+  const timeFrom=_calAlldayMode?'':document.getElementById('calTimeFrom').value;
+  const timeTo=_calAlldayMode?'':document.getElementById('calTimeTo').value;
+
   if(!calendarData[key])calendarData[key]=[];
-  calendarData[key].push({title,time,color});
+  calendarData[key].push({title, time:timeLabel, timeFrom, timeTo, color});
   try{localStorage.setItem('indCalendar',JSON.stringify(calendarData));}catch(e){}
   if(window.syncCloud)window.syncCloud();
   renderCalendarView();renderSidebar();closeModal('calModal');renderUpcoming();
+
   if(openGoogle){
     const parts=key.split('-');const y=parts[0];const mo=(parseInt(parts[1])+1).toString().padStart(2,'0');const da=parts[2].padStart(2,'0');
-    window.open(`https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(title)}&dates=${y}${mo}${da}/${y}${mo}${da}&details=${encodeURIComponent('Horario: '+time)}`,'_blank');
+    let details='';
+    if(timeFrom&&timeTo)details=`Horario: ${timeFrom} - ${timeTo}`;
+    else if(timeLabel)details=`Horario: ${timeLabel}`;
+    let gStart=y+mo+da,gEnd=y+mo+da;
+    if(timeFrom&&timeTo){
+      gStart=`${y}${mo}${da}T${timeFrom.replace(':','')}00`;
+      gEnd=`${y}${mo}${da}T${timeTo.replace(':','')}00`;
+    }
+    window.open(`https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(title)}&dates=${gStart}/${gEnd}&details=${encodeURIComponent(details)}`,'_blank');
   }
 };
+
 window.deleteCalEvent=(key,idx,e)=>{
   if(e)e.stopPropagation();
   if(confirm('Borrar esta actividad?')){
@@ -2294,7 +2325,7 @@ function renderStudyStats(){
   }).join('');
 }
 
-// ==================== APUNTES - NUEVO DISEÑO ====================
+// ==================== APUNTES ====================
 let _notesActiveSubject=null;
 const NOTE_CATS=[
   {id:'parciales',label:'Parciales viejos',icon:'doc'},
@@ -2303,7 +2334,6 @@ const NOTE_CATS=[
   {id:'otros',label:'Otros archivos',icon:'file'},
 ];
 
-// Función auxiliar para contar recursos de una materia
 function countResources(id){
   const subj=apuntesData[id];
   if(!subj)return 0;
@@ -2315,13 +2345,11 @@ function countResources(id){
   return count;
 }
 
-// Obtener ícono determinístico para una materia
 function getSubjectIcon(id){
   let h=0;for(let i=0;i<id.length;i++)h=(h*31)+id.charCodeAt(i);
   return SUBJECT_ICONS[Math.abs(h)%SUBJECT_ICONS.length];
 }
 
-// Setear filtro activo
 window.setNotesFilter=function(filter, btn){
   notesCurrentFilter=filter;
   document.querySelectorAll('.notes-filter-btn').forEach(b=>b.classList.remove('active'));
@@ -2335,7 +2363,6 @@ function renderNotesTab(){
   if(!grid)return;
   grid.style.display='grid';detail.style.display='none';_notesActiveSubject=null;
   const searchInput=document.getElementById('notesSearchInput');if(searchInput)searchInput.value='';
-  // Reset filtro
   notesCurrentFilter='all';
   document.querySelectorAll('.notes-filter-btn').forEach((b,i)=>b.classList.toggle('active',i===0));
 
@@ -2353,17 +2380,10 @@ function renderNotesTab(){
     const count=countResources(id);
     const hasNotes=count>0;
     const icon=getSubjectIcon(id);
-
-    // Badge de estado (simplificado, no intrusivo)
     const statusBadge=isCompleted
       ? `<span class="notes-card-status aprobada">${nota?nota+' ★':'✓ Aprobada'}</span>`
       : `<span class="notes-card-status cursando">En curso</span>`;
-
-    // Texto del contador
-    const countLabel=count===0
-      ? 'Sin recursos aún'
-      : `${count} recurso${count!==1?'s':''}`;
-
+    const countLabel=count===0?'Sin recursos aún':`${count} recurso${count!==1?'s':''}`;
     return`<div class="notes-canvas-card${hasNotes?' has-notes':''}" data-id="${id}" data-name="${name.replace(/"/g,'&quot;')}" data-has="${hasNotes?'1':'0'}" data-completed="${isCompleted?'1':'0'}" onclick="openNotesDetail('${id}','${name.replace(/'/g,"\\'").replace(/"/g,'&quot;')}')">
       ${statusBadge}
       <div class="notes-card-icon">${icon}</div>
@@ -2393,9 +2413,6 @@ function openNotesDetail(id,name){
   renderNotesDetail(id,name);
 }
 
-// Obtener clase de color para la portada del detalle
-function getCoverClass(id){let h=0;for(let i=0;i<id.length;i++)h=(h<<5)-h+id.charCodeAt(i);return'cover-'+(Math.abs(h)%10);}
-const COVER_CLASSES=['cover-0','cover-1','cover-2','cover-3','cover-4','cover-5','cover-6','cover-7','cover-8','cover-9'];
 const COVER_STYLES=[
   'background:linear-gradient(135deg,#f3a4b5,#f9d4db)',
   'background:linear-gradient(135deg,#a8d5c2,#c8ead8)',
@@ -2410,6 +2427,64 @@ const COVER_STYLES=[
 ];
 function getCoverStyle(id){let h=0;for(let i=0;i<id.length;i++)h=(h<<5)-h+id.charCodeAt(i);return COVER_STYLES[Math.abs(h)%COVER_STYLES.length];}
 
+// ==================== GOOGLE DRIVE: CREAR CARPETA ====================
+/**
+ * Abre Google Drive con una URL que permite al usuario crear una carpeta
+ * con el nombre de la materia ya copiado al portapapeles.
+ * Drive no tiene una URL directa para crear carpetas con nombre, así que
+ * lo hacemos de dos formas:
+ *  1. Copiamos el nombre al clipboard
+ *  2. Abrimos Drive para que el usuario cree la carpeta manualmente (o el link guardado si ya existe)
+ */
+function openDriveForSubject(id, name){
+  const subj = apuntesData[id];
+  const savedLink = subj && !Array.isArray(subj) ? subj._drive : '';
+
+  if(savedLink){
+    // Si ya hay un link guardado, abrirlo directamente
+    window.open(savedLink, '_blank');
+    return;
+  }
+
+  // Copiar el nombre al portapapeles y abrir Drive
+  navigator.clipboard.writeText(name).catch(()=>{});
+
+  // Abrir Google Drive. No hay URL para crear carpeta con nombre,
+  // pero podemos abrir el buscador de Drive con el nombre prellenado.
+  // Esto lleva al usuario a Drive donde puede buscar la carpeta o crear una nueva.
+  const driveUrl = `https://drive.google.com/drive/search?q=${encodeURIComponent(name)}`;
+  const w = window.open(driveUrl, '_blank');
+
+  // Mostrar un tooltip/toast de instruccion
+  showDriveToast(name);
+}
+
+function showDriveToast(name){
+  // Quitar toast previo
+  const old = document.getElementById('_driveToast');
+  if(old) old.remove();
+
+  const toast = document.createElement('div');
+  toast.id = '_driveToast';
+  toast.innerHTML = `
+    <div style="display:flex;align-items:center;gap:10px;">
+      <span style="font-size:1.3rem;">📋</span>
+      <div>
+        <div style="font-weight:700;font-size:.88rem;margin-bottom:2px">Nombre copiado al portapapeles</div>
+        <div style="font-size:.76rem;opacity:.85">En Drive, hace clic en "+ Nuevo → Carpeta" y pega el nombre: <strong>${name}</strong></div>
+      </div>
+      <button onclick="this.parentElement.parentElement.remove()" style="background:none;border:none;color:rgba(255,255,255,.7);font-size:1rem;cursor:pointer;flex-shrink:0;padding:4px;">×</button>
+    </div>`;
+  Object.assign(toast.style, {
+    position:'fixed', bottom:'24px', left:'50%', transform:'translateX(-50%)',
+    background:'#1a2e24', color:'#fff', padding:'14px 20px', borderRadius:'14px',
+    boxShadow:'0 8px 28px rgba(0,0,0,.22)', zIndex:'9999', maxWidth:'420px', width:'90%',
+    animation:'slideUp .3s ease', fontFamily:'Poppins,sans-serif'
+  });
+  document.body.appendChild(toast);
+  setTimeout(()=>{ if(toast.parentNode) toast.remove(); }, 7000);
+}
+
 function renderNotesDetail(id,name){
   const detail=document.getElementById('notesDetail');if(!detail)return;
   if(!apuntesData[id]||Array.isArray(apuntesData[id])){
@@ -2418,13 +2493,24 @@ function renderNotesDetail(id,name){
   }
   const subj=apuntesData[id];const campus=subj._campus||'';const drive=subj._drive||'';
   const nameEscaped=name.replace(/\\/g,'\\\\').replace(/'/g,"\\'").replace(/"/g,'&quot;');
-  const actionLinks=`${campus?`<a href="${campus}" target="_blank" class="ndn-link-pill">Campus Virtual</a>`:''}${drive?`<a href="${drive}" target="_blank" class="ndn-link-pill">Google Drive</a>`:''}
-    <button class="ndn-link-pill" onclick="toggleAddLinkRow()">Editar links</button>`;
+
+  // Icono Drive SVG
+  const driveSvg=`<svg width="13" height="13" viewBox="0 0 87.3 78" xmlns="http://www.w3.org/2000/svg"><path d="m6.6 66.85 3.85 6.65c.8 1.4 1.95 2.5 3.3 3.3l13.75-23.8h-27.5c0 1.55.4 3.1 1.2 4.5z" fill="#0066da"/><path d="m43.65 25-13.75-23.8c-1.35.8-2.5 1.9-3.3 3.3l-25.4 44a9.06 9.06 0 0 0 -1.2 4.5h27.5z" fill="#00ac47"/><path d="m73.55 76.8c1.35-.8 2.5-1.9 3.3-3.3l1.6-2.75 7.65-13.25c.8-1.4 1.2-2.95 1.2-4.5h-27.502l5.852 11.5z" fill="#ea4335"/><path d="m43.65 25 13.75-23.8c-1.35-.8-2.9-1.2-4.5-1.2h-18.5c-1.6 0-3.15.45-4.5 1.2z" fill="#00832d"/><path d="m59.8 53h-32.3l-13.75 23.8c1.35.8 2.9 1.2 4.5 1.2h50.8c1.6 0 3.15-.45 4.5-1.2z" fill="#2684fc"/><path d="m73.4 26.5-12.7-22c-.8-1.4-1.95-2.5-3.3-3.3l-13.75 23.8 16.15 27h27.45c0-1.55-.4-3.1-1.2-4.5z" fill="#ffba00"/></svg>`;
+
+  const actionLinks=`
+    ${campus?`<a href="${campus}" target="_blank" class="ndn-link-pill">🏫 Campus Virtual</a>`:''}
+    ${drive
+      ? `<a href="${drive}" target="_blank" class="ndn-link-pill drive-pill">${driveSvg} Mi carpeta Drive</a>`
+      : `<button class="ndn-link-pill drive-pill" onclick="openDriveForSubject('${id}','${nameEscaped}')" title="Crea una carpeta en Drive con el nombre de esta materia">${driveSvg} Crear carpeta en Drive</button>`
+    }
+    <button class="ndn-link-pill" onclick="toggleAddLinkRow()">✎ Editar links</button>`;
+
   const addLinkRow=`<div class="ndh-add-link-row" id="ndh-link-row">
     <input type="url" id="ndh-campus-input" placeholder="Link Campus virtual" value="${campus}">
-    <input type="url" id="ndh-drive-input" placeholder="Link Google Drive" value="${drive}">
+    <input type="url" id="ndh-drive-input" placeholder="Link carpeta Google Drive" value="${drive}">
     <button class="nc-add-btn" onclick="saveQuickLinks('${id}')">Guardar</button>
   </div>`;
+
   const catsHtml=NOTE_CATS.map(cat=>{
     const items=subj[cat.id]||[];
     const itemsHtml=items.length
@@ -2445,6 +2531,7 @@ function renderNotesDetail(id,name){
       </div>
     </div>`;
   }).join('');
+
   detail.innerHTML=`<div class="notes-detail-new">
     <div class="ndn-cover" style="${getCoverStyle(id)}">
       <div class="ndn-cover-overlay">
@@ -2457,6 +2544,7 @@ function renderNotesDetail(id,name){
 }
 
 function toggleAddLinkRow(){const row=document.getElementById('ndh-link-row');if(row)row.classList.toggle('show');}
+
 function saveQuickLinks(id){
   if(!apuntesData[id]||Array.isArray(apuntesData[id]))apuntesData[id]={_campus:'',_drive:''};
   apuntesData[id]._campus=document.getElementById('ndh-campus-input')?.value.trim()||'';
@@ -2465,6 +2553,7 @@ function saveQuickLinks(id){
   const nameEl=document.querySelector('.ndn-subject-name');
   renderNotesDetail(id,nameEl?.textContent||id);
 }
+
 function toggleCat(catBodyId){
   const body=document.getElementById(catBodyId);const chev=document.getElementById('chev-'+catBodyId);if(!body)return;
   const isOpen=body.style.display!=='none';body.style.display=isOpen?'none':'block';if(chev)chev.classList.toggle('open',!isOpen);
@@ -2665,3 +2754,4 @@ window.addEventListener('load',()=>{
 </script>
 </body>
 </html>
+    
