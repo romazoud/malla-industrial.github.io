@@ -2446,14 +2446,9 @@ function openDriveForSubject(id, name){
     return;
   }
 
-  // Copiar el nombre al portapapeles y abrir Drive
+  // Copiar el nombre al portapapeles y abrir Drive home
   navigator.clipboard.writeText(name).catch(()=>{});
-
-  // Abrir Google Drive. No hay URL para crear carpeta con nombre,
-  // pero podemos abrir el buscador de Drive con el nombre prellenado.
-  // Esto lleva al usuario a Drive donde puede buscar la carpeta o crear una nueva.
-  const driveUrl = `https://drive.google.com/drive/search?q=${encodeURIComponent(name)}`;
-  const w = window.open(driveUrl, '_blank');
+  window.open('https://drive.google.com/drive/home', '_blank');
 
   // Mostrar un tooltip/toast de instruccion
   showDriveToast(name);
@@ -2754,4 +2749,3 @@ window.addEventListener('load',()=>{
 </script>
 </body>
 </html>
-    
