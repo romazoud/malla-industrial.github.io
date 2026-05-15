@@ -1289,6 +1289,10 @@
 
 <audio id="pomAudio" preload="auto"></audio>
 
+<!-- Google Identity Services + Drive API -->
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+<script src="https://apis.google.com/js/api.js"></script>
+
 <script>
 // ==================== DARK MODE ====================
 function toggleDarkMode(){
@@ -2427,57 +2431,126 @@ const COVER_STYLES=[
 ];
 function getCoverStyle(id){let h=0;for(let i=0;i<id.length;i++)h=(h<<5)-h+id.charCodeAt(i);return COVER_STYLES[Math.abs(h)%COVER_STYLES.length];}
 
-// ==================== GOOGLE DRIVE: CREAR CARPETA ====================
-/**
- * Abre Google Drive con una URL que permite al usuario crear una carpeta
- * con el nombre de la materia ya copiado al portapapeles.
- * Drive no tiene una URL directa para crear carpetas con nombre, así que
- * lo hacemos de dos formas:
- *  1. Copiamos el nombre al clipboard
- *  2. Abrimos Drive para que el usuario cree la carpeta manualmente (o el link guardado si ya existe)
- */
+// ==================== GOOGLE DRIVE: CREAR CARPETA (API REAL) ====================
+const DRIVE_CLIENT_ID = "34112804247-gof76i8rb103qf6j9ht68qnenu6c5clr.apps.googleusercontent.com";
+const DRIVE_API_KEY   = "AIzaSyBpT2S6cFc3cVKcAaIrvW-MKdv8xVBcpFo";
+
+let _driveTokenClient = null;
+let _driveGapiInited  = false;
+let _driveGisInited   = false;
+let _driveSubjectId   = null;  // qué materia disparó la creación
+
+// Inicializa el cliente GAPI (llamado por el callback de api.js)
+function _initDriveGapiClient(){
+  gapi.client.init({
+    apiKey: DRIVE_API_KEY,
+    discoveryDocs: ["https://www.googleapis.com/discovery/v1/apis/drive/v3/rest"],
+  }).then(()=>{ _driveGapiInited = true; });
+}
+
+// Inicializa el cliente GIS (Identity Services)
+function _initDriveGis(){
+  if(!window.google || !window.google.accounts) return;
+  _driveTokenClient = google.accounts.oauth2.initTokenClient({
+    client_id: DRIVE_CLIENT_ID,
+    scope: "https://www.googleapis.com/auth/drive.file",
+    callback: _onDriveToken,
+  });
+  _driveGisInited = true;
+}
+
+// Callback cuando se obtiene el token OAuth
+async function _onDriveToken(resp){
+  if(resp.error){ console.error('Drive OAuth error:', resp); showDriveToast(null,'error'); return; }
+
+  // Recuperar nombre de materia
+  const subjId   = _driveSubjectId;
+  const nameEl   = document.querySelector('.ndn-subject-name');
+  const nombre   = nameEl ? nameEl.textContent.trim() : 'Carpeta de materia';
+
+  try {
+    const res = await gapi.client.drive.files.create({
+      resource: { name: nombre, mimeType: "application/vnd.google-apps.folder" },
+      fields: "id, webViewLink",
+    });
+
+    const folderId   = res.result.id;
+    const folderLink = res.result.webViewLink || `https://drive.google.com/drive/folders/${folderId}`;
+
+    // Guardar el link en los datos de la materia
+    if(subjId){
+      if(!apuntesData[subjId] || Array.isArray(apuntesData[subjId]))
+        apuntesData[subjId] = {_campus:'', _drive:''};
+      apuntesData[subjId]._drive = folderLink;
+      _saveApuntes();
+      renderNotesDetail(subjId, nombre);
+    }
+
+    showDriveToast(nombre, 'success', folderLink);
+  } catch(e){
+    console.error('Error creando carpeta Drive:', e);
+    showDriveToast(nombre, 'error');
+  }
+}
+
+// Punto de entrada: el botón "Crear carpeta en Drive" llama a esto
 function openDriveForSubject(id, name){
-  const subj = apuntesData[id];
+  const subj      = apuntesData[id];
   const savedLink = subj && !Array.isArray(subj) ? subj._drive : '';
 
-  if(savedLink){
-    // Si ya hay un link guardado, abrirlo directamente
-    window.open(savedLink, '_blank');
+  // Si ya hay link guardado, abrirlo directo
+  if(savedLink){ window.open(savedLink, '_blank'); return; }
+
+  _driveSubjectId = id;
+
+  // Si la API aún no cargó, fallback a Drive home
+  if(!_driveGapiInited || !_driveGisInited || !_driveTokenClient){
+    navigator.clipboard.writeText(name).catch(()=>{});
+    window.open('https://drive.google.com/drive/home', '_blank');
+    showDriveToast(name, 'fallback');
     return;
   }
 
-  // Copiar el nombre al portapapeles y abrir Drive home
-  navigator.clipboard.writeText(name).catch(()=>{});
-  window.open('https://drive.google.com/drive/home', '_blank');
-
-  // Mostrar un tooltip/toast de instruccion
-  showDriveToast(name);
+  // Pedir token y crear carpeta
+  _driveTokenClient.requestAccessToken({ prompt: '' });
 }
 
-function showDriveToast(name){
-  // Quitar toast previo
-  const old = document.getElementById('_driveToast');
-  if(old) old.remove();
-
+// Toast de feedback
+function showDriveToast(name, type, link){
+  const old = document.getElementById('_driveToast'); if(old) old.remove();
   const toast = document.createElement('div');
   toast.id = '_driveToast';
-  toast.innerHTML = `
-    <div style="display:flex;align-items:center;gap:10px;">
-      <span style="font-size:1.3rem;">📋</span>
+
+  let content = '';
+  if(type === 'success'){
+    content = `<span style="font-size:1.3rem">✅</span>
+      <div>
+        <div style="font-weight:700;font-size:.88rem;margin-bottom:3px">Carpeta creada en Drive</div>
+        <div style="font-size:.76rem;opacity:.9">"${name}" — <a href="${link}" target="_blank" style="color:#a8d5c2;text-decoration:underline">Abrir carpeta</a></div>
+      </div>`;
+  } else if(type === 'fallback'){
+    content = `<span style="font-size:1.3rem">📋</span>
       <div>
         <div style="font-weight:700;font-size:.88rem;margin-bottom:2px">Nombre copiado al portapapeles</div>
-        <div style="font-size:.76rem;opacity:.85">En Drive, hace clic en "+ Nuevo → Carpeta" y pega el nombre: <strong>${name}</strong></div>
-      </div>
-      <button onclick="this.parentElement.parentElement.remove()" style="background:none;border:none;color:rgba(255,255,255,.7);font-size:1rem;cursor:pointer;flex-shrink:0;padding:4px;">×</button>
-    </div>`;
+        <div style="font-size:.76rem;opacity:.85">En Drive: "+ Nuevo → Carpeta" y pega: <strong>${name}</strong></div>
+      </div>`;
+  } else {
+    content = `<span style="font-size:1.3rem">⚠️</span>
+      <div><div style="font-weight:700;font-size:.88rem">No se pudo crear la carpeta</div>
+      <div style="font-size:.76rem;opacity:.85">Intenta de nuevo o creala manualmente en Drive.</div></div>`;
+  }
+
+  toast.innerHTML = `<div style="display:flex;align-items:center;gap:10px;">${content}
+    <button onclick="this.parentElement.parentElement.remove()" style="background:none;border:none;color:rgba(255,255,255,.7);font-size:1rem;cursor:pointer;flex-shrink:0;padding:4px;">×</button>
+  </div>`;
   Object.assign(toast.style, {
     position:'fixed', bottom:'24px', left:'50%', transform:'translateX(-50%)',
     background:'#1a2e24', color:'#fff', padding:'14px 20px', borderRadius:'14px',
-    boxShadow:'0 8px 28px rgba(0,0,0,.22)', zIndex:'9999', maxWidth:'420px', width:'90%',
-    animation:'slideUp .3s ease', fontFamily:'Poppins,sans-serif'
+    boxShadow:'0 8px 28px rgba(0,0,0,.22)', zIndex:'9999', maxWidth:'440px', width:'92%',
+    fontFamily:'Poppins,sans-serif',
   });
   document.body.appendChild(toast);
-  setTimeout(()=>{ if(toast.parentNode) toast.remove(); }, 7000);
+  setTimeout(()=>{ if(toast.parentNode) toast.remove(); }, type==='success'?10000:7000);
 }
 
 function renderNotesDetail(id,name){
@@ -2745,6 +2818,16 @@ window.addEventListener('load',()=>{
   initDarkMode();
   const cfg=(()=>{try{return JSON.parse(localStorage.getItem('userConfig')||'{}');}catch{return{};}})();
   if(cfg.setup)window.initApp();else showOnboarding();
+
+  // Inicializar Drive API cuando los scripts de Google estén disponibles
+  function tryInitDrive(){
+    if(window.gapi){ gapi.load('client', _initDriveGapiClient); }
+    if(window.google && window.google.accounts){ _initDriveGis(); }
+  }
+  // Intentar inmediatamente y también escuchar carga tardía de scripts
+  tryInitDrive();
+  setTimeout(tryInitDrive, 1500);
+  setTimeout(tryInitDrive, 3500);
 });
 </script>
 </body>
