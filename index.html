@@ -803,6 +803,59 @@
       .habit-week-name { min-width: 100px; }
       .cal-time-range-row { gap: 6px; }
     }
+    /* ===== MODAL DE PRIVACIDAD ===== */
+    .otf-modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.6);
+      z-index: 3000;
+      display: none; /* Se oculta por defecto */
+      justify-content: center;
+      align-items: center;
+      backdrop-filter: blur(4px);
+    }
+
+    .otf-modal-content {
+      background: var(--surface);
+      color: var(--text-main);
+      padding: 32px 40px;
+      border-radius: 16px;
+      max-width: 700px;
+      width: 90%;
+      max-height: 85vh;
+      overflow-y: auto;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+      position: relative;
+      border: 1px solid var(--border);
+    }
+
+    .otf-modal-content p, .otf-modal-content li {
+      font-size: 0.9rem;
+      line-height: 1.6;
+      color: var(--text-muted);
+      margin-bottom: 12px;
+    }
+
+    .otf-modal-content h3 {
+      font-size: 1.05rem;
+      margin-top: 24px;
+      color: var(--text-main);
+    }
+
+    .otf-close-btn {
+      position: absolute;
+      top: 16px;
+      right: 24px;
+      font-size: 2rem;
+      cursor: pointer;
+      color: var(--text-muted);
+      line-height: 1;
+      transition: color 0.2s;
+    }
+
+    .otf-close-btn:hover {
+      color: #ef4444;
+    }
   </style>
 </head>
 <body>
@@ -2858,14 +2911,14 @@ window.addEventListener('click', function(e) {
     <div class="otf-modal-content">
         <span id="otf-close-privacy" class="otf-close-btn">&times;</span>
         
-        <h2 style="margin-top: 0; color: #333;">Política de Privacidad</h2>
-        <p style="font-size: 12px; color: #666;"><strong>Última actualización:</strong> Mayo 2026</p>
+        <h2 style="margin-top: 0; color: var(--accent-dark);">Política de Privacidad</h2>
+        <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 24px;"><strong>Última actualización:</strong> Mayo 2026</p>
         
         <p>En <strong>OrganizaTuFacu</strong> (en adelante, "la Aplicación"), nos tomamos muy en serio la privacidad de tus datos. Al ser una herramienta de autogestión académica de código abierto diseñada para estudiantes, garantizamos la máxima transparencia en el uso de tu información.</p>
         
         <h3>1. Información que Recopilamos y Uso de Datos</h3>
         <p>Nuestra Aplicación se integra con los servicios de Google a través de la API de <strong>Google Drive</strong>. El acceso se solicita exclusivamente para las siguientes finalidades:</p>
-        <ul>
+        <ul style="padding-left: 20px;">
             <li><strong>Sincronización y Respaldo:</strong> Permitir al usuario guardar, exportar y sincronizar su progreso académico, notas, materias y configuración de la malla curricular de forma directa.</li>
             <li><strong>Almacenamiento del lado del cliente:</strong> La Aplicación no cuenta con servidores externos ni bases de datos propias. Toda la información se procesa de forma local en el navegador del usuario y se almacena directamente en su cuenta personal de Google Drive.</li>
         </ul>
