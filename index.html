@@ -1199,10 +1199,10 @@
       <div class="section-header">
         <h2>Mis Apuntes</h2>
         <p>Selecciona una materia para ver y cargar tus recursos.</p>
-        <div class="notes-search-top">
+       <div class="notes-search-top">
           <button class="notes-filter-btn active" id="filterAll" onclick="setNotesFilter('all',this)">Todas</button>
-          <button class="notes-filter-btn" id="filterWith" onclick="setNotesFilter('with',this)">Con apuntes</button>
-          <button class="notes-filter-btn" id="filterWithout" onclick="setNotesFilter('without',this)">Sin apuntes</button>
+          <button class="notes-filter-btn" id="filterCursando" onclick="setNotesFilter('cursando',this)">En curso</button>
+          <button class="notes-filter-btn" id="filterAprobadas" onclick="setNotesFilter('aprobadas',this)">Aprobadas</button>
           <input type="text" id="notesSearchInput" class="notes-search-bar" placeholder="Buscar materia..." oninput="filterNotes()">
         </div>
       </div>
@@ -2402,14 +2402,15 @@ window.filterNotes=()=>{
   const query=(document.getElementById('notesSearchInput')?.value||'').toLowerCase();
   document.querySelectorAll('.notes-canvas-card').forEach(card=>{
     const name=(card.querySelector('.notes-card-title')?.textContent||'').toLowerCase();
-    const hasNotes=card.dataset.has==='1';
-    let showByFilter=true;
-    if(notesCurrentFilter==='with')showByFilter=hasNotes;
-    else if(notesCurrentFilter==='without')showByFilter=!hasNotes;
-    card.style.display=(name.includes(query)&&showByFilter)?'':'none';
+    const isCompleted = card.dataset.completed === '1';
+    
+    let showByFilter = true;
+    if(notesCurrentFilter === 'cursando') showByFilter = !isCompleted;
+    else if(notesCurrentFilter === 'aprobadas') showByFilter = isCompleted;
+    
+    card.style.display = (name.includes(query) && showByFilter) ? '' : 'none';
   });
 };
-
 function openNotesDetail(id,name){
   _notesActiveSubject=id;
   document.getElementById('notesGrid').style.display='none';
