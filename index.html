@@ -77,7 +77,7 @@
     function mostrarErrorAuth(msg){const el=document.getElementById('auth-error');el.textContent=msg;el.style.display='block';}
     window.logout = async()=>{
       await signOut(auth);
-      ['materiasAprobadas','materiasNotas','materiasPlanificadas','materiasTabla','indCalendar','userConfig','apuntes','pomodoroStats','horarioExtra','habitData'].forEach(k=>localStorage.removeItem(k));
+      ['materiasAprobadas','materiasNotas','materiasPlanificadas','materiasTabla','indCalendar','userConfig','apuntes','pomodoroStats','horarioExtra','todoData'].forEach(k=>localStorage.removeItem(k));
       location.reload();
     };
     onAuthStateChanged(auth, async(user)=>{
@@ -107,7 +107,7 @@
         apuntes:JSON.parse(localStorage.getItem('apuntes')||'{}'),
         pomodoroStats:JSON.parse(localStorage.getItem('pomodoroStats')||'{}'),
         horarioExtra:JSON.parse(localStorage.getItem('horarioExtra')||'{}'),
-        habitData:JSON.parse(localStorage.getItem('habitData')||'{}')
+        todoData:JSON.parse(localStorage.getItem('todoData')||'[]')
       };
       await setDoc(doc(db,'users',user.uid),data);
     }
@@ -124,7 +124,7 @@
         localStorage.setItem('apuntes',JSON.stringify(d.apuntes||{}));
         localStorage.setItem('pomodoroStats',JSON.stringify(d.pomodoroStats||{}));
         localStorage.setItem('horarioExtra',JSON.stringify(d.horarioExtra||{}));
-        localStorage.setItem('habitData',JSON.stringify(d.habitData||{}));
+        localStorage.setItem('todoData',JSON.stringify(d.todoData||[]));
       } else {await saveToCloud();}
       if(window.initApp)window.initApp();
     }
@@ -197,7 +197,7 @@
     body.dark-mode .ndh-add-link-row { background: #161b22; border-color: #30363d; }
     body.dark-mode .ndh-add-link-row input,
     body.dark-mode .ndh-add-link-row select { background: #0d1117; border-color: #30363d; color: var(--text-main); }
-    body.dark-mode .notes-detail { background: #161b22; border-color: #30363d; }
+    body.dark-mode .notes-detail { border-color: #30363d; }
     body.dark-mode .notes-category { border-color: #30363d; }
     body.dark-mode .course.enabled { background: #161b22; border-color: var(--accent); }
     body.dark-mode .ob-upload { background: #0d1117; border-color: #30363d; }
@@ -216,12 +216,6 @@
     body.dark-mode .progress-circle-inner { background: #161b22; }
     body.dark-mode .schedule-cell-occupied { background: rgba(8,71,52,0.35) !important; color: var(--accent-light) !important; }
     body.dark-mode .btn-close-modal { background: #161b22; border-color: #30363d; color: var(--text-muted); }
-    body.dark-mode .habit-card { background: #161b22; border-color: #30363d; }
-    body.dark-mode .habit-row { border-color: #21262d; }
-    body.dark-mode .habit-row:hover { background: #21262d; }
-    body.dark-mode .habit-check { border-color: #444; }
-    body.dark-mode .habit-add-row { background: #0d1117; border-color: #30363d; }
-    body.dark-mode .habit-add-row input, body.dark-mode .habit-add-row select { background: #161b22; border-color: #30363d; color: var(--text-main); }
     body.dark-mode .course:not(.enabled):not(.completed){ background:#161b22;border-color:#21262d;color:#4a7a55; }
     body.dark-mode .cal-week-event { filter: brightness(1.15) saturate(1.2); box-shadow: 0 2px 8px rgba(0,0,0,.4); }
     body.dark-mode .cal-month-event { filter: brightness(1.1) saturate(1.15); }
@@ -234,6 +228,14 @@
     body.dark-mode .notes-detail-new { background: #161b22; border-color: #30363d; }
     body.dark-mode .cal-time-range-row { background: #0d1117; border-color: #30363d; }
     body.dark-mode .cal-time-input { background: #0d1117 !important; border-color: #30363d !important; color: var(--text-main) !important; }
+    /* Todo dark */
+    body.dark-mode .todo-panel { background: #161b22 !important; border-color: #30363d !important; }
+    body.dark-mode .todo-input-row input, body.dark-mode .todo-input-row select { background: #0d1117 !important; border-color: #30363d !important; color: var(--text-main) !important; }
+    body.dark-mode .todo-item { background: #21262d; border-color: #30363d; }
+    body.dark-mode .todo-item:hover { border-color: var(--accent); }
+    body.dark-mode .todo-filter-btn { background: #21262d; color: #c9d1d9; border-color: #30363d; }
+    body.dark-mode .todo-filter-btn.active { background: var(--accent); color: white; }
+    body.dark-mode .todo-priority-badge { filter: brightness(.85); }
 
     /* Dark mode toggle */
     .dark-toggle-btn {
@@ -320,11 +322,13 @@
     .logo-area .career-name{font-family:'Lora',serif;font-size:1rem;font-weight:700;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:280px;}
     .logo-area .uni-name{font-size:.72rem;color:rgba(255,255,255,.65);font-weight:400;white-space:nowrap;}
     .tabs-container{display:flex;align-items:center;gap:4px;flex-wrap:wrap;}
-    .tab-btn{padding:7px 13px;border:none;border-radius:8px;font-size:.8rem;font-weight:500;cursor:pointer;transition:all .2s;background:transparent;color:rgba(255,255,255,.8);font-family:'Poppins',sans-serif;letter-spacing:.1px;}
+    .tab-btn{padding:7px 13px;border:none;border-radius:8px;font-size:.8rem;font-weight:500;cursor:pointer;transition:all .2s;background:transparent;color:rgba(255,255,255,.8);font-family:'Poppins',sans-serif;letter-spacing:.1px;position:relative;}
     .tab-btn:hover{background:rgba(255,255,255,.1);color:#fff;}
     .tab-btn.active{background:rgba(255,255,255,.18);color:#fff;font-weight:600;}
     .btn-auth{border:1px solid rgba(255,255,255,.25);opacity:1;color:#fff;}
     .btn-logout{background:rgba(255,255,255,.06);display:none;}
+    /* Tab badge for pending todos */
+    .tab-badge{position:absolute;top:2px;right:2px;background:#ef4444;color:#fff;border-radius:50%;width:16px;height:16px;font-size:.55rem;font-weight:700;display:flex;align-items:center;justify-content:center;pointer-events:none;}
 
     .main-content{padding:0 28px 60px;box-sizing:border-box;}
     .view-section{display:none;animation:fadeIn .3s ease;width:100%;box-sizing:border-box;}
@@ -483,52 +487,156 @@
       margin-bottom: 14px;
       flex-wrap: wrap;
     }
-    .cal-time-range-label {
-      font-size: .72rem;
-      font-weight: 700;
-      color: var(--text-muted);
-      text-transform: uppercase;
-      letter-spacing: .4px;
-      min-width: 56px;
+    .cal-time-range-label { font-size: .72rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: .4px; min-width: 56px; }
+    .cal-time-input { flex: 1; min-width: 110px; padding: 8px 10px; border-radius: 8px; border: 1.5px solid var(--border); font-family: 'Poppins', sans-serif; font-size: .85rem; font-weight: 600; color: var(--text-main); background: var(--surface); outline: none; transition: border-color .2s, background .4s; }
+    .cal-time-input:focus { border-color: var(--accent); }
+    .cal-time-separator { font-size: .82rem; font-weight: 700; color: var(--text-muted); }
+    .cal-allday-toggle { display: flex; align-items: center; gap: 6px; font-size: .78rem; font-weight: 600; color: var(--text-muted); cursor: pointer; padding: 4px 10px; border-radius: 7px; border: 1.5px solid var(--border); background: transparent; transition: .15s; font-family: 'Poppins', sans-serif; white-space: nowrap; }
+    .cal-allday-toggle:hover { border-color: var(--accent); color: var(--accent); }
+    .cal-allday-toggle.active { background: var(--accent-bg); border-color: var(--accent); color: var(--accent-dark); }
+
+    /* ===== TO-DO LIST ===== */
+    .todo-panel {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      margin-top: 22px;
+      overflow: hidden;
+      box-shadow: 0 4px 16px rgba(0,0,0,.05);
+      transition: background .4s, border-color .4s;
     }
-    .cal-time-input {
+    .todo-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 18px 22px;
+      border-bottom: 1px solid var(--border);
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    .todo-header-left { display: flex; align-items: center; gap: 12px; }
+    .todo-header-title { font-size: 1rem; font-weight: 700; color: var(--accent-dark); font-family: 'Lora', serif; margin: 0; }
+    .todo-count-badge { background: var(--accent); color: #fff; border-radius: 20px; padding: 2px 10px; font-size: .7rem; font-weight: 700; }
+    .todo-filters { display: flex; gap: 6px; flex-wrap: wrap; }
+    .todo-filter-btn { padding: 5px 14px; border-radius: 20px; border: 1.5px solid var(--border); background: var(--surface); color: var(--text-muted); font-family: 'Poppins', sans-serif; font-size: .72rem; font-weight: 600; cursor: pointer; transition: .15s; }
+    .todo-filter-btn:hover { border-color: var(--accent); color: var(--accent); }
+    .todo-filter-btn.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+    .todo-input-row {
+      display: flex;
+      gap: 10px;
+      padding: 16px 22px;
+      border-bottom: 1px solid var(--border);
+      flex-wrap: wrap;
+      align-items: center;
+      background: var(--surface-2);
+    }
+    .todo-input-row input[type=text] {
       flex: 1;
-      min-width: 110px;
-      padding: 8px 10px;
-      border-radius: 8px;
+      min-width: 200px;
+      padding: 10px 14px;
+      border-radius: 10px;
       border: 1.5px solid var(--border);
       font-family: 'Poppins', sans-serif;
-      font-size: .85rem;
-      font-weight: 600;
+      font-size: .88rem;
       color: var(--text-main);
       background: var(--surface);
       outline: none;
       transition: border-color .2s, background .4s;
     }
-    .cal-time-input:focus { border-color: var(--accent); }
-    .cal-time-separator {
-      font-size: .82rem;
-      font-weight: 700;
-      color: var(--text-muted);
-    }
-    .cal-allday-toggle {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      font-size: .78rem;
-      font-weight: 600;
-      color: var(--text-muted);
-      cursor: pointer;
-      padding: 4px 10px;
-      border-radius: 7px;
+    .todo-input-row input[type=text]:focus { border-color: var(--accent); }
+    .todo-input-row select {
+      padding: 10px 12px;
+      border-radius: 10px;
       border: 1.5px solid var(--border);
-      background: transparent;
-      transition: .15s;
       font-family: 'Poppins', sans-serif;
+      font-size: .82rem;
+      color: var(--text-main);
+      background: var(--surface);
+      outline: none;
+      cursor: pointer;
+      transition: background .4s;
+    }
+    .todo-input-row input[type=date] {
+      padding: 9px 12px;
+      border-radius: 10px;
+      border: 1.5px solid var(--border);
+      font-family: 'Poppins', sans-serif;
+      font-size: .82rem;
+      color: var(--text-main);
+      background: var(--surface);
+      outline: none;
+      transition: background .4s;
+    }
+    .todo-add-btn {
+      padding: 10px 20px;
+      border-radius: 10px;
+      border: none;
+      background: var(--accent);
+      color: #fff;
+      font-family: 'Poppins', sans-serif;
+      font-weight: 700;
+      font-size: .85rem;
+      cursor: pointer;
+      transition: .2s;
       white-space: nowrap;
     }
-    .cal-allday-toggle:hover { border-color: var(--accent); color: var(--accent); }
-    .cal-allday-toggle.active { background: var(--accent-bg); border-color: var(--accent); color: var(--accent-dark); }
+    .todo-add-btn:hover { opacity: .88; transform: translateY(-1px); }
+    .todo-list { padding: 8px 0; min-height: 60px; }
+    .todo-item {
+      display: flex;
+      align-items: center;
+      gap: 13px;
+      padding: 13px 22px;
+      border-bottom: 1px solid var(--border);
+      transition: background .12s;
+      background: var(--surface);
+      cursor: pointer;
+    }
+    .todo-item:last-child { border-bottom: none; }
+    .todo-item:hover { background: var(--surface-2); }
+    .todo-item.done { opacity: .55; }
+    .todo-check {
+      width: 22px;
+      height: 22px;
+      border-radius: 6px;
+      border: 2px solid var(--border);
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all .2s;
+      font-size: .8rem;
+      cursor: pointer;
+    }
+    .todo-check.checked { background: var(--accent); border-color: var(--accent); color: #fff; border-radius: 6px; }
+    .todo-text-block { flex: 1; min-width: 0; }
+    .todo-title { font-size: .9rem; font-weight: 600; color: var(--text-main); }
+    .todo-item.done .todo-title { text-decoration: line-through; color: var(--text-muted); }
+    .todo-meta { display: flex; gap: 8px; align-items: center; margin-top: 3px; flex-wrap: wrap; }
+    .todo-priority-badge {
+      font-size: .63rem;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 20px;
+      letter-spacing: .3px;
+    }
+    .todo-priority-badge.alta { background: #fef2f2; color: #b91c1c; border: 1px solid #fca5a5; }
+    .todo-priority-badge.media { background: #fffbeb; color: #92400e; border: 1px solid #fcd34d; }
+    .todo-priority-badge.baja { background: #f0fdf4; color: #166534; border: 1px solid #86efac; }
+    .todo-due-date { font-size: .68rem; color: var(--text-muted); font-weight: 600; }
+    .todo-due-date.overdue { color: #ef4444; }
+    .todo-category-tag { font-size: .65rem; font-weight: 600; color: var(--accent); background: var(--accent-bg); padding: 2px 8px; border-radius: 20px; }
+    .todo-item-actions { display: flex; gap: 6px; align-items: center; flex-shrink: 0; opacity: 0; transition: opacity .15s; }
+    .todo-item:hover .todo-item-actions { opacity: 1; }
+    .todo-del-btn { width: 26px; height: 26px; border-radius: 50%; border: none; background: transparent; color: var(--text-muted); cursor: pointer; font-size: .9rem; display: flex; align-items: center; justify-content: center; transition: .15s; }
+    .todo-del-btn:hover { background: #fef2f2; color: #ef4444; }
+    .todo-empty { text-align: center; padding: 40px 20px; color: var(--text-muted); font-size: .9rem; }
+    .todo-empty-icon { font-size: 2.5rem; margin-bottom: 10px; }
+    .todo-stats-row { display: flex; gap: 0; border-top: 1px solid var(--border); }
+    .todo-stat { flex: 1; text-align: center; padding: 12px 8px; border-right: 1px solid var(--border); }
+    .todo-stat:last-child { border-right: none; }
+    .todo-stat-val { font-size: 1.2rem; font-weight: 700; color: var(--accent-dark); display: block; }
+    .todo-stat-lbl { font-size: .65rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: .5px; }
 
     /* ===== HORARIO ===== */
     #view-schedule{max-width:1100px;margin:0 auto;padding-bottom:50px;}
@@ -626,17 +734,8 @@
     .ndn-action-links{display:flex;gap:7px;flex-wrap:wrap;}
     .ndn-link-pill{padding:6px 12px;border-radius:7px;border:1px solid rgba(255,255,255,.28);background:transparent;color:#fff;font-size:.72rem;font-weight:600;font-family:'Poppins',sans-serif;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;gap:4px;transition:.16s;}
     .ndn-link-pill:hover{background:rgba(255,255,255,.18);}
-
-    /* ===== DRIVE PILL ===== */
-    .ndn-link-pill.drive-pill {
-      background: rgba(255,255,255,.12);
-      border-color: rgba(255,255,255,.4);
-      display: inline-flex;
-      align-items: center;
-      gap: 5px;
-    }
-    .ndn-link-pill.drive-pill svg { flex-shrink: 0; }
-
+    .ndn-link-pill.drive-pill{background:rgba(255,255,255,.12);border-color:rgba(255,255,255,.4);display:inline-flex;align-items:center;gap:5px;}
+    .ndn-link-pill.drive-pill svg{flex-shrink:0;}
     .ndh-add-link-row{padding:13px 22px;background:var(--surface-2);display:none;flex-wrap:wrap;gap:10px;align-items:center;border-bottom:1px solid var(--border);transition:background .4s;}
     .ndh-add-link-row.show{display:flex;}
     .ndh-add-link-row input,.ndh-add-link-row select{padding:8px 11px;border-radius:8px;border:1px solid var(--border);outline:none;font-family:'Poppins',sans-serif;font-size:.83rem;color:var(--text-main);background:var(--surface);flex:1;min-width:140px;}
@@ -689,6 +788,13 @@
     .upcoming-item:last-child{border-bottom:none;}
     .upcoming-days{font-size:.72rem;font-weight:700;color:var(--accent);min-width:56px;background:var(--accent-bg);padding:3px 7px;border-radius:5px;text-align:center;}
     .upcoming-title{font-size:.83rem;font-weight:600;flex:1;}
+    /* Dashboard todo card */
+    .dash-todo-item{display:flex;align-items:center;gap:9px;padding:8px 0;border-bottom:1px solid var(--border);cursor:pointer;}
+    .dash-todo-item:last-child{border-bottom:none;}
+    .dash-todo-check{width:18px;height:18px;border-radius:4px;border:2px solid var(--border);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:.65rem;transition:.15s;}
+    .dash-todo-check.checked{background:var(--accent);border-color:var(--accent);color:#fff;}
+    .dash-todo-title{font-size:.82rem;font-weight:600;flex:1;color:var(--text-main);}
+    .dash-todo-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
 
     /* ===== PERFIL ===== */
     #view-profile{max-width:660px;margin:0 auto;padding-bottom:50px;}
@@ -708,55 +814,6 @@
     .profile-logout-btn:hover{background:var(--text-muted);color:#fff;}
     .profile-danger-btn{width:100%;padding:11px;border-radius:10px;border:2px solid #ef4444;background:#fff1f2;color:#b91c1c;font-family:'Poppins',sans-serif;font-weight:600;font-size:13px;cursor:pointer;transition:.2s;margin-top:9px;}
     .profile-danger-btn:hover{background:#ef4444;color:#fff;}
-
-    /* ===== HABIT TRACKER ===== */
-    #view-habits { max-width: 800px; margin: 0 auto; padding-bottom: 60px; }
-    .habit-header-bar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; flex-wrap: wrap; gap: 12px; }
-    .habit-date-nav { display: flex; align-items: center; gap: 10px; }
-    .habit-date-label { font-size: .95rem; font-weight: 700; color: var(--accent-dark); font-family: 'Lora', serif; }
-    .habit-nav-btn { background: none; border: 1.5px solid var(--border); border-radius: 8px; width: 32px; height: 32px; cursor: pointer; color: var(--text-muted); display: flex; align-items: center; justify-content: center; font-size: .9rem; transition: .15s; }
-    .habit-nav-btn:hover { background: var(--accent); color: #fff; border-color: var(--accent); }
-    .habit-add-btn { padding: 8px 18px; border-radius: 9px; border: none; background: var(--accent); color: #fff; font-family: 'Poppins', sans-serif; font-weight: 600; font-size: .82rem; cursor: pointer; transition: .2s; }
-    .habit-add-btn:hover { opacity: .88; }
-    .habit-card { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; overflow: hidden; box-shadow: 0 2px 10px rgba(0,0,0,.04); margin-bottom: 20px; transition: background .4s, border-color .4s; }
-    .habit-card-header { padding: 14px 20px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
-    .habit-card-title { font-size: .78rem; font-weight: 700; text-transform: uppercase; letter-spacing: .9px; color: var(--text-muted); }
-    .habit-progress-bar { height: 4px; background: var(--border); border-radius: 2px; overflow: hidden; flex: 1; max-width: 200px; }
-    .habit-progress-fill { height: 100%; background: var(--accent); border-radius: 2px; transition: width .5s ease; }
-    .habit-progress-label { font-size: .72rem; font-weight: 700; color: var(--accent); min-width: 40px; text-align: right; }
-    .habit-row { display: flex; align-items: center; gap: 14px; padding: 13px 20px; border-bottom: 1px solid var(--border); cursor: pointer; transition: background .12s; user-select: none; }
-    .habit-row:last-child { border-bottom: none; }
-    .habit-row:hover { background: var(--surface-2); }
-    .habit-check { width: 22px; height: 22px; border-radius: 50%; border: 2px solid var(--border); flex-shrink: 0; display: flex; align-items: center; justify-content: center; transition: all .2s; font-size: .8rem; }
-    .habit-check.checked { background: var(--accent); border-color: var(--accent); color: #fff; }
-    .habit-info { flex: 1; }
-    .habit-name { font-size: .9rem; font-weight: 600; color: var(--text-main); }
-    .habit-meta { font-size: .72rem; color: var(--text-muted); margin-top: 1px; }
-    .habit-streak { font-size: .72rem; font-weight: 700; color: var(--accent); background: var(--accent-bg); padding: 3px 8px; border-radius: 20px; }
-    .habit-del-btn { width: 26px; height: 26px; border-radius: 50%; border: none; background: transparent; color: var(--text-muted); cursor: pointer; font-size: .85rem; transition: .15s; display: flex; align-items: center; justify-content: center; opacity: 0; }
-    .habit-row:hover .habit-del-btn { opacity: 1; }
-    .habit-del-btn:hover { background: #fef2f2; color: #ef4444; }
-    .habit-add-row { display: none; padding: 16px 20px; background: var(--surface-2); border-top: 1px solid var(--border); gap: 10px; flex-wrap: wrap; align-items: center; transition: background .4s; }
-    .habit-add-row.show { display: flex; }
-    .habit-add-row input, .habit-add-row select { padding: 9px 12px; border-radius: 8px; border: 1.5px solid var(--border); font-family: 'Poppins', sans-serif; font-size: .85rem; color: var(--text-main); background: var(--surface); outline: none; transition: border-color .2s, background .4s; }
-    .habit-add-row input { flex: 1; min-width: 160px; }
-    .habit-add-row input:focus, .habit-add-row select:focus { border-color: var(--accent); }
-    .habit-save-btn { padding: 9px 16px; border-radius: 8px; border: none; background: var(--accent); color: #fff; font-family: 'Poppins', sans-serif; font-weight: 600; font-size: .82rem; cursor: pointer; }
-    .habit-save-btn:hover { opacity: .88; }
-    .habit-weekly-grid { padding: 16px 20px; border-top: 1px solid var(--border); }
-    .habit-weekly-title { font-size: .72rem; font-weight: 700; text-transform: uppercase; letter-spacing: .8px; color: var(--text-muted); margin-bottom: 10px; }
-    .habit-week-row { display: flex; gap: 8px; align-items: center; margin-bottom: 8px; }
-    .habit-week-name { font-size: .75rem; font-weight: 600; color: var(--text-main); min-width: 140px; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
-    .habit-week-days { display: flex; gap: 5px; }
-    .hwday { width: 28px; height: 28px; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: .65rem; font-weight: 700; color: var(--text-muted); border: 1.5px solid var(--border); background: var(--surface-2); transition: .15s; }
-    .hwday.done { background: var(--accent); border-color: var(--accent); color: #fff; }
-    .hwday.today-col { border-color: var(--accent); font-weight: 700; }
-    .hwday.future { opacity: .4; }
-    .habit-empty { text-align: center; padding: 40px 20px; color: var(--text-muted); font-size: .9rem; }
-    .habit-summary-row { display: flex; gap: 12px; margin-bottom: 20px; flex-wrap: wrap; }
-    .habit-summary-pill { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 12px 18px; display: flex; flex-direction: column; align-items: center; min-width: 100px; box-shadow: 0 2px 6px rgba(0,0,0,.04); flex: 1; transition: background .4s; }
-    .hsp-val { font-size: 1.6rem; font-weight: 700; color: var(--accent-dark); }
-    .hsp-label { font-size: .7rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: .6px; margin-top: 2px; }
 
     /* ===== MODALES ===== */
     .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:2000;display:none;justify-content:center;align-items:center;backdrop-filter:blur(4px);}
@@ -800,62 +857,25 @@
       .notes-canvas-card{min-height:150px;padding:16px;}
       .calendar-modern { flex-direction: column; }
       .cal-modern-sidebar { width: 100%; border-right: none; border-bottom: 1px solid var(--border); }
-      .habit-week-name { min-width: 100px; }
       .cal-time-range-row { gap: 6px; }
+      .todo-input-row { gap: 8px; }
+      .todo-stats-row { flex-wrap: wrap; }
     }
+
     /* ===== MODAL DE PRIVACIDAD ===== */
     .otf-modal-overlay {
-      position: fixed;
-      inset: 0;
-      background: rgba(0, 0, 0, 0.6);
-      z-index: 3000;
-      display: none; /* Se oculta por defecto */
-      justify-content: center;
-      align-items: center;
-      backdrop-filter: blur(4px);
+      position: fixed; inset: 0; background: rgba(0, 0, 0, 0.6); z-index: 3000;
+      display: none; justify-content: center; align-items: center; backdrop-filter: blur(4px);
     }
-
     .otf-modal-content {
-      background: var(--surface);
-      color: var(--text-main);
-      padding: 32px 40px;
-      border-radius: 16px;
-      max-width: 700px;
-      width: 90%;
-      max-height: 85vh;
-      overflow-y: auto;
-      box-shadow: 0 10px 40px rgba(0,0,0,0.2);
-      position: relative;
-      border: 1px solid var(--border);
+      background: var(--surface); color: var(--text-main); padding: 32px 40px; border-radius: 16px;
+      max-width: 700px; width: 90%; max-height: 85vh; overflow-y: auto;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.2); position: relative; border: 1px solid var(--border);
     }
-
-    .otf-modal-content p, .otf-modal-content li {
-      font-size: 0.9rem;
-      line-height: 1.6;
-      color: var(--text-muted);
-      margin-bottom: 12px;
-    }
-
-    .otf-modal-content h3 {
-      font-size: 1.05rem;
-      margin-top: 24px;
-      color: var(--text-main);
-    }
-
-    .otf-close-btn {
-      position: absolute;
-      top: 16px;
-      right: 24px;
-      font-size: 2rem;
-      cursor: pointer;
-      color: var(--text-muted);
-      line-height: 1;
-      transition: color 0.2s;
-    }
-
-    .otf-close-btn:hover {
-      color: #ef4444;
-    }
+    .otf-modal-content p, .otf-modal-content li { font-size: 0.9rem; line-height: 1.6; color: var(--text-muted); margin-bottom: 12px; }
+    .otf-modal-content h3 { font-size: 1.05rem; margin-top: 24px; color: var(--text-main); }
+    .otf-close-btn { position: absolute; top: 16px; right: 24px; font-size: 2rem; cursor: pointer; color: var(--text-muted); line-height: 1; transition: color 0.2s; }
+    .otf-close-btn:hover { color: #ef4444; }
   </style>
 </head>
 <body>
@@ -967,17 +987,13 @@
   </div>
 </div>
 
-<!-- MODAL CALENDARIO — con selector de horario inicio/fin -->
 <div id="calModal" class="modal-overlay">
   <div class="modal-box" style="width:440px;">
     <h2 style="color:var(--accent-dark);margin-top:0;font-size:1.15rem">Agregar Actividad</h2>
     <p id="calModalDateDisplay" style="font-size:.88rem;font-weight:600;color:var(--text-main);text-align:left;margin-bottom:14px;"></p>
     <input type="hidden" id="calDateKey">
-
     <label>Que tenes que hacer?</label>
     <input type="text" id="calTitle" placeholder="Ej: Estudiar Fisica, Parcial de Algebra..." autocomplete="off">
-
-    <!-- Selector de horario con toggle todo el dia -->
     <label>Horario <span style="font-weight:400;color:var(--text-muted);text-transform:none;letter-spacing:0">(opcional)</span></label>
     <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
       <button type="button" class="cal-allday-toggle" id="calAlldayToggle" onclick="toggleAlldayMode()">📅 Todo el dia</button>
@@ -988,7 +1004,6 @@
       <span class="cal-time-separator">→</span>
       <input type="time" class="cal-time-input" id="calTimeTo" value="09:00">
     </div>
-
     <label>Color:</label>
     <select id="calColor">
       <option value="#084734">Verde</option>
@@ -999,7 +1014,6 @@
       <option value="#565656">Gris</option>
       <option value="#d97706">Naranja</option>
     </select>
-
     <button class="btn-add" style="width:100%;margin-top:4px" onclick="saveCalEvent(false)">Guardar</button>
     <button class="btn-goog" onclick="saveCalEvent(true)">
       <span style="display:flex;align-items:center;justify-content:center;gap:7px;">
@@ -1035,10 +1049,7 @@
   <div class="modal-box" style="text-align:left">
     <h3 style="margin-top:0;color:var(--accent-dark);font-size:1.1rem" id="extraModalTitle">Detalles de la clase</h3>
     <label>Modalidad:</label>
-    <select id="extraModalidad">
-      <option value="presencial">Presencial</option>
-      <option value="virtual">Virtual</option>
-    </select>
+    <select id="extraModalidad"><option value="presencial">Presencial</option><option value="virtual">Virtual</option></select>
     <label id="extraLinkLabel">Link / Campus:</label>
     <input type="text" id="extraLink" placeholder="https://...">
     <label id="extraSalonLabel">Salon / Sede:</label>
@@ -1060,12 +1071,11 @@
     <div class="tabs-container">
       <button class="tab-btn active" onclick="switchTab('home',event)">Inicio</button>
       <button class="tab-btn" onclick="switchTab('map',event)">Plan</button>
-      <button class="tab-btn" onclick="switchTab('calendar',event)">Calendario</button>
+      <button class="tab-btn" id="calTabBtn" onclick="switchTab('calendar',event)">Calendario</button>
       <button class="tab-btn" onclick="switchTab('schedule',event)">Horario</button>
       <button class="tab-btn" onclick="switchTab('stats',event)">Progreso</button>
       <button class="tab-btn" onclick="switchTab('pomodoro',event)">Estudiar</button>
       <button class="tab-btn" onclick="switchTab('notes',event)">Apuntes</button>
-      <button class="tab-btn" onclick="switchTab('habits',event)">Habitos</button>
       <button class="tab-btn" onclick="switchTab('profile',event)">Perfil</button>
       <button class="dark-toggle-btn" id="darkToggleBtn" onclick="toggleDarkMode()">
         <span id="darkToggleIcon">&#9790;</span>
@@ -1078,6 +1088,7 @@
 
   <main class="main-content">
 
+    <!-- DASHBOARD -->
     <div id="view-home" class="view-section active">
       <div class="section-header">
         <h2>Resumen</h2>
@@ -1110,9 +1121,18 @@
           <h4>Proximos 7 dias</h4>
           <div id="upcomingContent"><span style="opacity:.6;font-size:.83rem">Sin eventos proximos.</span></div>
         </div>
+        <!-- NUEVO: To-do pendientes en dashboard -->
+        <div class="dash-card" id="dashTodoCard" style="grid-column:1/-1">
+          <h4>Tareas pendientes <span id="dashTodoBadge" style="display:none;background:var(--accent);color:#fff;border-radius:20px;padding:1px 9px;font-size:.68rem;font-weight:700;margin-left:6px;vertical-align:middle"></span></h4>
+          <div id="dashTodoContent"><span style="opacity:.6;font-size:.83rem">Sin tareas pendientes. Podes agregar desde el Calendario.</span></div>
+          <div style="margin-top:12px">
+            <button onclick="switchTab('calendar', {currentTarget: document.querySelector('[onclick*=calendar]')})" style="border:none;background:none;color:var(--accent);font-family:'Poppins',sans-serif;font-size:.78rem;font-weight:700;cursor:pointer;padding:0">Ver todas las tareas →</button>
+          </div>
+        </div>
       </div>
     </div>
 
+    <!-- PLAN -->
     <div id="view-map" class="view-section">
       <div class="section-header">
         <h2>Plan de estudios</h2>
@@ -1124,10 +1144,11 @@
       <div class="mapa-scroll-wrapper"><div class="year-row" id="mallaContainer"></div></div>
     </div>
 
+    <!-- CALENDARIO + TO-DO -->
     <div id="view-calendar" class="view-section">
       <div class="section-header">
         <h2>Calendario</h2>
-        <p>Anota examenes, parciales y entregas.</p>
+        <p>Anota examenes, parciales y entregas. Gestioná tus tareas pendientes abajo.</p>
       </div>
       <div class="calendar-modern">
         <div class="cal-modern-sidebar">
@@ -1168,8 +1189,50 @@
           <div id="calMainContent" style="flex:1;overflow:auto;"></div>
         </div>
       </div>
+
+      <!-- ====== TO-DO LIST ====== -->
+      <div class="todo-panel">
+        <div class="todo-header">
+          <div class="todo-header-left">
+            <h3 class="todo-header-title">Lista de Tareas</h3>
+            <span class="todo-count-badge" id="todoPendingCount">0 pendientes</span>
+          </div>
+          <div class="todo-filters">
+            <button class="todo-filter-btn active" onclick="setTodoFilter('all',this)">Todas</button>
+            <button class="todo-filter-btn" onclick="setTodoFilter('pending',this)">Pendientes</button>
+            <button class="todo-filter-btn" onclick="setTodoFilter('done',this)">Completadas</button>
+            <button class="todo-filter-btn" onclick="setTodoFilter('alta',this)">🔴 Alta prioridad</button>
+          </div>
+        </div>
+        <div class="todo-input-row">
+          <input type="text" id="todoInput" placeholder="Nueva tarea... (Ej: Estudiar parcial de Algebra)" onkeydown="if(event.key==='Enter')addTodo()">
+          <select id="todoPriority">
+            <option value="media">Prioridad media</option>
+            <option value="alta">🔴 Alta</option>
+            <option value="baja">🟢 Baja</option>
+          </select>
+          <select id="todoCategory">
+            <option value="">Sin categoria</option>
+            <option value="Examen">Examen</option>
+            <option value="Trabajo Practico">Trabajo Practico</option>
+            <option value="Lectura">Lectura</option>
+            <option value="Proyecto">Proyecto</option>
+            <option value="Otro">Otro</option>
+          </select>
+          <input type="date" id="todoDueDate" title="Fecha limite (opcional)">
+          <button class="todo-add-btn" onclick="addTodo()">+ Agregar</button>
+        </div>
+        <div class="todo-list" id="todoList"></div>
+        <div class="todo-stats-row">
+          <div class="todo-stat"><span class="todo-stat-val" id="todoStatTotal">0</span><span class="todo-stat-lbl">Total</span></div>
+          <div class="todo-stat"><span class="todo-stat-val" id="todoStatPending">0</span><span class="todo-stat-lbl">Pendientes</span></div>
+          <div class="todo-stat"><span class="todo-stat-val" id="todoStatDone">0</span><span class="todo-stat-lbl">Completadas</span></div>
+          <div class="todo-stat"><span class="todo-stat-val" id="todoStatRate">0%</span><span class="todo-stat-lbl">Completado</span></div>
+        </div>
+      </div>
     </div>
 
+    <!-- HORARIO -->
     <div id="view-schedule" class="view-section">
       <div class="section-header">
         <h2>Horario semanal</h2>
@@ -1181,6 +1244,7 @@
       <div id="scheduleWrapper"></div>
     </div>
 
+    <!-- PROGRESO -->
     <div id="view-stats" class="view-section">
       <div class="section-header">
         <h2>Mi progreso</h2>
@@ -1212,6 +1276,7 @@
       </div>
     </div>
 
+    <!-- POMODORO -->
     <div id="view-pomodoro" class="view-section">
       <div class="section-header">
         <h2>Modo estudio</h2>
@@ -1252,7 +1317,7 @@
       <div class="section-header">
         <h2>Mis Apuntes</h2>
         <p>Selecciona una materia para ver y cargar tus recursos.</p>
-       <div class="notes-search-top">
+        <div class="notes-search-top">
           <button class="notes-filter-btn active" id="filterAll" onclick="setNotesFilter('all',this)">Todas</button>
           <button class="notes-filter-btn" id="filterCursando" onclick="setNotesFilter('cursando',this)">En curso</button>
           <button class="notes-filter-btn" id="filterAprobadas" onclick="setNotesFilter('aprobadas',this)">Aprobadas</button>
@@ -1263,56 +1328,7 @@
       <div id="notesDetail" style="display:none"></div>
     </div>
 
-    <!-- HABIT TRACKER -->
-    <div id="view-habits" class="view-section">
-      <div class="section-header">
-        <h2>Seguimiento de Habitos</h2>
-        <p>Construye rutinas diarias y mantene tu racha activa.</p>
-      </div>
-      <div class="habit-header-bar">
-        <div class="habit-date-nav">
-          <button class="habit-nav-btn" onclick="habitNavDay(-1)">&#8249;</button>
-          <span class="habit-date-label" id="habitDateLabel"></span>
-          <button class="habit-nav-btn" onclick="habitNavDay(1)">&#8250;</button>
-        </div>
-        <button class="habit-add-btn" onclick="toggleHabitAddRow()">+ Nuevo habito</button>
-      </div>
-      <div class="habit-summary-row" id="habitSummaryRow"></div>
-      <div class="habit-card">
-        <div class="habit-add-row" id="habitAddRow">
-          <input type="text" id="habitNameInput" placeholder="Nombre del habito (Ej: Leer 30 minutos)" maxlength="60">
-          <select id="habitAreaSelect">
-            <option value="Estudio">Estudio</option>
-            <option value="Salud">Salud</option>
-            <option value="Ejercicio">Ejercicio</option>
-            <option value="Personal">Personal</option>
-            <option value="Finanzas">Finanzas</option>
-          </select>
-          <button class="habit-save-btn" onclick="addHabit()">Guardar</button>
-        </div>
-        <div class="habit-card-header">
-          <span class="habit-card-title">Habitos de hoy</span>
-          <div style="display:flex;align-items:center;gap:10px;">
-            <div class="habit-progress-bar"><div class="habit-progress-fill" id="habitProgressFill" style="width:0%"></div></div>
-            <span class="habit-progress-label" id="habitProgressLabel">0/0</span>
-          </div>
-        </div>
-        <div id="habitList"></div>
-      </div>
-      <div class="habit-card" style="margin-top:20px">
-        <div class="habit-card-header">
-          <span class="habit-card-title">Vista semanal</span>
-        </div>
-        <div class="habit-weekly-grid">
-          <div class="habit-weekly-title">Dias de la semana</div>
-          <div style="display:flex;gap:5px;margin-bottom:10px;padding-left:148px">
-            <div id="weekDayLabels" style="display:flex;gap:5px;"></div>
-          </div>
-          <div id="habitWeeklyRows"></div>
-        </div>
-      </div>
-    </div>
-
+    <!-- PERFIL -->
     <div id="view-profile" class="view-section">
       <div class="section-header"><h2>Perfil</h2><p>Administra tu cuenta y cambia el tema.</p></div>
       <div class="profile-section">
@@ -1341,8 +1357,6 @@
 </div>
 
 <audio id="pomAudio" preload="auto"></audio>
-
-<!-- Google Identity Services + Drive API -->
 <script src="https://accounts.google.com/gsi/client" async defer></script>
 <script src="https://apis.google.com/js/api.js"></script>
 
@@ -1350,26 +1364,21 @@
 // ==================== DARK MODE ====================
 function toggleDarkMode(){
   const isDark=document.body.classList.toggle('dark-mode');
-  const icon=document.getElementById('darkToggleIcon');
-  const label=document.getElementById('darkToggleLabel');
-  icon.textContent=isDark?'☀':'☽';
-  label.textContent=isDark?'Claro':'Oscuro';
+  document.getElementById('darkToggleIcon').textContent=isDark?'☀':'☽';
+  document.getElementById('darkToggleLabel').textContent=isDark?'Claro':'Oscuro';
   localStorage.setItem('darkMode',isDark?'1':'0');
 }
 function initDarkMode(){
-  const saved=localStorage.getItem('darkMode');
-  if(saved==='1'){
+  if(localStorage.getItem('darkMode')==='1'){
     document.body.classList.add('dark-mode');
-    const icon=document.getElementById('darkToggleIcon');
-    const label=document.getElementById('darkToggleLabel');
-    if(icon)icon.textContent='☀';
-    if(label)label.textContent='Claro';
+    const icon=document.getElementById('darkToggleIcon'),label=document.getElementById('darkToggleLabel');
+    if(icon)icon.textContent='☀';if(label)label.textContent='Claro';
   }
 }
 
 // ==================== SONIDO POMODORO ====================
 function playPomSound(){
-  try {
+  try{
     const ctx=new(window.AudioContext||window.webkitAudioContext)();
     [523,659,784,1047].forEach((freq,i)=>{
       const osc=ctx.createOscillator(),gain=ctx.createGain();
@@ -1385,9 +1394,10 @@ function playPomSound(){
 // ==================== ESTADO ====================
 let obState={career:'',uni:'',years:'',theme:'Verde',accent:'#084734',dark:'#084734',light:'#a8d5c2',bg:'#cdedb3',materias:[]};
 let profileSelectedTheme=null;
-let tableData={},gradesData={},calendarData={},apuntesData={},pomodoroStats={},horarioExtraData={},habitData={};
+let tableData={},gradesData={},calendarData={},apuntesData={},pomodoroStats={},horarioExtraData={},todoData=[];
 let authMode='registro';
 let _gradeModalCourseId=null;
+let todoFilter='all';
 
 const SUBJECT_ICONS=['📚','📖','📝','💡','🔬','📐','💻','🧪','📊','🎯','🏛','⚗️','🧮','📡','🎨','🔭'];
 let notesCurrentFilter='all';
@@ -1643,8 +1653,7 @@ window.switchTab=(name,event)=>{
   if(event&&event.currentTarget)event.currentTarget.classList.add('active');
   if(name==='notes')renderNotesTab();
   if(name==='pomodoro')renderPomSubjectSelect();
-  if(name==='calendar'){renderCalendarView();renderSidebar();}
-  if(name==='habits')renderHabitsView();
+  if(name==='calendar'){renderCalendarView();renderSidebar();renderTodoList();}
 };
 
 // ==================== MODAL DE NOTA ====================
@@ -1696,7 +1705,52 @@ function renderDashboard(){
   const grades=Object.values(gradesData).map(x=>parseFloat(x)).filter(x=>!isNaN(x));
   const avg=grades.length>0?(grades.reduce((a,b)=>a+b,0)/grades.length).toFixed(2):null;
   const dah=document.getElementById('dashAvgHome');if(dah)dah.textContent=avg!==null?avg:'—';
-  renderNextClass();renderUpcoming();
+  renderNextClass();renderUpcoming();renderDashTodo();
+}
+
+// ==================== DASHBOARD TODO ====================
+function renderDashTodo(){
+  const cont=document.getElementById('dashTodoContent');
+  const badge=document.getElementById('dashTodoBadge');
+  if(!cont)return;
+  const pending=todoData.filter(t=>!t.done);
+  if(!pending.length){
+    cont.innerHTML='<span style="opacity:.6;font-size:.83rem">Sin tareas pendientes. Podes agregar desde el Calendario.</span>';
+    if(badge){badge.style.display='none';}
+    updateCalTabBadge();
+    return;
+  }
+  // Sort: alta priority first, then by due date
+  const sorted=[...pending].sort((a,b)=>{
+    const pOrder={alta:0,media:1,baja:2};
+    if(pOrder[a.priority]!==pOrder[b.priority])return pOrder[a.priority]-pOrder[b.priority];
+    if(a.dueDate&&b.dueDate)return a.dueDate.localeCompare(b.dueDate);
+    if(a.dueDate)return -1;if(b.dueDate)return 1;
+    return 0;
+  }).slice(0,5);
+  const priorityColors={alta:'#ef4444',media:'#f59e0b',baja:'#22c55e'};
+  cont.innerHTML=sorted.map(t=>`
+    <div class="dash-todo-item" onclick="toggleTodoDone('${t.id}')">
+      <div class="dash-todo-check${t.done?' checked':''}"></div>
+      <div class="dash-todo-title">${t.title}</div>
+      ${t.dueDate?`<span style="font-size:.68rem;color:${isOverdue(t)?'#ef4444':'var(--text-muted)'};font-weight:600">${formatDate(t.dueDate)}</span>`:''}
+      <div class="dash-todo-dot" style="background:${priorityColors[t.priority]||'#888'}"></div>
+    </div>`).join('');
+  if(badge){badge.textContent=pending.length;badge.style.display='inline-block';}
+  updateCalTabBadge();
+}
+
+function updateCalTabBadge(){
+  const calTab=document.getElementById('calTabBtn');
+  if(!calTab)return;
+  const pending=todoData.filter(t=>!t.done).length;
+  let badge=calTab.querySelector('.tab-badge');
+  if(pending>0){
+    if(!badge){badge=document.createElement('span');badge.className='tab-badge';calTab.appendChild(badge);}
+    badge.textContent=pending>99?'99+':pending;
+  } else {
+    if(badge)badge.remove();
+  }
 }
 
 // ==================== PROXIMA CLASE ====================
@@ -1708,7 +1762,7 @@ function renderNextClass(){
   const hh=now.getHours(),mm=now.getMinutes();
   let found=null;
   horas.forEach(h=>{
-    const [hNum]=h.split(':').map(Number);
+    const[hNum]=h.split(':').map(Number);
     if(hNum>hh||(hNum===hh&&mm<30)){
       const key=`${today}-${h}`;
       const val=tableData[key];
@@ -1734,13 +1788,11 @@ function renderNextClass(){
   const detalle=found.modalidad==='virtual'&&found.link
     ?`<a href="${found.link}" target="_blank" style="color:var(--accent);text-decoration:underline;font-size:.76rem;font-weight:600">Entrar a la clase</a>`
     :found.salon?`<span style="font-size:.83rem;color:var(--text-muted)">${found.salon}</span>`:'';
-  cont.innerHTML=`<div style="display:flex;align-items:flex-start;gap:11px">
-      <div>
-        <div style="font-size:1rem;font-weight:700;color:var(--text-main)">${found.materia}</div>
-        <div style="font-size:.82rem;color:var(--text-muted);margin-top:2px">${found.hora}${diaLabel}</div>
-        ${detalle?'<div style="margin-top:5px">'+detalle+'</div>':''}
-      </div>
-    </div>`;
+  cont.innerHTML=`<div style="display:flex;align-items:flex-start;gap:11px"><div>
+    <div style="font-size:1rem;font-weight:700;color:var(--text-main)">${found.materia}</div>
+    <div style="font-size:.82rem;color:var(--text-muted);margin-top:2px">${found.hora}${diaLabel}</div>
+    ${detalle?'<div style="margin-top:5px">'+detalle+'</div>':''}
+  </div></div>`;
 }
 
 // ==================== PROXIMOS EVENTOS ====================
@@ -1878,50 +1930,176 @@ function saveExtraInfo(){
 function openModal(id){document.getElementById(id).classList.add('open');}
 function closeModal(id){document.getElementById(id).classList.remove('open');}
 
-// ==================== CALENDARIO MODAL: TOGGLE TODO EL DIA ====================
-let _calAlldayMode = false;
+// ==================== TODO LIST ====================
+function addTodo(){
+  const input=document.getElementById('todoInput');
+  const title=(input?.value||'').trim();
+  if(!title){input&&input.focus();return;}
+  const priority=document.getElementById('todoPriority')?.value||'media';
+  const category=document.getElementById('todoCategory')?.value||'';
+  const dueDate=document.getElementById('todoDueDate')?.value||'';
+  const newTodo={
+    id:'t'+Date.now(),
+    title,
+    priority,
+    category,
+    dueDate,
+    done:false,
+    createdAt:new Date().toISOString()
+  };
+  todoData.unshift(newTodo);
+  _saveTodo();
+  if(input)input.value='';
+  if(document.getElementById('todoDueDate'))document.getElementById('todoDueDate').value='';
+  renderTodoList();
+  renderDashTodo();
+}
+
+function toggleTodoDone(id){
+  const todo=todoData.find(t=>t.id===id);
+  if(!todo)return;
+  todo.done=!todo.done;
+  todo.completedAt=todo.done?new Date().toISOString():null;
+  _saveTodo();
+  renderTodoList();
+  renderDashTodo();
+}
+
+function deleteTodo(id){
+  if(!confirm('Borrar esta tarea?'))return;
+  todoData=todoData.filter(t=>t.id!==id);
+  _saveTodo();
+  renderTodoList();
+  renderDashTodo();
+}
+
+function setTodoFilter(f,btn){
+  todoFilter=f;
+  document.querySelectorAll('.todo-filter-btn').forEach(b=>b.classList.remove('active'));
+  if(btn)btn.classList.add('active');
+  renderTodoList();
+}
+
+function isOverdue(todo){
+  if(!todo.dueDate||todo.done)return false;
+  const today=new Date();today.setHours(0,0,0,0);
+  const due=new Date(todo.dueDate+'T00:00:00');
+  return due<today;
+}
+
+function formatDate(dateStr){
+  if(!dateStr)return'';
+  const d=new Date(dateStr+'T00:00:00');
+  const today=new Date();today.setHours(0,0,0,0);
+  const diff=Math.round((d-today)/(1000*60*60*24));
+  if(diff===0)return'Hoy';
+  if(diff===1)return'Mañana';
+  if(diff===-1)return'Ayer';
+  if(diff<0)return`Hace ${Math.abs(diff)}d`;
+  if(diff<=7)return`En ${diff}d`;
+  return d.toLocaleDateString('es-AR',{day:'numeric',month:'short'});
+}
+
+function renderTodoList(){
+  const list=document.getElementById('todoList');
+  if(!list)return;
+
+  let filtered=[...todoData];
+  if(todoFilter==='pending')filtered=filtered.filter(t=>!t.done);
+  else if(todoFilter==='done')filtered=filtered.filter(t=>t.done);
+  else if(todoFilter==='alta')filtered=filtered.filter(t=>t.priority==='alta'&&!t.done);
+
+  // Sort: pending first, then alta priority, then by due date
+  filtered.sort((a,b)=>{
+    if(a.done!==b.done)return a.done?1:-1;
+    const pOrder={alta:0,media:1,baja:2};
+    if(!a.done&&!b.done&&pOrder[a.priority]!==pOrder[b.priority])return pOrder[a.priority]-pOrder[b.priority];
+    if(a.dueDate&&b.dueDate)return a.dueDate.localeCompare(b.dueDate);
+    if(a.dueDate)return-1;if(b.dueDate)return 1;
+    return new Date(b.createdAt)-new Date(a.createdAt);
+  });
+
+  if(!filtered.length){
+    list.innerHTML=`<div class="todo-empty">
+      <div class="todo-empty-icon">${todoFilter==='done'?'✅':'📋'}</div>
+      ${todoFilter==='done'?'No completaste ninguna tarea todavia.':todoFilter==='alta'?'No hay tareas de alta prioridad.':'No hay tareas. Agrega una arriba!'}
+    </div>`;
+  } else {
+    const priorityLabel={alta:'Alta',media:'Media',baja:'Baja'};
+    list.innerHTML=filtered.map(t=>`
+      <div class="todo-item${t.done?' done':''}" onclick="toggleTodoDone('${t.id}')">
+        <div class="todo-check${t.done?' checked':(t.priority==='alta'?' ':(t.priority==='media'?' ':''))}">${t.done?'✓':''}</div>
+        <div class="todo-text-block">
+          <div class="todo-title">${t.title}</div>
+          <div class="todo-meta">
+            <span class="todo-priority-badge ${t.priority}">${priorityLabel[t.priority]||t.priority}</span>
+            ${t.category?`<span class="todo-category-tag">${t.category}</span>`:''}
+            ${t.dueDate?`<span class="todo-due-date${isOverdue(t)?' overdue':''}">${formatDate(t.dueDate)}</span>`:''}
+          </div>
+        </div>
+        <div class="todo-item-actions">
+          <button class="todo-del-btn" onclick="event.stopPropagation();deleteTodo('${t.id}')" title="Eliminar">×</button>
+        </div>
+      </div>`).join('');
+  }
+
+  // Stats
+  const total=todoData.length;
+  const pending=todoData.filter(t=>!t.done).length;
+  const done=todoData.filter(t=>t.done).length;
+  const rate=total>0?Math.round(done/total*100):0;
+  const el=(id,val)=>{const e=document.getElementById(id);if(e)e.textContent=val;};
+  el('todoStatTotal',total);
+  el('todoStatPending',pending);
+  el('todoStatDone',done);
+  el('todoStatRate',rate+'%');
+  const badge=document.getElementById('todoPendingCount');
+  if(badge)badge.textContent=`${pending} pendiente${pending!==1?'s':''}`;
+}
+
+function _saveTodo(){
+  try{localStorage.setItem('todoData',JSON.stringify(todoData));}catch(e){}
+  if(window.syncCloud)window.syncCloud();
+}
+
+// ==================== CALENDARIO MODAL ====================
+let _calAlldayMode=false;
 
 function toggleAlldayMode(){
-  _calAlldayMode = !_calAlldayMode;
-  const btn = document.getElementById('calAlldayToggle');
-  const row = document.getElementById('calTimeRangeRow');
+  _calAlldayMode=!_calAlldayMode;
+  const btn=document.getElementById('calAlldayToggle');
+  const row=document.getElementById('calTimeRangeRow');
   if(_calAlldayMode){
-    btn.classList.add('active');
-    btn.textContent = '✓ Todo el dia';
-    row.style.opacity = '.4';
-    row.style.pointerEvents = 'none';
+    btn.classList.add('active');btn.textContent='✓ Todo el dia';
+    row.style.opacity='.4';row.style.pointerEvents='none';
   } else {
-    btn.classList.remove('active');
-    btn.textContent = '📅 Todo el dia';
-    row.style.opacity = '1';
-    row.style.pointerEvents = '';
+    btn.classList.remove('active');btn.textContent='📅 Todo el dia';
+    row.style.opacity='1';row.style.pointerEvents='';
   }
 }
 
 function resetCalModal(){
-  _calAlldayMode = false;
-  const btn = document.getElementById('calAlldayToggle');
-  const row = document.getElementById('calTimeRangeRow');
-  if(btn){ btn.classList.remove('active'); btn.textContent='📅 Todo el dia'; }
-  if(row){ row.style.opacity='1'; row.style.pointerEvents=''; }
+  _calAlldayMode=false;
+  const btn=document.getElementById('calAlldayToggle');
+  const row=document.getElementById('calTimeRangeRow');
+  if(btn){btn.classList.remove('active');btn.textContent='📅 Todo el dia';}
+  if(row){row.style.opacity='1';row.style.pointerEvents='';}
   const tf=document.getElementById('calTimeFrom');if(tf)tf.value='08:00';
   const tt=document.getElementById('calTimeTo');if(tt)tt.value='09:00';
 }
 
-// Formato de hora para mostrar en eventos: "09:00 - 10:30"
 function buildTimeLabel(){
-  if(_calAlldayMode) return 'Todo el dia';
-  const from = document.getElementById('calTimeFrom')?.value || '';
-  const to   = document.getElementById('calTimeTo')?.value || '';
-  if(!from && !to) return '';
-  if(from && to) return `${from} - ${to}`;
-  return from || to;
+  if(_calAlldayMode)return'Todo el dia';
+  const from=document.getElementById('calTimeFrom')?.value||'';
+  const to=document.getElementById('calTimeTo')?.value||'';
+  if(!from&&!to)return'';
+  if(from&&to)return`${from} - ${to}`;
+  return from||to;
 }
 
-// Hora en minutos para posición en vista semana
 function timeToMinutes(t){
-  if(!t) return 0;
-  const [h,m]=(t||'0:0').split(':').map(Number);
+  if(!t)return 0;
+  const[h,m]=(t||'0:0').split(':').map(Number);
   return h*60+(m||0);
 }
 
@@ -1936,8 +2114,7 @@ let calView='week';
 let sidebarMonth=new Date().getMonth();
 let sidebarYear=new Date().getFullYear();
 
-function getTodayKey(){
-  const n=new Date();return`${n.getFullYear()}-${n.getMonth()}-${n.getDate()}`;}
+function getTodayKey(){const n=new Date();return`${n.getFullYear()}-${n.getMonth()}-${n.getDate()}`;}
 
 function initWeekStart(){
   const now=new Date();
@@ -2032,7 +2209,7 @@ function jumpToDate(y,m,d){
   currentWeekStart=new Date(dt);
   currentWeekStart.setDate(dt.getDate()+diff);
   currentWeekStart.setHours(0,0,0,0);
-  if(calView==='month'){renderCalendarView();}
+  if(calView==='month')renderCalendarView();
   else{calView='week';setCalView('week');}
 }
 
@@ -2044,7 +2221,7 @@ function renderSidebarUpcoming(){
     const dt=new Date(now);dt.setDate(now.getDate()+d);
     const key=`${dt.getFullYear()}-${dt.getMonth()}-${dt.getDate()}`;
     if(calendarData[key])calendarData[key].forEach(ev=>{
-      items.push({d:d,title:ev.title,color:ev.color,date:`${dt.getDate()} ${monthNames[dt.getMonth()].slice(0,3)}`});
+      items.push({d,title:ev.title,color:ev.color,date:`${dt.getDate()} ${monthNames[dt.getMonth()].slice(0,3)}`});
     });
     if(items.length>=5)break;
   }
@@ -2084,12 +2261,9 @@ function renderWeekView(cont){
   weekDays.forEach((d,di)=>{
     const dStr=`${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
     bodyHTML+=`<div class="cal-week-day-col" data-dstr="${dStr}">`;
-    horas.forEach((h,hi)=>{
-      bodyHTML+=`<div class="cal-time-slot" onclick="openCalModal('${dStr}',${d.getDate()})"></div>`;
-    });
+    horas.forEach(h=>{bodyHTML+=`<div class="cal-time-slot" onclick="openCalModal('${dStr}',${d.getDate()})"></div>`;});
     if(calendarData[dStr]){
       calendarData[dStr].forEach((ev,idx)=>{
-        // Soporte para horario con from/to o formato legacy "HH:MM - HH:MM"
         let topPx=0,heightPx=56;
         const startH=8;
         if(ev.timeFrom){
@@ -2099,11 +2273,7 @@ function renderWeekView(cont){
           heightPx=Math.max(28,(toMin-fromMin)/60*56);
         } else if(ev.time){
           const m=ev.time.match(/(\d+):(\d+)/);
-          if(m){
-            const evH=parseInt(m[1]),evM=parseInt(m[2]);
-            topPx=(evH-startH)*56+Math.floor(evM/60*56);
-            heightPx=56;
-          }
+          if(m){const evH=parseInt(m[1]),evM=parseInt(m[2]);topPx=(evH-startH)*56+Math.floor(evM/60*56);heightPx=56;}
         }
         const timeLabel=ev.timeFrom?(ev.timeTo?`${ev.timeFrom} - ${ev.timeTo}`:ev.timeFrom):(ev.time||'');
         bodyHTML+=`<div class="cal-week-event" style="background:${ev.color};top:${topPx}px;height:${heightPx}px;" onclick="event.stopPropagation();openCalModal('${dStr}',${d.getDate()})">
@@ -2147,7 +2317,7 @@ function renderDayView(cont){
   const d=new Date(currentWeekStart);
   const dStr=`${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
   let html=`<div style="padding:16px">`;
-  horas.forEach((h,hi)=>{
+  horas.forEach(h=>{
     html+=`<div style="display:flex;gap:12px;border-bottom:1px solid var(--border);min-height:52px;align-items:flex-start;padding:8px 0;cursor:pointer" onclick="openCalModal('${dStr}',${d.getDate()})">
       <span style="font-size:.7rem;font-weight:700;color:var(--text-muted);min-width:46px">${h}</span>
       <div style="flex:1">`;
@@ -2157,7 +2327,8 @@ function renderDayView(cont){
     }).forEach((ev,idx)=>{
       const tl=ev.timeFrom?(ev.timeTo?`${ev.timeFrom} - ${ev.timeTo}`:ev.timeFrom):(ev.time||'');
       html+=`<div style="background:${ev.color};color:#fff;border-radius:7px;padding:5px 10px;font-size:.8rem;font-weight:600;margin-bottom:4px;display:flex;align-items:center;justify-content:space-between;">
-        <span>${tl?`<span style='opacity:.8;font-size:.75rem'>${tl}</span> `:''}<span>${ev.title}</span></span><span style="cursor:pointer;opacity:.8" onclick="event.stopPropagation();deleteCalEvent('${dStr}',${idx})">×</span></div>`;
+        <span>${tl?`<span style='opacity:.8;font-size:.75rem'>${tl}</span> `:''}<span>${ev.title}</span></span>
+        <span style="cursor:pointer;opacity:.8" onclick="event.stopPropagation();deleteCalEvent('${dStr}',${idx})">×</span></div>`;
     });
     html+=`</div></div>`;
   });
@@ -2180,28 +2351,19 @@ window.saveCalEvent=(openGoogle)=>{
   const title=document.getElementById('calTitle').value.trim();
   const color=document.getElementById('calColor').value;
   if(!title){alert('Escribe que vas a hacer.');return;}
-
-  // Horario: nuevo sistema con timeFrom/timeTo o "Todo el dia"
   const timeLabel=buildTimeLabel();
   const timeFrom=_calAlldayMode?'':document.getElementById('calTimeFrom').value;
   const timeTo=_calAlldayMode?'':document.getElementById('calTimeTo').value;
-
   if(!calendarData[key])calendarData[key]=[];
-  calendarData[key].push({title, time:timeLabel, timeFrom, timeTo, color});
+  calendarData[key].push({title,time:timeLabel,timeFrom,timeTo,color});
   try{localStorage.setItem('indCalendar',JSON.stringify(calendarData));}catch(e){}
   if(window.syncCloud)window.syncCloud();
   renderCalendarView();renderSidebar();closeModal('calModal');renderUpcoming();
-
   if(openGoogle){
     const parts=key.split('-');const y=parts[0];const mo=(parseInt(parts[1])+1).toString().padStart(2,'0');const da=parts[2].padStart(2,'0');
-    let details='';
-    if(timeFrom&&timeTo)details=`Horario: ${timeFrom} - ${timeTo}`;
-    else if(timeLabel)details=`Horario: ${timeLabel}`;
     let gStart=y+mo+da,gEnd=y+mo+da;
-    if(timeFrom&&timeTo){
-      gStart=`${y}${mo}${da}T${timeFrom.replace(':','')}00`;
-      gEnd=`${y}${mo}${da}T${timeTo.replace(':','')}00`;
-    }
+    if(timeFrom&&timeTo){gStart=`${y}${mo}${da}T${timeFrom.replace(':','')}00`;gEnd=`${y}${mo}${da}T${timeTo.replace(':','')}00`;}
+    const details=timeFrom&&timeTo?`Horario: ${timeFrom} - ${timeTo}`:(timeLabel?`Horario: ${timeLabel}`:'');
     window.open(`https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(title)}&dates=${gStart}/${gEnd}&details=${encodeURIComponent(details)}`,'_blank');
   }
 };
@@ -2407,7 +2569,7 @@ function getSubjectIcon(id){
   return SUBJECT_ICONS[Math.abs(h)%SUBJECT_ICONS.length];
 }
 
-window.setNotesFilter=function(filter, btn){
+window.setNotesFilter=function(filter,btn){
   notesCurrentFilter=filter;
   document.querySelectorAll('.notes-filter-btn').forEach(b=>b.classList.remove('active'));
   if(btn)btn.classList.add('active');
@@ -2422,13 +2584,11 @@ function renderNotesTab(){
   const searchInput=document.getElementById('notesSearchInput');if(searchInput)searchInput.value='';
   notesCurrentFilter='all';
   document.querySelectorAll('.notes-filter-btn').forEach((b,i)=>b.classList.toggle('active',i===0));
-
   const enabled=Array.from(getCourses()).filter(c=>c.classList.contains('enabled')||c.classList.contains('completed'));
   if(!enabled.length){
     grid.innerHTML='<span style="color:var(--text-muted);font-size:.88rem;grid-column:1/-1">Habilita materias en el Plan de estudios para ver sus apuntes.</span>';
     return;
   }
-
   grid.innerHTML=enabled.map((c,idx)=>{
     const id=c.dataset.id;
     const name=c.querySelector('.course-name')?.textContent||'';
@@ -2438,8 +2598,8 @@ function renderNotesTab(){
     const hasNotes=count>0;
     const icon=getSubjectIcon(id);
     const statusBadge=isCompleted
-      ? `<span class="notes-card-status aprobada">${nota?nota+' ★':'✓ Aprobada'}</span>`
-      : `<span class="notes-card-status cursando">En curso</span>`;
+      ?`<span class="notes-card-status aprobada">${nota?nota+' ★':'✓ Aprobada'}</span>`
+      :`<span class="notes-card-status cursando">En curso</span>`;
     const countLabel=count===0?'Sin recursos aún':`${count} recurso${count!==1?'s':''}`;
     return`<div class="notes-canvas-card${hasNotes?' has-notes':''}" data-id="${id}" data-name="${name.replace(/"/g,'&quot;')}" data-has="${hasNotes?'1':'0'}" data-completed="${isCompleted?'1':'0'}" onclick="openNotesDetail('${id}','${name.replace(/'/g,"\\'").replace(/"/g,'&quot;')}')">
       ${statusBadge}
@@ -2455,15 +2615,14 @@ window.filterNotes=()=>{
   const query=(document.getElementById('notesSearchInput')?.value||'').toLowerCase();
   document.querySelectorAll('.notes-canvas-card').forEach(card=>{
     const name=(card.querySelector('.notes-card-title')?.textContent||'').toLowerCase();
-    const isCompleted = card.dataset.completed === '1';
-    
-    let showByFilter = true;
-    if(notesCurrentFilter === 'cursando') showByFilter = !isCompleted;
-    else if(notesCurrentFilter === 'aprobadas') showByFilter = isCompleted;
-    
-    card.style.display = (name.includes(query) && showByFilter) ? '' : 'none';
+    const isCompleted=card.dataset.completed==='1';
+    let showByFilter=true;
+    if(notesCurrentFilter==='cursando')showByFilter=!isCompleted;
+    else if(notesCurrentFilter==='aprobadas')showByFilter=isCompleted;
+    card.style.display=(name.includes(query)&&showByFilter)?'':'none';
   });
 };
+
 function openNotesDetail(id,name){
   _notesActiveSubject=id;
   document.getElementById('notesGrid').style.display='none';
@@ -2485,126 +2644,55 @@ const COVER_STYLES=[
 ];
 function getCoverStyle(id){let h=0;for(let i=0;i<id.length;i++)h=(h<<5)-h+id.charCodeAt(i);return COVER_STYLES[Math.abs(h)%COVER_STYLES.length];}
 
-// ==================== GOOGLE DRIVE: CREAR CARPETA (API REAL) ====================
-const DRIVE_CLIENT_ID = "34112804247-gof76i8rb103qf6j9ht68qnenu6c5clr.apps.googleusercontent.com";
-const DRIVE_API_KEY   = "AIzaSyBpT2S6cFc3cVKcAaIrvW-MKdv8xVBcpFo";
+// ==================== GOOGLE DRIVE ====================
+const DRIVE_CLIENT_ID="34112804247-gof76i8rb103qf6j9ht68qnenu6c5clr.apps.googleusercontent.com";
+const DRIVE_API_KEY="AIzaSyBpT2S6cFc3cVKcAaIrvW-MKdv8xVBcpFo";
+let _driveTokenClient=null,_driveGapiInited=false,_driveGisInited=false,_driveSubjectId=null;
 
-let _driveTokenClient = null;
-let _driveGapiInited  = false;
-let _driveGisInited   = false;
-let _driveSubjectId   = null;  // qué materia disparó la creación
+function _initDriveGapiClient(){gapi.client.init({apiKey:DRIVE_API_KEY,discoveryDocs:["https://www.googleapis.com/discovery/v1/apis/drive/v3/rest"]}).then(()=>{_driveGapiInited=true;});}
+function _initDriveGis(){if(!window.google||!window.google.accounts)return;_driveTokenClient=google.accounts.oauth2.initTokenClient({client_id:DRIVE_CLIENT_ID,scope:"https://www.googleapis.com/auth/drive.file",callback:_onDriveToken});_driveGisInited=true;}
 
-// Inicializa el cliente GAPI (llamado por el callback de api.js)
-function _initDriveGapiClient(){
-  gapi.client.init({
-    apiKey: DRIVE_API_KEY,
-    discoveryDocs: ["https://www.googleapis.com/discovery/v1/apis/drive/v3/rest"],
-  }).then(()=>{ _driveGapiInited = true; });
-}
-
-// Inicializa el cliente GIS (Identity Services)
-function _initDriveGis(){
-  if(!window.google || !window.google.accounts) return;
-  _driveTokenClient = google.accounts.oauth2.initTokenClient({
-    client_id: DRIVE_CLIENT_ID,
-    scope: "https://www.googleapis.com/auth/drive.file",
-    callback: _onDriveToken,
-  });
-  _driveGisInited = true;
-}
-
-// Callback cuando se obtiene el token OAuth
 async function _onDriveToken(resp){
-  if(resp.error){ console.error('Drive OAuth error:', resp); showDriveToast(null,'error'); return; }
-
-  // Recuperar nombre de materia
-  const subjId   = _driveSubjectId;
-  const nameEl   = document.querySelector('.ndn-subject-name');
-  const nombre   = nameEl ? nameEl.textContent.trim() : 'Carpeta de materia';
-
-  try {
-    const res = await gapi.client.drive.files.create({
-      resource: { name: nombre, mimeType: "application/vnd.google-apps.folder" },
-      fields: "id, webViewLink",
-    });
-
-    const folderId   = res.result.id;
-    const folderLink = res.result.webViewLink || `https://drive.google.com/drive/folders/${folderId}`;
-
-    // Guardar el link en los datos de la materia
+  if(resp.error){showDriveToast(null,'error');return;}
+  const subjId=_driveSubjectId;
+  const nameEl=document.querySelector('.ndn-subject-name');
+  const nombre=nameEl?nameEl.textContent.trim():'Carpeta de materia';
+  try{
+    const res=await gapi.client.drive.files.create({resource:{name:nombre,mimeType:"application/vnd.google-apps.folder"},fields:"id, webViewLink"});
+    const folderLink=res.result.webViewLink||`https://drive.google.com/drive/folders/${res.result.id}`;
     if(subjId){
-      if(!apuntesData[subjId] || Array.isArray(apuntesData[subjId]))
-        apuntesData[subjId] = {_campus:'', _drive:''};
-      apuntesData[subjId]._drive = folderLink;
-      _saveApuntes();
-      renderNotesDetail(subjId, nombre);
+      if(!apuntesData[subjId]||Array.isArray(apuntesData[subjId]))apuntesData[subjId]={_campus:'',_drive:''};
+      apuntesData[subjId]._drive=folderLink;
+      _saveApuntes();renderNotesDetail(subjId,nombre);
     }
-
-    showDriveToast(nombre, 'success', folderLink);
-  } catch(e){
-    console.error('Error creando carpeta Drive:', e);
-    showDriveToast(nombre, 'error');
-  }
+    showDriveToast(nombre,'success',folderLink);
+  }catch(e){showDriveToast(nombre,'error');}
 }
 
-// Punto de entrada: el botón "Crear carpeta en Drive" llama a esto
-function openDriveForSubject(id, name){
-  const subj      = apuntesData[id];
-  const savedLink = subj && !Array.isArray(subj) ? subj._drive : '';
-
-  // Si ya hay link guardado, abrirlo directo
-  if(savedLink){ window.open(savedLink, '_blank'); return; }
-
-  _driveSubjectId = id;
-
-  // Si la API aún no cargó, fallback a Drive home
-  if(!_driveGapiInited || !_driveGisInited || !_driveTokenClient){
+function openDriveForSubject(id,name){
+  const subj=apuntesData[id];
+  const savedLink=subj&&!Array.isArray(subj)?subj._drive:'';
+  if(savedLink){window.open(savedLink,'_blank');return;}
+  _driveSubjectId=id;
+  if(!_driveGapiInited||!_driveGisInited||!_driveTokenClient){
     navigator.clipboard.writeText(name).catch(()=>{});
-    window.open('https://drive.google.com/drive/home', '_blank');
-    showDriveToast(name, 'fallback');
-    return;
+    window.open('https://drive.google.com/drive/home','_blank');
+    showDriveToast(name,'fallback');return;
   }
-
-  // Pedir token y crear carpeta
-  _driveTokenClient.requestAccessToken({ prompt: '' });
+  _driveTokenClient.requestAccessToken({prompt:''});
 }
 
-// Toast de feedback
-function showDriveToast(name, type, link){
-  const old = document.getElementById('_driveToast'); if(old) old.remove();
-  const toast = document.createElement('div');
-  toast.id = '_driveToast';
-
-  let content = '';
-  if(type === 'success'){
-    content = `<span style="font-size:1.3rem">✅</span>
-      <div>
-        <div style="font-weight:700;font-size:.88rem;margin-bottom:3px">Carpeta creada en Drive</div>
-        <div style="font-size:.76rem;opacity:.9">"${name}" — <a href="${link}" target="_blank" style="color:#a8d5c2;text-decoration:underline">Abrir carpeta</a></div>
-      </div>`;
-  } else if(type === 'fallback'){
-    content = `<span style="font-size:1.3rem">📋</span>
-      <div>
-        <div style="font-weight:700;font-size:.88rem;margin-bottom:2px">Nombre copiado al portapapeles</div>
-        <div style="font-size:.76rem;opacity:.85">En Drive: "+ Nuevo → Carpeta" y pega: <strong>${name}</strong></div>
-      </div>`;
-  } else {
-    content = `<span style="font-size:1.3rem">⚠️</span>
-      <div><div style="font-weight:700;font-size:.88rem">No se pudo crear la carpeta</div>
-      <div style="font-size:.76rem;opacity:.85">Intenta de nuevo o creala manualmente en Drive.</div></div>`;
-  }
-
-  toast.innerHTML = `<div style="display:flex;align-items:center;gap:10px;">${content}
-    <button onclick="this.parentElement.parentElement.remove()" style="background:none;border:none;color:rgba(255,255,255,.7);font-size:1rem;cursor:pointer;flex-shrink:0;padding:4px;">×</button>
-  </div>`;
-  Object.assign(toast.style, {
-    position:'fixed', bottom:'24px', left:'50%', transform:'translateX(-50%)',
-    background:'#1a2e24', color:'#fff', padding:'14px 20px', borderRadius:'14px',
-    boxShadow:'0 8px 28px rgba(0,0,0,.22)', zIndex:'9999', maxWidth:'440px', width:'92%',
-    fontFamily:'Poppins,sans-serif',
-  });
+function showDriveToast(name,type,link){
+  const old=document.getElementById('_driveToast');if(old)old.remove();
+  const toast=document.createElement('div');toast.id='_driveToast';
+  let content='';
+  if(type==='success')content=`<span style="font-size:1.3rem">✅</span><div><div style="font-weight:700;font-size:.88rem;margin-bottom:3px">Carpeta creada en Drive</div><div style="font-size:.76rem;opacity:.9">"${name}" — <a href="${link}" target="_blank" style="color:#a8d5c2;text-decoration:underline">Abrir carpeta</a></div></div>`;
+  else if(type==='fallback')content=`<span style="font-size:1.3rem">📋</span><div><div style="font-weight:700;font-size:.88rem;margin-bottom:2px">Nombre copiado al portapapeles</div><div style="font-size:.76rem;opacity:.85">En Drive: "+ Nuevo → Carpeta" y pega: <strong>${name}</strong></div></div>`;
+  else content=`<span style="font-size:1.3rem">⚠️</span><div><div style="font-weight:700;font-size:.88rem">No se pudo crear la carpeta</div><div style="font-size:.76rem;opacity:.85">Intenta de nuevo o creala manualmente en Drive.</div></div>`;
+  toast.innerHTML=`<div style="display:flex;align-items:center;gap:10px;">${content}<button onclick="this.parentElement.parentElement.remove()" style="background:none;border:none;color:rgba(255,255,255,.7);font-size:1rem;cursor:pointer;flex-shrink:0;padding:4px;">×</button></div>`;
+  Object.assign(toast.style,{position:'fixed',bottom:'24px',left:'50%',transform:'translateX(-50%)',background:'#1a2e24',color:'#fff',padding:'14px 20px',borderRadius:'14px',boxShadow:'0 8px 28px rgba(0,0,0,.22)',zIndex:'9999',maxWidth:'440px',width:'92%',fontFamily:'Poppins,sans-serif'});
   document.body.appendChild(toast);
-  setTimeout(()=>{ if(toast.parentNode) toast.remove(); }, type==='success'?10000:7000);
+  setTimeout(()=>{if(toast.parentNode)toast.remove();},type==='success'?10000:7000);
 }
 
 function renderNotesDetail(id,name){
@@ -2615,24 +2703,16 @@ function renderNotesDetail(id,name){
   }
   const subj=apuntesData[id];const campus=subj._campus||'';const drive=subj._drive||'';
   const nameEscaped=name.replace(/\\/g,'\\\\').replace(/'/g,"\\'").replace(/"/g,'&quot;');
-
-  // Icono Drive SVG
   const driveSvg=`<svg width="13" height="13" viewBox="0 0 87.3 78" xmlns="http://www.w3.org/2000/svg"><path d="m6.6 66.85 3.85 6.65c.8 1.4 1.95 2.5 3.3 3.3l13.75-23.8h-27.5c0 1.55.4 3.1 1.2 4.5z" fill="#0066da"/><path d="m43.65 25-13.75-23.8c-1.35.8-2.5 1.9-3.3 3.3l-25.4 44a9.06 9.06 0 0 0 -1.2 4.5h27.5z" fill="#00ac47"/><path d="m73.55 76.8c1.35-.8 2.5-1.9 3.3-3.3l1.6-2.75 7.65-13.25c.8-1.4 1.2-2.95 1.2-4.5h-27.502l5.852 11.5z" fill="#ea4335"/><path d="m43.65 25 13.75-23.8c-1.35-.8-2.9-1.2-4.5-1.2h-18.5c-1.6 0-3.15.45-4.5 1.2z" fill="#00832d"/><path d="m59.8 53h-32.3l-13.75 23.8c1.35.8 2.9 1.2 4.5 1.2h50.8c1.6 0 3.15-.45 4.5-1.2z" fill="#2684fc"/><path d="m73.4 26.5-12.7-22c-.8-1.4-1.95-2.5-3.3-3.3l-13.75 23.8 16.15 27h27.45c0-1.55-.4-3.1-1.2-4.5z" fill="#ffba00"/></svg>`;
-
   const actionLinks=`
     ${campus?`<a href="${campus}" target="_blank" class="ndn-link-pill">🏫 Campus Virtual</a>`:''}
-    ${drive
-      ? `<a href="${drive}" target="_blank" class="ndn-link-pill drive-pill">${driveSvg} Mi carpeta Drive</a>`
-      : `<button class="ndn-link-pill drive-pill" onclick="openDriveForSubject('${id}','${nameEscaped}')" title="Crea una carpeta en Drive con el nombre de esta materia">${driveSvg} Crear carpeta en Drive</button>`
-    }
+    ${drive?`<a href="${drive}" target="_blank" class="ndn-link-pill drive-pill">${driveSvg} Mi carpeta Drive</a>`:`<button class="ndn-link-pill drive-pill" onclick="openDriveForSubject('${id}','${nameEscaped}')">${driveSvg} Crear carpeta en Drive</button>`}
     <button class="ndn-link-pill" onclick="toggleAddLinkRow()">✎ Editar links</button>`;
-
   const addLinkRow=`<div class="ndh-add-link-row" id="ndh-link-row">
     <input type="url" id="ndh-campus-input" placeholder="Link Campus virtual" value="${campus}">
     <input type="url" id="ndh-drive-input" placeholder="Link carpeta Google Drive" value="${drive}">
     <button class="nc-add-btn" onclick="saveQuickLinks('${id}')">Guardar</button>
   </div>`;
-
   const catsHtml=NOTE_CATS.map(cat=>{
     const items=subj[cat.id]||[];
     const itemsHtml=items.length
@@ -2653,7 +2733,6 @@ function renderNotesDetail(id,name){
       </div>
     </div>`;
   }).join('');
-
   detail.innerHTML=`<div class="notes-detail-new">
     <div class="ndn-cover" style="${getCoverStyle(id)}">
       <div class="ndn-cover-overlay">
@@ -2666,7 +2745,6 @@ function renderNotesDetail(id,name){
 }
 
 function toggleAddLinkRow(){const row=document.getElementById('ndh-link-row');if(row)row.classList.toggle('show');}
-
 function saveQuickLinks(id){
   if(!apuntesData[id]||Array.isArray(apuntesData[id]))apuntesData[id]={_campus:'',_drive:''};
   apuntesData[id]._campus=document.getElementById('ndh-campus-input')?.value.trim()||'';
@@ -2675,7 +2753,6 @@ function saveQuickLinks(id){
   const nameEl=document.querySelector('.ndn-subject-name');
   renderNotesDetail(id,nameEl?.textContent||id);
 }
-
 function toggleCat(catBodyId){
   const body=document.getElementById(catBodyId);const chev=document.getElementById('chev-'+catBodyId);if(!body)return;
   const isOpen=body.style.display!=='none';body.style.display=isOpen?'none':'block';if(chev)chev.classList.toggle('open',!isOpen);
@@ -2695,135 +2772,6 @@ function deleteNoteInCat(subjectId,catId,idx){
   const nameEl=document.querySelector('.ndn-subject-name');renderNotesDetail(subjectId,nameEl?.textContent||subjectId);
 }
 function _saveApuntes(){try{localStorage.setItem('apuntes',JSON.stringify(apuntesData));}catch(e){}if(window.syncCloud)window.syncCloud();}
-
-// ==================== HABIT TRACKER ====================
-let habitCurrentDate=new Date();
-habitCurrentDate.setHours(0,0,0,0);
-
-function getHabitDateKey(d){return`${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;}
-
-function habitNavDay(dir){
-  habitCurrentDate.setDate(habitCurrentDate.getDate()+dir);
-  renderHabitsView();
-}
-
-function toggleHabitAddRow(){
-  const row=document.getElementById('habitAddRow');if(row)row.classList.toggle('show');
-}
-
-function addHabit(){
-  const name=document.getElementById('habitNameInput')?.value.trim();
-  const area=document.getElementById('habitAreaSelect')?.value||'Personal';
-  if(!name){alert('Ingresa un nombre para el habito.');return;}
-  if(!habitData.habits)habitData.habits=[];
-  const id='h'+Date.now();
-  habitData.habits.push({id,name,area,createdAt:getHabitDateKey(habitCurrentDate)});
-  _saveHabits();
-  document.getElementById('habitNameInput').value='';
-  toggleHabitAddRow();
-  renderHabitsView();
-}
-
-function toggleHabit(hid){
-  const dk=getHabitDateKey(habitCurrentDate);
-  if(!habitData.completions)habitData.completions={};
-  if(!habitData.completions[dk])habitData.completions[dk]={};
-  habitData.completions[dk][hid]=!habitData.completions[dk][hid];
-  _saveHabits();
-  renderHabitsView();
-}
-
-function deleteHabit(hid){
-  if(!confirm('Eliminar este habito?'))return;
-  habitData.habits=(habitData.habits||[]).filter(h=>h.id!==hid);
-  _saveHabits();renderHabitsView();
-}
-
-function getHabitStreak(hid){
-  let streak=0;const d=new Date();d.setHours(0,0,0,0);
-  for(let i=0;i<365;i++){
-    d.setDate(d.getDate()-(i===0?0:1));
-    const dk=getHabitDateKey(d);
-    if(habitData.completions&&habitData.completions[dk]&&habitData.completions[dk][hid])streak++;
-    else if(i>0)break;
-  }
-  return streak;
-}
-
-function renderHabitsView(){
-  const dk=getHabitDateKey(habitCurrentDate);
-  const now=new Date();now.setHours(0,0,0,0);
-  const isToday=habitCurrentDate.getTime()===now.getTime();
-  const monthNames2=["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"];
-  const dayNamesEs=["Domingo","Lunes","Martes","Miercoles","Jueves","Viernes","Sabado"];
-  const lbl=document.getElementById('habitDateLabel');
-  if(lbl)lbl.textContent=isToday?`Hoy — ${dayNamesEs[habitCurrentDate.getDay()]} ${habitCurrentDate.getDate()} ${monthNames2[habitCurrentDate.getMonth()]}`:`${dayNamesEs[habitCurrentDate.getDay()]} ${habitCurrentDate.getDate()} ${monthNames2[habitCurrentDate.getMonth()]}`;
-  const habits=habitData.habits||[];
-  const completions=habitData.completions||{};
-  const todayComp=completions[dk]||{};
-  const doneCount=habits.filter(h=>todayComp[h.id]).length;
-  const total=habits.length;
-  const pct=total>0?Math.round(doneCount/total*100):0;
-  const pf=document.getElementById('habitProgressFill');if(pf)pf.style.width=pct+'%';
-  const pl=document.getElementById('habitProgressLabel');if(pl)pl.textContent=`${doneCount}/${total}`;
-  const maxStreak=habits.reduce((mx,h)=>Math.max(mx,getHabitStreak(h.id)),0);
-  const summaryRow=document.getElementById('habitSummaryRow');
-  if(summaryRow)summaryRow.innerHTML=[
-    {val:total,label:'Habitos'},
-    {val:doneCount,label:'Completados hoy'},
-    {val:pct+'%',label:'Tasa hoy'},
-    {val:maxStreak,label:'Racha maxima'},
-  ].map(p=>`<div class="habit-summary-pill"><div class="hsp-val">${p.val}</div><div class="hsp-label">${p.label}</div></div>`).join('');
-  const list=document.getElementById('habitList');
-  if(!list)return;
-  if(!habits.length){list.innerHTML=`<div class="habit-empty">No tenes habitos todavia.<br>Crea uno con el boton de arriba.</div>`;return;}
-  list.innerHTML=habits.map(h=>{
-    const done=todayComp[h.id];
-    const streak=getHabitStreak(h.id);
-    return`<div class="habit-row" onclick="toggleHabit('${h.id}')">
-      <div class="habit-check${done?' checked':''}">
-        ${done?'✓':''}
-      </div>
-      <div class="habit-info">
-        <div class="habit-name" style="${done?'text-decoration:line-through;opacity:.6':''}">${h.name}</div>
-        <div class="habit-meta">${h.area}</div>
-      </div>
-      ${streak>0?`<span class="habit-streak">${streak}d</span>`:''}
-      <button class="habit-del-btn" onclick="event.stopPropagation();deleteHabit('${h.id}')">×</button>
-    </div>`;
-  }).join('');
-  renderHabitWeekly(habits);
-}
-
-function renderHabitWeekly(habits){
-  const now=new Date();now.setHours(0,0,0,0);
-  const day=now.getDay();const diff=day===0?-6:1-day;
-  const weekStart=new Date(now);weekStart.setDate(now.getDate()+diff);
-  const weekDays=[];for(let i=0;i<7;i++){const d=new Date(weekStart);d.setDate(weekStart.getDate()+i);weekDays.push(d);}
-  const dayNamesShortEs=['Lu','Ma','Mi','Ju','Vi','Sa','Do'];
-  const labelsEl=document.getElementById('weekDayLabels');
-  if(labelsEl)labelsEl.innerHTML=weekDays.map((d,i)=>{
-    const isToday2=d.getTime()===now.getTime();
-    return`<div class="hwday${isToday2?' today-col':''}" style="background:transparent;border:none;color:var(--text-muted)">${dayNamesShortEs[i]}</div>`;
-  }).join('');
-  const rowsEl=document.getElementById('habitWeeklyRows');if(!rowsEl)return;
-  const completions=habitData.completions||{};
-  rowsEl.innerHTML=habits.map(h=>{
-    const cells=weekDays.map((d,i)=>{
-      const dk=getHabitDateKey(d);
-      const done=completions[dk]&&completions[dk][h.id];
-      const isToday2=d.getTime()===now.getTime();
-      const isFuture=d>now;
-      return`<div class="hwday${done?' done':''}${isToday2?' today-col':''}${isFuture?' future':''}">${done?'✓':''}</div>`;
-    }).join('');
-    return`<div class="habit-week-row"><div class="habit-week-name" title="${h.name}">${h.name}</div><div class="habit-week-days">${cells}</div></div>`;
-  }).join('');
-}
-
-function _saveHabits(){
-  try{localStorage.setItem('habitData',JSON.stringify(habitData));}catch(e){}
-  if(window.syncCloud)window.syncCloud();
-}
 
 // ==================== INITAPP ====================
 window.initApp=function(){
@@ -2850,20 +2798,20 @@ window.initApp=function(){
     apuntesData=JSON.parse(localStorage.getItem('apuntes')||'{}');
     pomodoroStats=JSON.parse(localStorage.getItem('pomodoroStats')||'{}');
     horarioExtraData=JSON.parse(localStorage.getItem('horarioExtra')||'{}');
-    habitData=JSON.parse(localStorage.getItem('habitData')||'{}');
+    todoData=JSON.parse(localStorage.getItem('todoData')||'[]');
   }catch(e){}
   initWeekStart();
   initScheduleModal();loadProgress();updateStates();
   buildSchedule();renderGradesInStats();renderStudyStats();
   pomUpdateDisplay();renderDashboard();
-  renderCalendarView();renderSidebar();
+  renderCalendarView();renderSidebar();renderTodoList();
   initDarkMode();
 };
 
 // ==================== REINICIAR ====================
 window.reiniciarCuenta=async()=>{
   if(!confirm('Estas seguro de que queres borrar TODO? Esta accion no se puede deshacer.'))return;
-  ['materiasAprobadas','materiasNotas','materiasPlanificadas','materiasTabla','indCalendar','userConfig','apuntes','pomodoroStats','horarioExtra','habitData','darkMode'].forEach(k=>localStorage.removeItem(k));
+  ['materiasAprobadas','materiasNotas','materiasPlanificadas','materiasTabla','indCalendar','userConfig','apuntes','pomodoroStats','horarioExtra','todoData','darkMode'].forEach(k=>localStorage.removeItem(k));
   if(window.syncCloud)await window.syncCloud();location.reload();
 };
 
@@ -2872,67 +2820,53 @@ window.addEventListener('load',()=>{
   initDarkMode();
   const cfg=(()=>{try{return JSON.parse(localStorage.getItem('userConfig')||'{}');}catch{return{};}})();
   if(cfg.setup)window.initApp();else showOnboarding();
-
-  // Inicializar Drive API cuando los scripts de Google estén disponibles
   function tryInitDrive(){
-    if(window.gapi){ gapi.load('client', _initDriveGapiClient); }
-    if(window.google && window.google.accounts){ _initDriveGis(); }
+    if(window.gapi){gapi.load('client',_initDriveGapiClient);}
+    if(window.google&&window.google.accounts){_initDriveGis();}
   }
-  // Intentar inmediatamente y también escuchar carga tardía de scripts
   tryInitDrive();
-  setTimeout(tryInitDrive, 1500);
-  setTimeout(tryInitDrive, 3500);
-});
-  // Lógica para abrir y cerrar el Modal de Privacidad
-document.getElementById('otf-open-privacy').addEventListener('click', function(e) {
-    e.preventDefault();
-    document.getElementById('otf-privacy-modal').style.display = 'flex';
+  setTimeout(tryInitDrive,1500);
+  setTimeout(tryInitDrive,3500);
 });
 
-document.getElementById('otf-close-privacy').addEventListener('click', function() {
-    document.getElementById('otf-privacy-modal').style.display = 'none';
+document.getElementById('otf-open-privacy').addEventListener('click',function(e){
+  e.preventDefault();
+  document.getElementById('otf-privacy-modal').style.display='flex';
 });
-
-// Cierra el modal si el usuario hace clic fuera del cuadro blanco
-window.addEventListener('click', function(e) {
-    var modal = document.getElementById('otf-privacy-modal');
-    if (e.target === modal) {
-        modal.style.display = 'none';
-    }
+document.getElementById('otf-close-privacy').addEventListener('click',function(){
+  document.getElementById('otf-privacy-modal').style.display='none';
+});
+window.addEventListener('click',function(e){
+  var modal=document.getElementById('otf-privacy-modal');
+  if(e.target===modal)modal.style.display='none';
 });
 </script>
-  <footer style="text-align: center; padding: 20px; font-family: sans-serif; font-size: 14px;">
-    <p>© 2026 OrganizaTuFacu. Todos los derechos reservados. 
-       <a href="#" id="otf-open-privacy" style="color: #ff6b8b; text-decoration: underline; cursor: pointer; margin-left: 10px;">Política de Privacidad</a>
-    </p>
+
+<footer style="text-align:center;padding:20px;font-family:sans-serif;font-size:14px;">
+  <p>© 2026 OrganizaTuFacu. Todos los derechos reservados.
+     <a href="#" id="otf-open-privacy" style="color:#ff6b8b;text-decoration:underline;cursor:pointer;margin-left:10px;">Política de Privacidad</a>
+  </p>
 </footer>
 
 <div id="otf-privacy-modal" class="otf-modal-overlay">
-    <div class="otf-modal-content">
-        <span id="otf-close-privacy" class="otf-close-btn">&times;</span>
-        
-        <h2 style="margin-top: 0; color: var(--accent-dark);">Política de Privacidad</h2>
-        <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 24px;"><strong>Última actualización:</strong> Mayo 2026</p>
-        
-        <p>En <strong>OrganizaTuFacu</strong> (en adelante, "la Aplicación"), nos tomamos muy en serio la privacidad de tus datos. Al ser una herramienta de autogestión académica de código abierto diseñada para estudiantes, garantizamos la máxima transparencia en el uso de tu información.</p>
-        
-        <h3>1. Información que Recopilamos y Uso de Datos</h3>
-        <p>Nuestra Aplicación se integra con los servicios de Google a través de la API de <strong>Google Drive</strong>. El acceso se solicita exclusivamente para las siguientes finalidades:</p>
-        <ul style="padding-left: 20px;">
-            <li><strong>Sincronización y Respaldo:</strong> Permitir al usuario guardar, exportar y sincronizar su progreso académico, notas, materias y configuración de la malla curricular de forma directa.</li>
-            <li><strong>Almacenamiento del lado del cliente:</strong> La Aplicación no cuenta con servidores externos ni bases de datos propias. Toda la información se procesa de forma local en el navegador del usuario y se almacena directamente en su cuenta personal de Google Drive.</li>
-        </ul>
-
-        <h3>2. Transferencia y Uso Limitado de Datos</h3>
-        <p>OrganizaTuFacu <strong>NO recopila, NO almacena en servidores externos, NO comparte ni vende</strong> ningún tipo de información personal, dirección de correo electrónico o archivos de Google Drive a terceras partes, empresas de publicidad o analíticas externas.</p>
-        <p>El uso de la información recibida a través de las APIs de Google se apega estrictamente a la <em>Política de Datos del Usuario de los Servicios de la API de Google</em>, incluyendo los requisitos de Uso Limitado.</p>
-
-        <h3>3. Control del Usuario y Revocación de Permisos</h3>
-        <p>El usuario tiene el control total sobre sus datos en todo momento. Puede desconectar la aplicación o revocar el acceso a su cuenta de Google Drive de manera inmediata desde la configuración de seguridad de su cuenta de Google o limpiando el almacenamiento local de su navegador.</p>
-
-        <h3>4. Contacto</h3>
-        <p>Si tenés alguna duda o consulta sobre el funcionamiento de la Aplicación o esta Política de Privacidad, podés contactarnos a través de nuestro repositorio oficial de GitHub donde se encuentra alojado el proyecto.</p>
-    </div>
+  <div class="otf-modal-content">
+    <span id="otf-close-privacy" class="otf-close-btn">&times;</span>
+    <h2 style="margin-top:0;color:var(--accent-dark);">Política de Privacidad</h2>
+    <p style="font-size:12px;color:var(--text-muted);margin-bottom:24px;"><strong>Última actualización:</strong> Mayo 2026</p>
+    <p>En <strong>OrganizaTuFacu</strong> (en adelante, "la Aplicación"), nos tomamos muy en serio la privacidad de tus datos. Al ser una herramienta de autogestión académica diseñada para estudiantes, garantizamos la máxima transparencia en el uso de tu información.</p>
+    <h3>1. Información que Recopilamos y Uso de Datos</h3>
+    <p>Nuestra Aplicación se integra con los servicios de Google a través de la API de <strong>Google Drive</strong>. El acceso se solicita exclusivamente para las siguientes finalidades:</p>
+    <ul style="padding-left:20px;">
+      <li><strong>Sincronización y Respaldo:</strong> Permitir al usuario guardar y sincronizar su progreso académico directamente en su cuenta personal.</li>
+      <li><strong>Almacenamiento del lado del cliente:</strong> Toda la información se procesa de forma local en el navegador del usuario.</li>
+    </ul>
+    <h3>2. Transferencia y Uso Limitado de Datos</h3>
+    <p>OrganizaTuFacu <strong>NO recopila, NO almacena en servidores externos, NO comparte ni vende</strong> ningún tipo de información personal. El uso de las APIs de Google se apega estrictamente a la Política de Datos del Usuario.</p>
+    <h3>3. Control del Usuario</h3>
+    <p>El usuario tiene el control total sobre sus datos en todo momento y puede revocar el acceso desde la configuración de seguridad de su cuenta de Google.</p>
+    <h3>4. Contacto</h3>
+    <p>Si tenés alguna duda sobre esta Política de Privacidad, podés contactarnos a través de nuestro repositorio oficial de GitHub.</p>
+  </div>
 </div>
 </body>
 </html>
