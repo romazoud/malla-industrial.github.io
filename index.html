@@ -322,22 +322,22 @@
     .logo-area img{height:32px;width:auto;}
     .logo-area .career-name{
       font-family:'Cormorant Garamond',serif;
-      font-size:1.05rem;font-weight:700;font-style:italic;
-      color:var(--violet);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:280px;
+      font-size:1.35rem;font-weight:700;font-style:italic;
+      color:var(--violet);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:300px;
       text-shadow:var(--glow-v);
     }
-    .logo-area .uni-name{font-size:.68rem;color:var(--text-muted);font-weight:400;white-space:nowrap;}
+    .logo-area .uni-name{font-size:.82rem;color:var(--text-muted);font-weight:500;white-space:nowrap;}
 
     .tabs-container{display:flex;align-items:center;gap:2px;flex-wrap:wrap;}
     .tab-btn{
-      padding:7px 12px;border:none;border-radius:6px;
-      font-size:.75rem;font-weight:500;cursor:pointer;
+      padding:8px 14px;border:none;border-radius:6px;
+      font-size:.88rem;font-weight:500;cursor:pointer;
       transition:all .2s;background:transparent;
       color:rgba(157,150,255,.5);font-family:'DM Sans',sans-serif;
       letter-spacing:.2px; position:relative;
     }
     .tab-btn:hover{background:rgba(157,150,255,.08);color:var(--violet);}
-    .tab-btn.active{background:rgba(157,150,255,.12);color:var(--violet);font-weight:600;}
+    .tab-btn.active{background:rgba(157,150,255,.12);color:var(--violet);font-weight:700;}
     .btn-auth{border:1px solid rgba(157,150,255,.2);}
     .btn-logout{display:none;}
 
@@ -834,9 +834,9 @@
     @media(max-width:768px){
       .main-content{padding:18px 14px 50px;}
       header{padding:10px 14px;gap:8px;}
-      .logo-area .career-name{max-width:140px;font-size:.88rem;}
+      .logo-area .career-name{max-width:160px;font-size:1.1rem;}
       .tabs-container{justify-content:center;}
-      .tab-btn{font-size:.68rem;padding:5px 8px;}
+      .tab-btn{font-size:.78rem;padding:6px 9px;}
       .dash-grid{grid-template-columns:1fr;}
       .dash-progress-card{grid-column:1;flex-direction:column;text-align:center;}
       .dash-mini-stats{justify-content:center;}
@@ -893,6 +893,254 @@
 
     /* checkbox color custom */
     input[type=checkbox]{accent-color:var(--violet);}
+
+    /* ============================================================
+       MODO CLARO — sobreescribe variables y estilos clave
+       ============================================================ */
+    body.light-mode {
+      --bg:        #f4f2ff;
+      --bg-deep:   #e8e4ff;
+      --surface:   rgba(255,255,255,.85);
+      --surface-2: rgba(240,237,255,.9);
+      --surface-3: rgba(248,246,255,.7);
+      --border:    rgba(100,90,200,.18);
+      --border-2:  rgba(100,90,200,.10);
+      --text-main: #1a1440;
+      --text-muted: rgba(80,70,160,.55);
+      --text-soft:  rgba(50,40,130,.75);
+      --glow-v:    0 0 20px rgba(120,110,220,.18);
+      --glow-l:    0 0 18px rgba(130,160,50,.18);
+      background: var(--bg);
+      color: var(--text-main);
+    }
+
+    /* fondo claro */
+    body.light-mode::before {
+      background:
+        radial-gradient(ellipse 80% 60% at 10% 10%, rgba(157,150,255,.13) 0%, transparent 60%),
+        radial-gradient(ellipse 70% 50% at 90% 5%,  rgba(190,218,98,.09)  0%, transparent 55%),
+        radial-gradient(ellipse 60% 70% at 80% 50%, rgba(201,54,174,.06)  0%, transparent 55%),
+        radial-gradient(ellipse 80% 60% at 5%  70%, rgba(190,218,98,.07)  0%, transparent 60%),
+        radial-gradient(ellipse 70% 50% at 50% 90%, rgba(157,150,255,.08) 0%, transparent 55%),
+        #f4f2ff;
+    }
+
+    /* header claro */
+    body.light-mode header {
+      background: rgba(255,255,255,.88);
+      border-bottom: 1px solid rgba(130,120,220,.15);
+      box-shadow: 0 2px 16px rgba(100,90,200,.08);
+    }
+
+    /* tabs claras */
+    body.light-mode .tab-btn {
+      color: rgba(80,70,160,.5);
+    }
+    body.light-mode .tab-btn:hover {
+      background: rgba(120,110,220,.08);
+      color: var(--violet);
+    }
+    body.light-mode .tab-btn.active {
+      background: rgba(120,110,220,.12);
+      color: var(--violet);
+    }
+
+    /* botón dark toggle */
+    body.light-mode .dark-toggle-btn {
+      background: rgba(120,110,220,.08);
+      border-color: rgba(120,110,220,.2);
+      color: var(--text-muted);
+    }
+
+    /* panel-box claro */
+    body.light-mode .panel-box {
+      background: rgba(255,255,255,.85);
+      border-color: rgba(120,110,220,.15);
+      box-shadow: 0 4px 20px rgba(100,90,200,.08);
+    }
+
+    /* cards de materias */
+    body.light-mode .course.enabled {
+      background: rgba(255,255,255,.9);
+      color: #2a2060;
+      border-color: rgba(120,110,220,.2);
+      box-shadow: 0 2px 8px rgba(100,90,200,.1);
+    }
+    body.light-mode .course {
+      background: rgba(220,216,255,.25);
+      color: rgba(80,70,160,.35);
+      border-color: rgba(120,110,220,.08);
+    }
+    body.light-mode .course.completed {
+      background: linear-gradient(135deg,rgba(157,150,255,.2),rgba(190,218,98,.12));
+      color: #1a1440;
+      border-color: rgba(120,110,220,.3);
+    }
+
+    /* calendario claro */
+    body.light-mode .calendar-modern {
+      background: rgba(255,255,255,.9);
+      border-color: rgba(120,110,220,.15);
+    }
+    body.light-mode .cal-modern-sidebar {
+      background: rgba(240,237,255,.7);
+      border-right-color: rgba(120,110,220,.12);
+    }
+    body.light-mode .cal-week-header,
+    body.light-mode .cal-month-weekdays {
+      background: rgba(240,237,255,.92);
+    }
+    body.light-mode .cal-time-slot:hover,
+    body.light-mode .cal-month-cell:hover {
+      background: rgba(120,110,220,.06);
+    }
+    body.light-mode .cal-month-cell.today {
+      background: rgba(120,110,220,.08);
+    }
+
+    /* columnas de horario */
+    body.light-mode .day-column {
+      background: rgba(255,255,255,.88);
+      border-color: rgba(120,110,220,.15);
+    }
+    body.light-mode .day-header {
+      background: rgba(240,237,255,.9);
+    }
+    body.light-mode .hour-cell textarea {
+      color: #2a2060;
+    }
+    body.light-mode .hour-label {
+      background: rgba(240,237,255,.7);
+      color: rgba(80,70,160,.6);
+    }
+
+    /* stat cards */
+    body.light-mode .stat-card {
+      background: rgba(255,255,255,.85);
+      border-color: rgba(120,110,220,.15);
+      color: #1a1440;
+    }
+    body.light-mode .stat-card.dark {
+      background: rgba(157,150,255,.12);
+      border-color: rgba(120,110,220,.22);
+    }
+
+    /* todo panel */
+    body.light-mode .todo-panel {
+      background: rgba(255,255,255,.85);
+      border-color: rgba(120,110,220,.15);
+    }
+    body.light-mode .todo-input-row {
+      background: rgba(240,237,255,.6);
+    }
+    body.light-mode .todo-input-row input[type=text],
+    body.light-mode .todo-input-row select,
+    body.light-mode .todo-input-row input[type=date] {
+      background: rgba(255,255,255,.9);
+      color: #1a1440;
+      border-color: rgba(120,110,220,.2);
+    }
+
+    /* modales */
+    body.light-mode .modal-box {
+      background: rgba(248,246,255,.97);
+      color: #1a1440;
+      border-color: rgba(120,110,220,.18);
+    }
+    body.light-mode .modal-box select,
+    body.light-mode .modal-box input[type=text],
+    body.light-mode .modal-box input[type=number],
+    body.light-mode .modal-box input[type=time] {
+      background: rgba(255,255,255,.95);
+      color: #1a1440;
+      border-color: rgba(120,110,220,.2);
+    }
+    body.light-mode .btn-close-modal {
+      border-color: rgba(120,110,220,.18);
+      color: rgba(80,70,160,.6);
+    }
+
+    /* pom circle */
+    body.light-mode .pom-circle {
+      background: rgba(255,255,255,.75);
+      border-color: rgba(120,110,220,.2);
+    }
+    body.light-mode .pom-btn.secondary {
+      background: rgba(240,237,255,.9);
+      border-color: rgba(120,110,220,.2);
+      color: rgba(80,70,160,.7);
+    }
+
+    /* apuntes cards */
+    body.light-mode .notes-canvas-card {
+      background: rgba(255,255,255,.9);
+      border-color: rgba(120,110,220,.15);
+    }
+    body.light-mode .notes-detail-new {
+      background: rgba(255,255,255,.92);
+      border-color: rgba(120,110,220,.15);
+    }
+
+    /* notas: barra de búsqueda y filtros */
+    body.light-mode .notes-search-bar {
+      background: rgba(255,255,255,.9);
+      color: #1a1440;
+      border-color: rgba(120,110,220,.2);
+    }
+
+    /* progress circle */
+    body.light-mode .progress-circle-container,
+    body.light-mode .progress-circle-inner {
+      background: rgba(255,255,255,.88);
+      border-color: rgba(120,110,220,.15);
+    }
+
+    /* completed row inputs */
+    body.light-mode .cr-input {
+      background: rgba(240,237,255,.9);
+      border-color: rgba(120,110,220,.2);
+    }
+
+    /* select options en modo claro */
+    body.light-mode option {
+      background: #f0eeff;
+      color: #1a1440;
+    }
+
+    /* scrollbars claros */
+    body.light-mode ::-webkit-scrollbar-thumb {
+      background: rgba(120,110,220,.2);
+    }
+    body.light-mode ::-webkit-scrollbar-thumb:hover {
+      background: rgba(120,110,220,.38);
+    }
+
+    /* footer claro */
+    body.light-mode footer {
+      background: rgba(255,255,255,.7);
+      border-top-color: rgba(120,110,220,.12);
+    }
+
+    /* inputs / selects generales */
+    body.light-mode .pom-subject-select,
+    body.light-mode .cal-time-input,
+    body.light-mode .ob-input {
+      background: rgba(255,255,255,.9);
+      color: #1a1440;
+      border-color: rgba(120,110,220,.2);
+    }
+
+    /* mapa de hint */
+    body.light-mode .map-hint {
+      background: rgba(255,255,255,.85);
+      color: rgba(80,70,160,.65);
+    }
+
+    /* sidebar calendario claro */
+    body.light-mode .cal-sidebar-event {
+      background: rgba(240,237,255,.7);
+      border-color: rgba(120,110,220,.12);
+    }
   </style>
 </head>
 <body>
