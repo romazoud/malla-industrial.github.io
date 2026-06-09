@@ -11,7 +11,7 @@
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
     import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut, sendPasswordResetEmail, GoogleAuthProvider, signInWithPopup, sendEmailVerification } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-    import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+   import { getFirestore, doc, getDoc, setDoc, collection, addDoc, updateDoc, arrayUnion } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
     const firebaseConfig = {
       apiKey:"AIzaSyDFtB_22y_4lkVjjQXMyhd0pltKjOeYiv0",
       authDomain:"facu-app-5bef9.firebaseapp.com",
@@ -129,6 +129,78 @@
       if(window.initApp)window.initApp();
     }
     window.syncCloud=saveToCloud;
+    // --- FUNCIONES COMUNIDAD ---
+
+// 1. Crear un espacio nuevo
+window.crearEspacio = async () => {
+  const user = auth.currentUser;
+  if (!user) { alert("Debes iniciar sesión para crear un espacio."); return; }
+
+  const nombreMateria = prompt("¿Cómo se llama la materia del nuevo espacio? (Ej: Física 2)");
+  if (!nombreMateria) return;
+
+  try {
+    // A. Crea el documento en la nueva colección 'clases'
+    const docRef = await addDoc(collection(db, "clases"), {
+      nombre: nombreMateria,
+      creador_uid: user.uid,
+      miembros: [user.uid], // vos sos el primer miembro
+      fecha_creacion: new Date().toISOString()
+    });
+
+    // B. Guarda el ID de esta clase en tu perfil de usuario
+    const userRef = doc(db, 'users', user.uid);
+    await updateDoc(userRef, {
+      clases_unidas: arrayUnion(docRef.id)
+    });
+
+    alert("¡Espacio creado! El código para invitar a tus compañeros es: " + docRef.id);
+    
+    // Acá después vamos a llamar a la función que dibuja las tarjetitas en pantalla
+  } catch (e) {
+    console.error("Error al crear espacio:", e);
+    alert("Hubo un error al crear el espacio.");
+  }
+};
+
+// 2. Unirse a un espacio con código
+window.unirseEspacio = async () => {
+  const user = auth.currentUser;
+  if (!user) return;
+
+  const codigoInput = document.getElementById('codigoEspacioInput').value.trim();
+  if (!codigoInput) { alert("Ingresá un código válido"); return; }
+
+  try {
+    // A. Verifica que la clase exista y te agrega como miembro
+    const claseRef = doc(db, 'clases', codigoInput);
+    const claseSnap = await getDoc(claseRef);
+
+    if (!claseSnap.exists()) {
+      alert("No se encontró ningún espacio con ese código. Revisá las mayúsculas.");
+      return;
+    }
+
+    await updateDoc(claseRef, {
+      miembros: arrayUnion(user.uid)
+    });
+
+    // B. Agrega la clase a tu perfil
+    const userRef = doc(db, 'users', user.uid);
+    await updateDoc(userRef, {
+      clases_unidas: arrayUnion(codigoInput)
+    });
+
+    alert("¡Te uniste con éxito a " + claseSnap.data().nombre + "!");
+    closeModal('joinSpaceModal'); 
+    document.getElementById('codigoEspacioInput').value = ''; // Limpia el input
+    
+    // Acá después vamos a actualizar la pantalla
+  } catch (e) {
+    console.error(e);
+    alert("Error al intentar unirse. Asegurate de tener conexión.");
+  }
+};
   </script>
 
   <style>
@@ -1263,20 +1335,22 @@
     </div>
   </header>
 
-  <main class="main-content">
-<div id="view-comunidad" class="view-section">
+  <div id="view-comunidad" class="view-section">
   <div class="section-header">
     <h2>Comunidad ✦</h2>
     <p>Conectate con tu cursada, compartí recursos y armá grupos de estudio.</p>
   </div>
 
   <div style="display:flex;gap:12px;margin-bottom:24px;flex-wrap:wrap">
-    <button class="btn-add" style="display:flex;align-items:center;gap:6px;">
+    
+    <button class="btn-add" style="display:flex;align-items:center;gap:6px;" onclick="crearEspacio()">
       <span style="font-size:1.2rem;">+</span> Crear Espacio
     </button>
-    <button class="notes-filter-btn" style="border-color:var(--violet);color:var(--violet);display:flex;align-items:center;gap:6px;">
+    
+    <button class="notes-filter-btn" style="border-color:var(--violet);color:var(--violet);display:flex;align-items:center;gap:6px;" onclick="openModal('joinSpaceModal')">
       <span>🔗</span> Unirse con código
     </button>
+    
   </div>
 
   <div class="panel-box">
@@ -1337,14 +1411,15 @@
   </div>
 </div>
 
-<div id="joinSpaceModal" class="modal-overlay"> <div class="modal-box">
+<div id="joinSpaceModal" class="modal-overlay">
+  <div class="modal-box">
     <h2 style="font-family:'Cormorant Garamond',serif;font-style:italic;color:var(--violet);margin-top:0;font-size:1.5rem">Unirse a un espacio</h2>
     <p style="font-size:0.9rem;color:var(--text-muted);margin-bottom:18px;line-height:1.4;">Ingresá el código o ID único que te compartió el creador del espacio.</p>
     
-    <input type="text" placeholder="Ej: FIS2-2026" style="width:100%;padding:14px;border-radius:10px;border:1px solid var(--violet);background:rgba(157,150,255,.06);color:var(--text-main);font-family:'DM Sans',sans-serif;font-size:1.2rem;text-align:center;text-transform:uppercase;letter-spacing:2px;outline:none;margin-bottom:20px;box-shadow:var(--glow-v);transition:all 0.2s;">
+    <input type="text" id="codigoEspacioInput" placeholder="Ej: FIS2-2026" style="width:100%;padding:14px;border-radius:10px;border:1px solid var(--violet);background:rgba(157,150,255,.06);color:var(--text-main);font-family:'DM Sans',sans-serif;font-size:1.2rem;text-align:center;text-transform:uppercase;letter-spacing:2px;outline:none;margin-bottom:20px;box-shadow:var(--glow-v);transition:all 0.2s;">
     
-    <button class="btn-add" style="width:100%;font-size:1rem;padding:12px;">Buscar y Unirse</button>
-    <button class="btn-close-modal" onclick="/* tu función closeModal('joinSpaceModal') */" style="margin-top:10px;">Cancelar</button>
+    <button class="btn-add" style="width:100%;font-size:1rem;padding:12px;" onclick="unirseEspacio()">Buscar y Unirse</button>
+    <button class="btn-close-modal" onclick="closeModal('joinSpaceModal')" style="margin-top:10px;">Cancelar</button>
   </div>
 </div>
     <!-- DASHBOARD -->
