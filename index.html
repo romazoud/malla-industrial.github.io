@@ -140,13 +140,100 @@
     }
     
     window.syncCloud=saveToCloud;
-window.entrarEspacio = (claseId, nombre) => {
+let _espacioActualId = null;
+
+    // Entrar a un espacio y cargar sus apuntes
+    window.entrarEspacio = (claseId, nombre) => {
+      _espacioActualId = claseId; // Guardamos en qué materia estamos
+      
       document.querySelectorAll('.view-section').forEach(s => s.classList.remove('active'));
       document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
       
       document.getElementById('view-espacio').classList.add('active');
       document.getElementById('espacio-titulo').textContent = nombre;
       document.getElementById('espacio-id').textContent = 'ID: ' + claseId;
+      
+      window.cargarApuntesEspacio();
+    };
+
+    // Traer los apuntes desde Firebase
+    window.cargarApuntesEspacio = async () => {
+      const grid = document.getElementById('espacio-apuntes-grid');
+      grid.innerHTML = '<span style="color:var(--text-muted)">Cargando apuntes...</span>';
+      if(!_espacioActualId) return;
+
+      try {
+        const docRef = doc(db, 'clases', _espacioActualId);
+        const docSnap = await getDoc(docRef);
+        
+        if(docSnap.exists()){
+          const data = docSnap.data();
+          const apuntes = data.apuntes_compartidos || [];
+          
+          if(apuntes.length === 0){
+             grid.innerHTML = '<p style="color:var(--text-muted); font-size: 0.9rem;">Acá van a aparecer los links y resúmenes que suban vos y tus compañeros.</p>';
+             return;
+          }
+          
+          let html = '';
+          apuntes.forEach(ap => {
+            html += `
+            <div class="note-item" style="background:rgba(7,6,20,.6); border-color:var(--border); margin-bottom:10px;">
+              <span class="note-item-icon" style="font-size:1.4rem;">🔗</span>
+              <div class="note-item-info">
+                <div class="note-item-name" style="font-size:1.1rem; color:var(--text-main);">${ap.nombre}</div>
+                <div class="note-item-url" style="font-size:0.8rem; color:var(--text-muted); margin-top:2px;">Subido por ${ap.autor} • ${ap.fecha}</div>
+              </div>
+              <div class="note-item-actions">
+                <a href="${ap.link}" target="_blank" class="note-open-btn">Abrir Apunte</a>
+              </div>
+            </div>`;
+          });
+          grid.innerHTML = html;
+        }
+      } catch(e) {
+        grid.innerHTML = '<span style="color:var(--magenta)">Error al cargar apuntes.</span>';
+      }
+    };
+
+    // Subir un apunte nuevo a Firebase
+    window.subirApunteCompartido = async () => {
+      const user = auth.currentUser;
+      if(!user || !_espacioActualId) return;
+      
+      const nombre = document.getElementById('nuevoApunteNombre').value.trim();
+      const link = document.getElementById('nuevoApunteLink').value.trim();
+      
+      if(!nombre || !link){ alert('Completá nombre y link'); return; }
+      
+      // Armamos la fecha y sacamos el nombre del autor desde el mail
+      const fecha = new Date().toLocaleDateString('es-AR', {day:'2-digit', month:'short'});
+      const autor = user.email.split('@')[0]; 
+      
+      try {
+        const claseRef = doc(db, 'clases', _espacioActualId);
+        
+        // Guardamos el apunte adentro del espacio en Firebase
+        await updateDoc(claseRef, {
+          apuntes_compartidos: arrayUnion({
+            nombre: nombre,
+            link: link,
+            autor: autor,
+            fecha: fecha
+          })
+        });
+        
+        alert("¡Apunte subido exitosamente a la comunidad!");
+        closeModal('subirApunteModal');
+        document.getElementById('nuevoApunteNombre').value = '';
+        document.getElementById('nuevoApunteLink').value = '';
+        
+        // Recargamos los apuntes para que aparezca el nuevo
+        window.cargarApuntesEspacio();
+      } catch(e){
+         console.error(e);
+         alert("Error al subir el apunte. Verificá tu conexión.");
+      }
     };
     // --- FUNCIONES COMUNIDAD ---
     window.cargarEspacios = async () => {
@@ -1477,6 +1564,21 @@ window.entrarEspacio = (claseId, nombre) => {
 </div>
 
 <div id="joinSpaceModal" class="modal-overlay">
+  <div id="subirApunteModal" class="modal-overlay">
+  <div class="modal-box">
+    <h2 style="font-family:'Cormorant Garamond',serif;font-style:italic;color:var(--violet);margin-top:0;font-size:1.5rem">Compartir Apunte</h2>
+    <p style="font-size:0.9rem;color:var(--text-muted);margin-bottom:18px;line-height:1.4;">Compartí un link de Drive, resúmenes o cualquier otra web con tu cursada.</p>
+    
+    <label>Nombre del apunte:</label>
+    <input type="text" id="nuevoApunteNombre" placeholder="Ej: Resumen Primer Parcial">
+    
+    <label>Link (URL):</label>
+    <input type="url" id="nuevoApunteLink" placeholder="https://...">
+    
+    <button class="btn-add" style="width:100%; margin-top: 10px;" onclick="subirApunteCompartido()">Subir a la comunidad</button>
+    <button class="btn-close-modal" onclick="closeModal('subirApunteModal')" style="margin-top:10px;">Cancelar</button>
+  </div>
+</div>
   <div class="modal-box">
     <h2 style="font-family:'Cormorant Garamond',serif;font-style:italic;color:var(--violet);margin-top:0;font-size:1.5rem">Unirse a un espacio</h2>
     <p style="font-size:0.9rem;color:var(--text-muted);margin-bottom:18px;line-height:1.4;">Ingresá el código o ID único que te compartió el creador del espacio.</p>
@@ -1722,7 +1824,9 @@ window.entrarEspacio = (claseId, nombre) => {
       <div class="panel-box">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 16px;">
           <h3 style="font-family:'Cormorant Garamond',serif;font-style:italic;margin-top:0;font-size:1.4rem;color:var(--violet);">Apuntes Compartidos</h3>
-          <button class="btn-add" style="padding: 6px 12px; font-size: 0.9rem;">+ Subir apunte</button>
+          
+          <button class="btn-add" style="padding: 6px 12px; font-size: 0.9rem;" onclick="openModal('subirApunteModal')">+ Subir apunte</button>
+        
         </div>
         
         <div id="espacio-apuntes-grid">
