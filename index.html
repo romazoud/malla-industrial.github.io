@@ -8,10 +8,11 @@
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600;1,700&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 
-  <script type="module">
+ <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
     import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut, sendPasswordResetEmail, GoogleAuthProvider, signInWithPopup, sendEmailVerification } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-   import { getFirestore, doc, getDoc, setDoc, collection, addDoc, updateDoc, arrayUnion } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+    import { getFirestore, doc, getDoc, setDoc, collection, addDoc, updateDoc, arrayUnion } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+    
     const firebaseConfig = {
       apiKey:"AIzaSyDFtB_22y_4lkVjjQXMyhd0pltKjOeYiv0",
       authDomain:"facu-app-5bef9.firebaseapp.com",
@@ -23,6 +24,7 @@
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
     const db   = getFirestore(app);
+    
     window.iniciarSesion = async () => {
       const email = document.getElementById('ob-email').value.trim();
       const pass = document.getElementById('ob-pass').value;
@@ -40,6 +42,7 @@
         return false;
       }
     };
+    
     window.registrarse = async () => {
       const email = document.getElementById('ob-email').value.trim();
       const pass = document.getElementById('ob-pass').value;
@@ -58,10 +61,12 @@
         return false;
       }
     };
+    
     window.recuperarContrasena = async(email)=>{
       try{await sendPasswordResetEmail(auth,email);alert('Revisa tu casilla de correo.');if(window.switchAuthTab)window.switchAuthTab('login');}
       catch(e){mostrarErrorAuth('Error al enviar el correo.');}
     };
+    
     window.loginConGoogle = async()=>{
       try{
         const provider = new GoogleAuthProvider();
@@ -74,12 +79,15 @@
         }
       }
     };
+    
     function mostrarErrorAuth(msg){const el=document.getElementById('auth-error');el.textContent=msg;el.style.display='block';}
+    
     window.logout = async()=>{
       await signOut(auth);
       ['materiasAprobadas','materiasNotas','materiasPlanificadas','materiasTabla','indCalendar','userConfig','apuntes','pomodoroStats','horarioExtra','todoData'].forEach(k=>localStorage.removeItem(k));
       location.reload();
     };
+    
     onAuthStateChanged(auth, async(user)=>{
       const btnLogin=document.getElementById('btnOpenLogin'), btnLogout=document.getElementById('btnLogout'), userLabel=document.getElementById('userLabel');
       if(user){
@@ -95,6 +103,7 @@
         else if(window.initApp)window.initApp();
       }
     });
+    
     async function saveToCloud(){
       const user=auth.currentUser; if(!user)return;
       const data={
@@ -111,6 +120,7 @@
       };
       await setDoc(doc(db,'users',user.uid),data);
     }
+    
     async function loadFromCloud(uid){
       const snap=await getDoc(doc(db,'users',uid));
       if(snap.exists()){
@@ -128,79 +138,70 @@
       } else {await saveToCloud();}
       if(window.initApp)window.initApp();
     }
+    
     window.syncCloud=saveToCloud;
+
     // --- FUNCIONES COMUNIDAD ---
+    window.crearEspacio = async () => {
+      const user = auth.currentUser;
+      if (!user) { alert("Debes iniciar sesión para crear un espacio."); return; }
 
-// 1. Crear un espacio nuevo
-window.crearEspacio = async () => {
-  const user = auth.currentUser;
-  if (!user) { alert("Debes iniciar sesión para crear un espacio."); return; }
+      const nombreMateria = prompt("¿Cómo se llama la materia del nuevo espacio? (Ej: Física 2)");
+      if (!nombreMateria) return;
 
-  const nombreMateria = prompt("¿Cómo se llama la materia del nuevo espacio? (Ej: Física 2)");
-  if (!nombreMateria) return;
+      try {
+        const docRef = await addDoc(collection(db, "clases"), {
+          nombre: nombreMateria,
+          creador_uid: user.uid,
+          miembros: [user.uid],
+          fecha_creacion: new Date().toISOString()
+        });
 
-  try {
-    // A. Crea el documento en la nueva colección 'clases'
-    const docRef = await addDoc(collection(db, "clases"), {
-      nombre: nombreMateria,
-      creador_uid: user.uid,
-      miembros: [user.uid], // vos sos el primer miembro
-      fecha_creacion: new Date().toISOString()
-    });
+        const userRef = doc(db, 'users', user.uid);
+        await updateDoc(userRef, {
+          clases_unidas: arrayUnion(docRef.id)
+        });
 
-    // B. Guarda el ID de esta clase en tu perfil de usuario
-    const userRef = doc(db, 'users', user.uid);
-    await updateDoc(userRef, {
-      clases_unidas: arrayUnion(docRef.id)
-    });
+        alert("¡Espacio creado! El código para invitar a tus compañeros es: " + docRef.id);
+      } catch (e) {
+        console.error("Error al crear espacio:", e);
+        alert("Hubo un error al crear el espacio.");
+      }
+    };
 
-    alert("¡Espacio creado! El código para invitar a tus compañeros es: " + docRef.id);
-    
-    // Acá después vamos a llamar a la función que dibuja las tarjetitas en pantalla
-  } catch (e) {
-    console.error("Error al crear espacio:", e);
-    alert("Hubo un error al crear el espacio.");
-  }
-};
+    window.unirseEspacio = async () => {
+      const user = auth.currentUser;
+      if (!user) return;
 
-// 2. Unirse a un espacio con código
-window.unirseEspacio = async () => {
-  const user = auth.currentUser;
-  if (!user) return;
+      const codigoInput = document.getElementById('codigoEspacioInput').value.trim();
+      if (!codigoInput) { alert("Ingresá un código válido"); return; }
 
-  const codigoInput = document.getElementById('codigoEspacioInput').value.trim();
-  if (!codigoInput) { alert("Ingresá un código válido"); return; }
+      try {
+        const claseRef = doc(db, 'clases', codigoInput);
+        const claseSnap = await getDoc(claseRef);
 
-  try {
-    // A. Verifica que la clase exista y te agrega como miembro
-    const claseRef = doc(db, 'clases', codigoInput);
-    const claseSnap = await getDoc(claseRef);
+        if (!claseSnap.exists()) {
+          alert("No se encontró ningún espacio con ese código. Revisá las mayúsculas.");
+          return;
+        }
 
-    if (!claseSnap.exists()) {
-      alert("No se encontró ningún espacio con ese código. Revisá las mayúsculas.");
-      return;
-    }
+        await updateDoc(claseRef, {
+          miembros: arrayUnion(user.uid)
+        });
 
-    await updateDoc(claseRef, {
-      miembros: arrayUnion(user.uid)
-    });
+        const userRef = doc(db, 'users', user.uid);
+        await updateDoc(userRef, {
+          clases_unidas: arrayUnion(codigoInput)
+        });
 
-    // B. Agrega la clase a tu perfil
-    const userRef = doc(db, 'users', user.uid);
-    await updateDoc(userRef, {
-      clases_unidas: arrayUnion(codigoInput)
-    });
-
-    alert("¡Te uniste con éxito a " + claseSnap.data().nombre + "!");
-    closeModal('joinSpaceModal'); 
-    document.getElementById('codigoEspacioInput').value = ''; // Limpia el input
-    
-    // Acá después vamos a actualizar la pantalla
-  } catch (e) {
-    console.error(e);
-    alert("Error al intentar unirse. Asegurate de tener conexión.");
-  }
-};
+        alert("¡Te uniste con éxito a " + claseSnap.data().nombre + "!");
+        closeModal('joinSpaceModal'); 
+        document.getElementById('codigoEspacioInput').value = ''; 
+      } catch (e) {
+        console.error(e);
+        alert("Error al intentar unirse. Asegurate de tener conexión.");
+      }
+    };
   </script>
 
   <style>
