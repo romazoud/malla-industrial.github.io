@@ -11,6 +11,7 @@
  <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
     import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut, sendPasswordResetEmail, GoogleAuthProvider, signInWithPopup, sendEmailVerification } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+    import { getFirestore, doc, getDoc, setDoc, collection, addDoc, updateDoc, arrayUnion } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
     import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
     
     const firebaseConfig = {
@@ -24,7 +25,7 @@
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
     const db   = getFirestore(app);
-    const storage = getStorage(app); // <--- AGREGAR ESTA LÍNEA
+    const storage = getStorage(app);
     
     window.iniciarSesion = async () => {
       const email = document.getElementById('ob-email').value.trim();
@@ -141,120 +142,10 @@
     }
     
     window.syncCloud=saveToCloud;
-let _espacioActualId = null;
 
-    // Entrar a un espacio y cargar sus apuntes
-    window.entrarEspacio = (claseId, nombre) => {
-      _espacioActualId = claseId; // Guardamos en qué materia estamos
-      
-      document.querySelectorAll('.view-section').forEach(s => s.classList.remove('active'));
-      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-      
-      document.getElementById('view-espacio').classList.add('active');
-      document.getElementById('espacio-titulo').textContent = nombre;
-      document.getElementById('espacio-id').textContent = 'ID: ' + claseId;
-      
-      window.cargarApuntesEspacio();
-    };
-
-    // Traer los apuntes desde Firebase
-    window.cargarApuntesEspacio = async () => {
-      const grid = document.getElementById('espacio-apuntes-grid');
-      grid.innerHTML = '<span style="color:var(--text-muted)">Cargando apuntes...</span>';
-      if(!_espacioActualId) return;
-
-      try {
-        const docRef = doc(db, 'clases', _espacioActualId);
-        const docSnap = await getDoc(docRef);
-        
-        if(docSnap.exists()){
-          const data = docSnap.data();
-          const apuntes = data.apuntes_compartidos || [];
-          
-          if(apuntes.length === 0){
-             grid.innerHTML = '<p style="color:var(--text-muted); font-size: 0.9rem;">Acá van a aparecer los links y resúmenes que suban vos y tus compañeros.</p>';
-             return;
-          }
-          
-          let html = '';
-          apuntes.forEach(ap => {
-            html += `
-            <div class="note-item" style="background:rgba(7,6,20,.6); border-color:var(--border); margin-bottom:10px;">
-              <span class="note-item-icon" style="font-size:1.4rem;">🔗</span>
-              <div class="note-item-info">
-                <div class="note-item-name" style="font-size:1.1rem; color:var(--text-main);">${ap.nombre}</div>
-                <div class="note-item-url" style="font-size:0.8rem; color:var(--text-muted); margin-top:2px;">Subido por ${ap.autor} • ${ap.fecha}</div>
-              </div>
-              <div class="note-item-actions">
-                <a href="${ap.link}" target="_blank" class="note-open-btn">Abrir Apunte</a>
-              </div>
-            </div>`;
-          });
-          grid.innerHTML = html;
-        }
-      } catch(e) {
-        grid.innerHTML = '<span style="color:var(--magenta)">Error al cargar apuntes.</span>';
-      }
-    };
-
-    // Subir un apunte nuevo a Firebase
-    // Subir un archivo real a Firebase Storage
-    window.subirApunteCompartido = async () => {
-      const user = auth.currentUser;
-      if(!user || !_espacioActualId) return;
-      
-      const nombre = document.getElementById('nuevoApunteNombre').value.trim();
-      const fileInput = document.getElementById('nuevoApunteFile');
-      const file = fileInput.files[0];
-      
-      if(!nombre || !file){ alert('Completá el nombre y seleccioná un archivo.'); return; }
-      if(file.size > 10 * 1024 * 1024){ alert('El archivo es muy pesado. Máximo 10 MB.'); return; }
-      
-      // Cambiamos el botón para avisar que está cargando
-      const btn = document.getElementById('btnSubirApunte');
-      btn.textContent = "Subiendo archivo... no cierres ⏳";
-      btn.disabled = true;
-      btn.style.opacity = '0.6';
-
-      const fecha = new Date().toLocaleDateString('es-AR', {day:'2-digit', month:'short'});
-      const autor = user.email.split('@')[0]; 
-      
-      try {
-        // 1. Subir archivo a Storage
-        const archivoPath = `apuntes_comunidad/${_espacioActualId}/${Date.now()}_${file.name}`;
-        const storageRef = ref(storage, archivoPath);
-        
-        await uploadBytes(storageRef, file);
-        const downloadUrl = await getDownloadURL(storageRef);
-
-        // 2. Guardar la información en Firestore
-        const claseRef = doc(db, 'clases', _espacioActualId);
-        await updateDoc(claseRef, {
-          apuntes_compartidos: arrayUnion({
-            nombre: nombre,
-            link: downloadUrl, // Usamos el link directo al archivo que acabamos de subir
-            autor: autor,
-            fecha: fecha
-          })
-        });
-        
-        alert("¡Archivo subido exitosamente a la comunidad!");
-        closeModal('subirApunteModal');
-        document.getElementById('nuevoApunteNombre').value = '';
-        fileInput.value = ''; // Limpiamos el selector de archivos
-        
-        window.cargarApuntesEspacio(); // Recargamos para ver el nuevo apunte
-      } catch(e){
-         console.error(e);
-         alert("Error al subir el archivo. Revisá tu conexión a internet.");
-      } finally {
-         // Volvemos el botón a la normalidad
-         btn.textContent = "Subir a la comunidad";
-         btn.disabled = false;
-         btn.style.opacity = '1';
-      }
-    };
     // --- FUNCIONES COMUNIDAD ---
+    let _espacioActualId = null;
+
     window.cargarEspacios = async () => {
       const user = auth.currentUser;
       if (!user) return;
@@ -370,6 +261,112 @@ let _espacioActualId = null;
       } catch (e) {
         console.error(e);
         alert("Error al intentar unirse. Asegurate de tener conexión.");
+      }
+    };
+
+    window.entrarEspacio = (claseId, nombre) => {
+      _espacioActualId = claseId; 
+      
+      document.querySelectorAll('.view-section').forEach(s => s.classList.remove('active'));
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      
+      document.getElementById('view-espacio').classList.add('active');
+      document.getElementById('espacio-titulo').textContent = nombre;
+      document.getElementById('espacio-id').textContent = 'ID: ' + claseId;
+      
+      window.cargarApuntesEspacio();
+    };
+
+    window.cargarApuntesEspacio = async () => {
+      const grid = document.getElementById('espacio-apuntes-grid');
+      if(!grid) return;
+      grid.innerHTML = '<span style="color:var(--text-muted)">Cargando apuntes...</span>';
+      if(!_espacioActualId) return;
+
+      try {
+        const docRef = doc(db, 'clases', _espacioActualId);
+        const docSnap = await getDoc(docRef);
+        
+        if(docSnap.exists()){
+          const data = docSnap.data();
+          const apuntes = data.apuntes_compartidos || [];
+          
+          if(apuntes.length === 0){
+             grid.innerHTML = '<p style="color:var(--text-muted); font-size: 0.9rem;">Acá van a aparecer los archivos y resúmenes que suban vos y tus compañeros.</p>';
+             return;
+          }
+          
+          let html = '';
+          apuntes.forEach(ap => {
+            html += `
+            <div class="note-item" style="background:rgba(7,6,20,.6); border-color:var(--border); margin-bottom:10px;">
+              <span class="note-item-icon" style="font-size:1.4rem;">📄</span>
+              <div class="note-item-info">
+                <div class="note-item-name" style="font-size:1.1rem; color:var(--text-main);">${ap.nombre}</div>
+                <div class="note-item-url" style="font-size:0.8rem; color:var(--text-muted); margin-top:2px;">Subido por ${ap.autor} • ${ap.fecha}</div>
+              </div>
+              <div class="note-item-actions">
+                <a href="${ap.link}" target="_blank" class="note-open-btn">Abrir / Descargar</a>
+              </div>
+            </div>`;
+          });
+          grid.innerHTML = html;
+        }
+      } catch(e) {
+        grid.innerHTML = '<span style="color:var(--magenta)">Error al cargar apuntes.</span>';
+      }
+    };
+
+    window.subirApunteCompartido = async () => {
+      const user = auth.currentUser;
+      if(!user) { alert('Iniciá sesión primero.'); return; }
+      if(!_espacioActualId) { alert('Error: No estás en ningún espacio.'); return; }
+      
+      const nombre = document.getElementById('nuevoApunteNombre').value.trim();
+      const fileInput = document.getElementById('nuevoApunteFile');
+      const file = fileInput.files[0];
+      
+      if(!nombre || !file){ alert('Completá el nombre y seleccioná un archivo.'); return; }
+      if(file.size > 10 * 1024 * 1024){ alert('El archivo es muy pesado. Máximo 10 MB.'); return; }
+      
+      const btn = document.getElementById('btnSubirApunte');
+      btn.textContent = "Subiendo archivo... no cierres ⏳";
+      btn.disabled = true;
+      btn.style.opacity = '0.6';
+
+      const fecha = new Date().toLocaleDateString('es-AR', {day:'2-digit', month:'short'});
+      const autor = user.email.split('@')[0]; 
+      
+      try {
+        const archivoPath = `apuntes_comunidad/${_espacioActualId}/${Date.now()}_${file.name}`;
+        const storageRef = ref(storage, archivoPath);
+        
+        await uploadBytes(storageRef, file);
+        const downloadUrl = await getDownloadURL(storageRef);
+
+        const claseRef = doc(db, 'clases', _espacioActualId);
+        await updateDoc(claseRef, {
+          apuntes_compartidos: arrayUnion({
+            nombre: nombre,
+            link: downloadUrl,
+            autor: autor,
+            fecha: fecha
+          })
+        });
+        
+        alert("¡Archivo subido exitosamente a la comunidad!");
+        if(typeof closeModal === 'function') closeModal('subirApunteModal');
+        document.getElementById('nuevoApunteNombre').value = '';
+        fileInput.value = ''; 
+        
+        window.cargarApuntesEspacio(); 
+      } catch(e){
+         console.error(e);
+         alert("Error al subir el archivo. Revisá tu conexión a internet.");
+      } finally {
+         btn.textContent = "Subir a la comunidad";
+         btn.disabled = false;
+         btn.style.opacity = '1';
       }
     };
   </script>
