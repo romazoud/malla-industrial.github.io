@@ -1263,7 +1263,89 @@
   </header>
 
   <main class="main-content">
+<div id="view-comunidad" class="view-section active">
+  <div class="section-header">
+    <h2>Comunidad ✦</h2>
+    <p>Conectate con tu cursada, compartí recursos y armá grupos de estudio.</p>
+  </div>
 
+  <div style="display:flex;gap:12px;margin-bottom:24px;flex-wrap:wrap">
+    <button class="btn-add" style="display:flex;align-items:center;gap:6px;">
+      <span style="font-size:1.2rem;">+</span> Crear Espacio
+    </button>
+    <button class="notes-filter-btn" style="border-color:var(--violet);color:var(--violet);display:flex;align-items:center;gap:6px;">
+      <span>🔗</span> Unirse con código
+    </button>
+  </div>
+
+  <div class="panel-box">
+    <h3 style="font-family:'Cormorant Garamond',serif;font-style:italic;margin-top:0;font-size:1.4rem;color:var(--violet);margin-bottom:4px;">Tus espacios activos</h3>
+    <p style="font-size:.85rem;color:var(--text-muted);margin:0 0 16px">Acá ves las materias a las que te uniste con otros estudiantes.</p>
+    
+    <div class="notes-canvas-grid">
+      
+      <div class="notes-canvas-card" style="min-height:auto;padding:20px;cursor:default;">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+          <div class="notes-card-icon" style="background:rgba(190,218,98,.15);color:var(--lime);font-size:1.5rem;width:45px;height:45px;">⚡</div>
+          <span class="notes-card-status cursando" style="background:rgba(157,150,255,.08);border:1px dashed var(--border);color:var(--text-main);user-select:all;" title="Doble clic para copiar">ID: FIS2-2026</span>
+        </div>
+        
+        <div class="notes-card-title" style="margin-top:14px;font-size:1.35rem;">Física 2</div>
+        <div style="font-size:0.85rem;color:var(--text-muted);margin-top:4px;font-weight:600;display:flex;align-items:center;gap:6px;">
+          <span style="width:8px;height:8px;background:var(--lime);border-radius:50%;display:inline-block;box-shadow:var(--glow-l);"></span>
+          14 estudiantes unidos
+        </div>
+        
+        <div style="margin-top:18px;border-top:1px solid var(--border-2);padding-top:14px;">
+          <div style="font-size:0.75rem;color:var(--text-muted);margin-bottom:8px;font-weight:700;text-transform:uppercase;letter-spacing:0.8px;">Último aporte</div>
+          <div class="note-item" style="margin-bottom:0;background:rgba(7,6,20,.6);border-color:var(--border-2);">
+            <span class="note-item-icon" style="font-size:1.2rem;">📄</span>
+            <div class="note-item-info">
+              <div class="note-item-name" style="font-size:0.95rem;color:var(--text-main);">Resumen Electromagnetismo</div>
+              <div class="note-item-url" style="font-size:0.75rem;margin-top:2px;color:var(--text-muted);">Por Rocio M. • Hace 2 horas</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="notes-canvas-card" style="min-height:auto;padding:20px;cursor:default;">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+          <div class="notes-card-icon" style="background:rgba(201,54,174,.15);color:var(--magenta);font-size:1.5rem;width:45px;height:45px;">🏭</div>
+          <span class="notes-card-status cursando" style="background:rgba(157,150,255,.08);border:1px dashed var(--border);color:var(--text-main);user-select:all;">ID: EST-TRAB</span>
+        </div>
+        
+        <div class="notes-card-title" style="margin-top:14px;font-size:1.35rem;">Estudio del Trabajo</div>
+        <div style="font-size:0.85rem;color:var(--text-muted);margin-top:4px;font-weight:600;display:flex;align-items:center;gap:6px;">
+          <span style="width:8px;height:8px;background:var(--lime);border-radius:50%;display:inline-block;box-shadow:var(--glow-l);"></span>
+          8 estudiantes unidos
+        </div>
+        
+        <div style="margin-top:18px;border-top:1px solid var(--border-2);padding-top:14px;">
+          <div style="font-size:0.75rem;color:var(--text-muted);margin-bottom:8px;font-weight:700;text-transform:uppercase;letter-spacing:0.8px;">Último aporte</div>
+          <div class="note-item" style="margin-bottom:0;background:rgba(7,6,20,.6);border-color:var(--border-2);">
+            <span class="note-item-icon" style="font-size:1.2rem;">🔗</span>
+            <div class="note-item-info">
+              <div class="note-item-name" style="font-size:0.95rem;color:var(--text-main);">Plantilla Cursogramas</div>
+              <div class="note-item-url" style="font-size:0.75rem;margin-top:2px;color:var(--text-muted);">Por Juan P. • Ayer</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<div id="joinSpaceModal" class="modal-overlay"> <div class="modal-box">
+    <h2 style="font-family:'Cormorant Garamond',serif;font-style:italic;color:var(--violet);margin-top:0;font-size:1.5rem">Unirse a un espacio</h2>
+    <p style="font-size:0.9rem;color:var(--text-muted);margin-bottom:18px;line-height:1.4;">Ingresá el código o ID único que te compartió el creador del espacio.</p>
+    
+    <input type="text" placeholder="Ej: FIS2-2026" style="width:100%;padding:14px;border-radius:10px;border:1px solid var(--violet);background:rgba(157,150,255,.06);color:var(--text-main);font-family:'DM Sans',sans-serif;font-size:1.2rem;text-align:center;text-transform:uppercase;letter-spacing:2px;outline:none;margin-bottom:20px;box-shadow:var(--glow-v);transition:all 0.2s;">
+    
+    <button class="btn-add" style="width:100%;font-size:1rem;padding:12px;">Buscar y Unirse</button>
+    <button class="btn-close-modal" onclick="/* tu función closeModal('joinSpaceModal') */" style="margin-top:10px;">Cancelar</button>
+  </div>
+</div>
     <!-- DASHBOARD -->
     <div id="view-home" class="view-section active">
       <div class="section-header">
