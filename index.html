@@ -142,6 +142,61 @@
     window.syncCloud=saveToCloud;
 
     // --- FUNCIONES COMUNIDAD ---
+    window.cargarEspacios = async () => {
+      const user = auth.currentUser;
+      if (!user) return;
+
+      const grid = document.querySelector('#view-comunidad .notes-canvas-grid');
+      if (!grid) return;
+
+      grid.innerHTML = '<div style="color:var(--text-muted); width:100%; font-size: 0.9rem;">Cargando tus espacios...</div>';
+
+      try {
+        const userRef = doc(db, 'users', user.uid);
+        const userSnap = await getDoc(userRef);
+        
+        if (!userSnap.exists()) return;
+        
+        const clasesUnidas = userSnap.data().clases_unidas || [];
+        
+        if (clasesUnidas.length === 0) {
+          grid.innerHTML = '<div style="color:var(--text-muted); width:100%; font-size: 0.9rem;">Aún no te uniste a ningún espacio. ¡Creá uno o unite con un código!</div>';
+          return;
+        }
+
+        let html = '';
+        for (const claseId of clasesUnidas) {
+          const claseRef = doc(db, 'clases', claseId);
+          const claseSnap = await getDoc(claseRef);
+          
+          if (claseSnap.exists()) {
+            const data = claseSnap.data();
+            const miembrosCount = data.miembros ? data.miembros.length : 1;
+            html += `
+              <div class="notes-canvas-card" style="min-height:auto;padding:20px;cursor:pointer;">
+                <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+                  <div class="notes-card-icon" style="background:rgba(157,150,255,.15);color:var(--violet);font-size:1.5rem;width:45px;height:45px;">✦</div>
+                  <span class="notes-card-status cursando" style="background:rgba(157,150,255,.08);border:1px dashed var(--border);color:var(--text-main);user-select:all;" title="Doble clic para copiar">ID: ${claseId}</span>
+                </div>
+                <div class="notes-card-title" style="margin-top:14px;font-size:1.35rem;">${data.nombre}</div>
+                <div style="font-size:0.85rem;color:var(--text-muted);margin-top:4px;font-weight:600;display:flex;align-items:center;gap:6px;">
+                  <span style="width:8px;height:8px;background:var(--lime);border-radius:50%;display:inline-block;box-shadow:var(--glow-l);"></span>
+                  ${miembrosCount} estudiante(s) unidos
+                </div>
+                <div style="margin-top:18px;border-top:1px solid var(--border-2);padding-top:14px;font-size:0.8rem;color:var(--violet);text-align:center;">
+                  Entrar al espacio →
+                </div>
+              </div>
+            `;
+          }
+        }
+        grid.innerHTML = html;
+      } catch (e) {
+        console.error("Error al cargar espacios:", e);
+        grid.innerHTML = '<div style="color:var(--magenta); width:100%; font-size: 0.9rem;">Error al cargar los espacios. Revisá tu conexión.</div>';
+      }
+    };
+
     window.crearEspacio = async () => {
       const user = auth.currentUser;
       if (!user) { alert("Debes iniciar sesión para crear un espacio."); return; }
@@ -163,6 +218,7 @@
         });
 
         alert("¡Espacio creado! El código para invitar a tus compañeros es: " + docRef.id);
+        window.cargarEspacios();
       } catch (e) {
         console.error("Error al crear espacio:", e);
         alert("Hubo un error al crear el espacio.");
@@ -195,8 +251,9 @@
         });
 
         alert("¡Te uniste con éxito a " + claseSnap.data().nombre + "!");
-        closeModal('joinSpaceModal'); 
+        if(typeof closeModal === 'function') closeModal('joinSpaceModal'); 
         document.getElementById('codigoEspacioInput').value = ''; 
+        window.cargarEspacios();
       } catch (e) {
         console.error(e);
         alert("Error al intentar unirse. Asegurate de tener conexión.");
@@ -1996,6 +2053,9 @@ window.switchTab=(name,event)=>{
   if(name==='notes')renderNotesTab();
   if(name==='pomodoro')renderPomSubjectSelect();
   if(name==='calendar'){renderCalendarView();renderSidebar();renderTodoList();}
+  
+  // Esta es la línea clave que actualiza tus espacios al entrar a la pestaña:
+  if(name==='comunidad' && window.cargarEspacios) window.cargarEspacios(); 
 };
 
 // ==================== MODAL DE NOTA ====================
