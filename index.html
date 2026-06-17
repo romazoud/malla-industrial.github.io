@@ -11,8 +11,9 @@
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
     import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut, sendPasswordResetEmail, GoogleAuthProvider, signInWithPopup, sendEmailVerification } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-    import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+    import { getFirestore, doc, getDoc, setDoc, collection, addDoc, getDocs, updateDoc, arrayUnion, arrayRemove, query, where, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
     import { getStorage, ref as storageRef, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
+    
     const firebaseConfig = {
       apiKey:"AIzaSyDFtB_22y_4lkVjjQXMyhd0pltKjOeYiv0",
       authDomain:"facu-app-5bef9.firebaseapp.com",
@@ -25,10 +26,33 @@
     const auth = getAuth(app);
     const db   = getFirestore(app);
     const storage = getStorage(app);
-    import {
-  collection, addDoc, getDocs, updateDoc, arrayUnion, arrayRemove,
-  query, where, onSnapshot, serverTimestamp, getDoc as getDocFS
-} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+    const getDocFS = getDoc;
+    
+    // Exponer a window para acceso desde scripts externos
+    window.auth = auth;
+    window.db = db;
+    window.storage = storage;
+    window.getDocFS = getDocFS;
+    window.collection = collection;
+    window.addDoc = addDoc;
+    window.getDocs = getDocs;
+    window.updateDoc = updateDoc;
+    window.arrayUnion = arrayUnion;
+    window.arrayRemove = arrayRemove;
+    window.query = query;
+    window.where = where;
+    window.onSnapshot = onSnapshot;
+    window.serverTimestamp = serverTimestamp;
+    window.doc = doc;
+    window.setDoc = setDoc;
+    window.storageRef = storageRef;
+    window.uploadBytes = uploadBytes;
+    window.getDownloadURL = getDownloadURL;
+
+    // Variables globales comunitarias
+    window._notesMode = 'private';
+    window._selectedSharedClassId = null;
+    window._currentClaseUnsubscribe = null;
 
 // ── Crear clase ──────────────────────────────────────
 window.crearClase = async ({ nombre, materia, descripcion }) => {
@@ -2091,7 +2115,7 @@ body.light-mode .com-shared-empty { background: rgba(240,237,255,.6); }
               <div class="com-shared-form-field"><label>Título</label><input type="text" id="comSharedTitle" placeholder="Nombre del recurso"></div>
               <div class="com-shared-form-field"><label>Enlace</label><input type="url" id="comSharedUrl" placeholder="URL del recurso"></div>
               <div class="com-shared-form-field"><label>Archivo</label><input type="file" id="comSharedFile" accept="image/*"></div>
-              <button class="com-shared-publish-btn" id="comSharedPublishBtn" onclick="submitSharedResource(_selectedSharedClassId)">+ Publicar</button>
+              <button class="com-shared-publish-btn" id="comSharedPublishBtn" onclick="submitSharedResource(window._selectedSharedClassId)">+ Publicar</button>
             </div>
           </div>
           <div id="comSharedNotesList" class="com-shared-list" style="margin-top:16px;"></div>
@@ -2171,7 +2195,7 @@ body.light-mode .com-shared-empty { background: rgba(240,237,255,.6); }
             <div class="com-shared-form-field"><label>Título</label><input type="text" id="comSelectedTitle" placeholder="Nombre del recurso"></div>
             <div class="com-shared-form-field"><label>Enlace</label><input type="url" id="comSelectedUrl" placeholder="URL del recurso"></div>
             <div class="com-shared-form-field"><label>Foto o archivo</label><input type="file" id="comSelectedFile" accept="image/*"></div>
-            <button class="com-shared-publish-btn" id="comSelectedPublishBtn" onclick="submitSharedResource(_selectedSharedClassId)">+ Publicar</button>
+            <button class="com-shared-publish-btn" id="comSelectedPublishBtn" onclick="submitSharedResource(window._selectedSharedClassId)">+ Publicar</button>
           </div>
         </div>
         <div id="comSelectedNotes" class="com-shared-list" style="margin-top:18px;"></div>
@@ -2230,12 +2254,8 @@ let tableData={},gradesData={},calendarData={},apuntesData={},pomodoroStats={},h
 let authMode='registro';
 let _gradeModalCourseId=null;
 let todoFilter='all';
-let _notesMode='private';
-let _selectedSharedClassId=null;
-let _currentClaseUnsubscribe=null;
-
-const SUBJECT_ICONS=['📚','📖','📝','💡','🔬','📐','💻','🧪','📊','🎯','🏛','⚗️','🧮','📡','🎨','🔭'];
 let notesCurrentFilter='all';
+const SUBJECT_ICONS=['📚','📖','📝','💡','🔬','📐','💻','🧪','📊','🎯','🏛','⚗️','🧮','📡','🎨','🔭'];
 
 // ==================== ONBOARDING ====================
 function showOnboarding(){document.getElementById('onboardingScreen').classList.add('visible');document.getElementById('appContent').style.display='none';}
@@ -2493,7 +2513,7 @@ window.switchTab=(name,event)=>{
     if(selected) selected.classList.add('active');
   }
   closeHeaderMenu();
-  if(name==='notes')setNotesMode(_notesMode||'private');
+  if(name==='notes')setNotesMode(window._notesMode||'private');
   if(name==='comunidad')renderCommunityPage();
   if(name==='pomodoro')renderPomSubjectSelect();
   if(name==='calendar'){renderCalendarView();renderSidebar();renderTodoList();}
@@ -3292,7 +3312,7 @@ function renderNotesTab(){
 }
 
 window.setNotesMode=function(mode,btn){
-  _notesMode=mode;
+  window._notesMode=mode;
   document.querySelectorAll('.notes-mode-btn').forEach(b=>b.classList.remove('active'));
   if(btn)btn.classList.add('active');
   const privateView=document.getElementById('notesPrivateView');
@@ -3330,9 +3350,9 @@ window.openSharedClass = async (claseId) => {
   const snap = await getDocFS(doc(db, 'clases', claseId));
   if (!snap.exists()) { alert('No se encontró la clase.'); return; }
   const data = snap.data();
-  _selectedSharedClassId = claseId;
-  if (_currentClaseUnsubscribe) _currentClaseUnsubscribe();
-  _currentClaseUnsubscribe = suscribirseAClase(claseId, renderSharedClassData);
+  window._selectedSharedClassId = claseId;
+  if (window._currentClaseUnsubscribe) window._currentClaseUnsubscribe();
+  window._currentClaseUnsubscribe = suscribirseAClase(claseId, renderSharedClassData);
   renderSharedClassData({ id: claseId, ...data });
   
   const details = document.getElementById('sharedClassDetails');
@@ -3359,9 +3379,9 @@ window.openCommunityClass = async (claseId) => {
   const snap = await getDocFS(doc(db, 'clases', claseId));
   if (!snap.exists()) { alert('No se encontró la clase.'); return; }
   const data = snap.data();
-  _selectedSharedClassId = claseId;
-  if (_currentClaseUnsubscribe) _currentClaseUnsubscribe();
-  _currentClaseUnsubscribe = suscribirseAClase(claseId, renderSharedClassData);
+  window._selectedSharedClassId = claseId;
+  if (window._currentClaseUnsubscribe) window._currentClaseUnsubscribe();
+  window._currentClaseUnsubscribe = suscribirseAClase(claseId, renderSharedClassData);
   renderSharedClassData({ id: claseId, ...data });
 
   const comDetails = document.getElementById('comSelectedClassDetails');
@@ -3383,8 +3403,8 @@ window.openCommunityClass = async (claseId) => {
 };
 
 window.closeSharedClassDetails = () => {
-  if (_currentClaseUnsubscribe) { _currentClaseUnsubscribe(); _currentClaseUnsubscribe = null; }
-  _selectedSharedClassId = null;
+  if (window._currentClaseUnsubscribe) { window._currentClaseUnsubscribe(); window._currentClaseUnsubscribe = null; }
+  window._selectedSharedClassId = null;
   
   const details = document.getElementById('sharedClassDetails');
   if (details) details.style.display = 'none';
@@ -3686,8 +3706,8 @@ window.addEventListener('load',()=>{
   tryInitDrive();setTimeout(tryInitDrive,1500);setTimeout(tryInitDrive,3500);
 });
 
-document.getElementById('otf-open-privacy').addEventListener('click',function(e){e.preventDefault();document.getElementById('otf-privacy-modal').style.display='flex';});
-document.getElementById('otf-close-privacy').addEventListener('click',function(){document.getElementById('otf-privacy-modal').style.display='none';});
+if(document.getElementById('otf-open-privacy'))document.getElementById('otf-open-privacy').addEventListener('click',function(e){e.preventDefault();document.getElementById('otf-privacy-modal').style.display='flex';});
+if(document.getElementById('otf-close-privacy'))document.getElementById('otf-close-privacy').addEventListener('click',function(){document.getElementById('otf-privacy-modal').style.display='none';});
 window.addEventListener('click',function(e){var modal=document.getElementById('otf-privacy-modal');if(e.target===modal)modal.style.display='none';});
 </script>
 
