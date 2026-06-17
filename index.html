@@ -3356,9 +3356,30 @@ window.openSharedClass = async (claseId) => {
 };
 
 window.openCommunityClass = async (claseId) => {
-  await openSharedClass(claseId);
+  const snap = await getDocFS(doc(db, 'clases', claseId));
+  if (!snap.exists()) { alert('No se encontró la clase.'); return; }
+  const data = snap.data();
+  _selectedSharedClassId = claseId;
+  if (_currentClaseUnsubscribe) _currentClaseUnsubscribe();
+  _currentClaseUnsubscribe = suscribirseAClase(claseId, renderSharedClassData);
+  renderSharedClassData({ id: claseId, ...data });
+
   const comDetails = document.getElementById('comSelectedClassDetails');
   if (comDetails) comDetails.style.display = 'block';
+
+  const comList = document.getElementById('comClassesList');
+  if (comList) comList.style.display = 'none';
+
+  const headerRows = document.querySelectorAll('#view-comunidad .com-header-row');
+  headerRows.forEach(el => el.style.display = 'none');
+
+  const formCrear = document.querySelector('#view-comunidad .com-shared-upload');
+  if (formCrear) formCrear.style.display = 'none';
+
+  const notesDetails = document.getElementById('sharedClassDetails');
+  if (notesDetails) notesDetails.style.display = 'none';
+
+  window.scrollTo({ top: 0, behavior: 'smooth' });
 };
 
 window.closeSharedClassDetails = () => {
