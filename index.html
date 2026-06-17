@@ -3316,18 +3316,21 @@ function renderSharedClassData(clase){
 }
 
 window.submitSharedResource=async(claseId)=>{
-  const name=document.getElementById('comSharedTitle')?.value.trim();
-  const url=document.getElementById('comSharedUrl')?.value.trim();
-  const file=document.getElementById('comSharedFile')?.files[0];
+  const titleInput = document.getElementById('comSharedTitle') || document.getElementById('comSelectedTitle');
+  const urlInput = document.getElementById('comSharedUrl') || document.getElementById('comSelectedUrl');
+  const fileInput = document.getElementById('comSharedFile') || document.getElementById('comSelectedFile');
+  const name = titleInput?.value.trim();
+  const url = urlInput?.value.trim();
+  const file = fileInput?.files?.[0];
   if(!name){alert('Agrega un título para tu recurso.');return;}
   if(!url && !file){alert('Agrega una URL o sube un archivo.');return;}
-  const btn=document.getElementById('comSharedPublishBtn');
+  const btn=document.getElementById('comSharedPublishBtn') || document.getElementById('comSelectedPublishBtn');
   if(btn){btn.disabled=true;btn.textContent='Publicando...';}
   try{
     await publicarApunte(claseId,{ nombre:name, url:url, file:file });
-    if(document.getElementById('comSharedTitle')) document.getElementById('comSharedTitle').value='';
-    if(document.getElementById('comSharedUrl')) document.getElementById('comSharedUrl').value='';
-    if(document.getElementById('comSharedFile')) document.getElementById('comSharedFile').value='';
+    if(titleInput) titleInput.value='';
+    if(urlInput) urlInput.value='';
+    if(fileInput) fileInput.value='';
   }catch(e){alert('No se pudo publicar el recurso.');}
   if(btn){btn.disabled=false;btn.textContent='+ Publicar';}
 };
@@ -3380,75 +3383,6 @@ window.handleJoinClass=async()=>{
 window.deleteSharedApunte=async(claseId,apunteId)=>{
   if(!confirm('¿Querés eliminar este aporte compartido?')) return;
   await borrarApunteCompartido(claseId,apunteId);
-};
-
-window.closeSharedClassDetails=()=>{
-  if(_currentClaseUnsubscribe){_currentClaseUnsubscribe();_currentClaseUnsubscribe=null;}
-  _selectedSharedClassId=null;
-  const details=document.getElementById('sharedClassDetails');
-  if(details) details.style.display='none';
-};
-
-window.submitSharedResource=async(claseId)=>{
-  const name=document.getElementById('comSharedTitle')?.value.trim();
-  const url=document.getElementById('comSharedUrl')?.value.trim();
-  const file=document.getElementById('comSharedFile')?.files[0];
-  if(!name){alert('Agrega un título para tu recurso.');return;}
-  if(!url && !file){alert('Agrega una URL o subí un archivo.');return;}
-  const btn=document.getElementById('comSharedPublishBtn');
-  if(btn){btn.disabled=true;btn.textContent='Publicando...';}
-  try{
-    await publicarApunte(claseId,{ nombre:name, url:url, file:file });
-    if(document.getElementById('comSharedTitle')) document.getElementById('comSharedTitle').value='';
-    if(document.getElementById('comSharedUrl')) document.getElementById('comSharedUrl').value='';
-    if(document.getElementById('comSharedFile')) document.getElementById('comSharedFile').value='';
-  }catch(e){alert('No se pudo publicar el recurso.');}
-  if(btn){btn.disabled=false;btn.textContent='+ Publicar';}
-};
-
-window.renderCommunityPage=async()=>{
-  const wrapper=document.getElementById('comClassesList');
-  if(!wrapper) return;
-  const clases=await cargarMisClases();
-  if(!clases.length){
-    wrapper.innerHTML=`<div class="com-shared-empty"><div class="com-shared-empty-icon">📭</div><div class="com-shared-empty-text">Todavía no estás en ninguna clase. Creá una o unite ingresando un código.</div></div>`;
-    document.getElementById('comSelectedClassDetails').style.display='none';
-    return;
-  }
-  wrapper.innerHTML = clases.map(clase=>`
-    <div class="com-clase-card">
-      <span class="com-clase-badge ${clase.creador_uid===window._comCurrentUid?'creador':'miembro'}">${clase.creador_uid===window._comCurrentUid?'Creador':'Miembro'}</span>
-      <div class="com-clase-nombre">${clase.nombre||'Clase compartida'}</div>
-      <div class="com-clase-materia">${clase.materia||'Materia'}</div>
-      <div class="com-clase-desc">${clase.descripcion||'Accedé a apuntes compartidos y subí recursos para tu grupo.'}</div>
-      <div class="com-clase-meta">
-        <div class="com-clase-members">${(clase.miembros?.length||0)} miembro${(clase.miembros?.length===1?'':'s')}</div>
-        <button class="com-btn-sm accent" onclick="openSharedClass('${clase.id}')">Abrir</button>
-      </div>
-    </div>`).join('');
-  document.getElementById('comSelectedClassDetails').style.display='none';
-};
-
-window.handleCreateClass=async()=>{
-  const nombre=document.getElementById('comCreateName')?.value.trim();
-  const materia=document.getElementById('comCreateMateria')?.value.trim();
-  const descripcion=document.getElementById('comCreateDescription')?.value.trim();
-  if(!nombre || !materia){alert('Completá nombre y materia.');return;}
-  const result=await crearClase({ nombre, materia, descripcion });
-  if(!result) return;
-  alert(`Clase creada. Código: ${result.codigo}`);
-  renderCommunityPage();
-  openSharedClass(result.id);
-};
-
-window.handleJoinClass=async()=>{
-  const codigo=document.getElementById('comJoinCode')?.value.trim();
-  if(!codigo){alert('Ingresá el código de clase.');return;}
-  const result=await unirseAClase(codigo);
-  if(result.error){alert(result.error);return;}
-  alert(`Te uniste a ${result.nombre}`);
-  renderCommunityPage();
-  openSharedClass(result.id);
 };
 
 window.filterNotes=()=>{
