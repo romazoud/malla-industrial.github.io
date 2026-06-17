@@ -3326,43 +3326,93 @@ window.renderSharedNotesTab=async()=>{
     </div>`).join('');
 };
 
-window.openSharedClass=async(claseId)=>{
-  const snap = await getDocFS(doc(db,'clases',claseId));
-  if(!snap.exists()){alert('No se encontró la clase.');return;}
+window.openSharedClass = async (claseId) => {
+  const snap = await getDocFS(doc(db, 'clases', claseId));
+  if (!snap.exists()) { alert('No se encontró la clase.'); return; }
   const data = snap.data();
   _selectedSharedClassId = claseId;
-  if(_currentClaseUnsubscribe) _currentClaseUnsubscribe();
+  if (_currentClaseUnsubscribe) _currentClaseUnsubscribe();
   _currentClaseUnsubscribe = suscribirseAClase(claseId, renderSharedClassData);
   renderSharedClassData({ id: claseId, ...data });
+  
   const details = document.getElementById('sharedClassDetails');
-  if(details) details.style.display='block';
+  if (details) details.style.display = 'block';
   const comDetails = document.getElementById('comSelectedClassDetails');
-  if(comDetails) comDetails.style.display='block';
+  if (comDetails) comDetails.style.display = 'block';
+
+  // NUEVO: Ocultar la lista de clases y formularios para ver bien el aula
+  const comList = document.getElementById('comClassesList');
+  if (comList) comList.style.display = 'none';
+  const sharedUpload = document.querySelector('.com-shared-upload[style*="grid"]');
+  if (sharedUpload) sharedUpload.style.display = 'none';
+  const headerRow = document.querySelector('.com-header-row');
+  if (headerRow) headerRow.style.display = 'none';
+
+  // Subir la pantalla automáticamente
+  window.scrollTo({ top: 0, behavior: 'smooth' });
 };
 
-window.closeSharedClassDetails=()=>{
-  if(_currentClaseUnsubscribe){_currentClaseUnsubscribe();_currentClaseUnsubscribe=null;}
-  _selectedSharedClassId=null;
-  const details=document.getElementById('sharedClassDetails');
-  if(details)details.style.display='none';
+window.closeSharedClassDetails = () => {
+  if (_currentClaseUnsubscribe) { _currentClaseUnsubscribe(); _currentClaseUnsubscribe = null; }
+  _selectedSharedClassId = null;
+  
+  const details = document.getElementById('sharedClassDetails');
+  if (details) details.style.display = 'none';
+  const comDetails = document.getElementById('comSelectedClassDetails');
+  if (comDetails) comDetails.style.display = 'none';
+
+  // NUEVO: Volver a mostrar la lista y los formularios
+  const comList = document.getElementById('comClassesList');
+  if (comList) comList.style.display = 'grid';
+  const sharedUpload = document.querySelector('.com-shared-upload[style*="grid"]');
+  if (sharedUpload) sharedUpload.style.display = 'grid';
+  const headerRow = document.querySelector('.com-header-row');
+  if (headerRow) headerRow.style.display = 'flex';
 };
 
-function renderSharedClassData(clase){
-  const title=document.getElementById('sharedClassName');
-  const code=document.getElementById('sharedClassCode');
-  const communityTitle=document.getElementById('comSelectedClassName');
-  const communityMeta=document.getElementById('comSelectedClassMeta');
-  const list=document.getElementById('comSharedNotesList') || document.getElementById('comSelectedNotes');
-  if(title) title.textContent = clase.nombre || 'Clase compartida';
-  if(code) code.textContent = `Código: ${clase.codigo||'—'} · ${(clase.miembros?.length||0)} miembro${(clase.miembros?.length===1?'':'s')}`;
-  if(communityTitle) communityTitle.textContent = clase.nombre || 'Clase compartida';
-  if(communityMeta) communityMeta.textContent = `Código: ${clase.codigo||'—'} · ${(clase.miembros?.length||0)} miembro${(clase.miembros?.length===1?'':'s')}`;
-  if(!list) return;
+function renderSharedClassData(clase) {
+  const title = document.getElementById('sharedClassName');
+  const code = document.getElementById('sharedClassCode');
+  const communityTitle = document.getElementById('comSelectedClassName');
+  const communityMeta = document.getElementById('comSelectedClassMeta');
+  
+  const listApuntes = document.getElementById('comSharedNotesList');
+  const listComunidad = document.getElementById('comSelectedNotes');
+
+  if (title) title.textContent = clase.nombre || 'Clase compartida';
+  if (code) code.textContent = `Código: ${clase.codigo||'—'} · ${(clase.miembros?.length||0)} miembro${(clase.miembros?.length===1?'':'s')}`;
+  if (communityTitle) communityTitle.textContent = clase.nombre || 'Clase compartida';
+  if (communityMeta) communityMeta.textContent = `Código: ${clase.codigo||'—'} · ${(clase.miembros?.length||0)} miembro${(clase.miembros?.length===1?'':'s')}`;
+  
   const notes = (clase.apuntes_compartidos||[]).slice().sort((a,b)=>new Date(b.fecha)-new Date(a.fecha));
-  if(!notes.length){
-    list.innerHTML = `<div class="com-shared-empty"><div class="com-shared-empty-icon">📝</div><div class="com-shared-empty-text">Aún no hay aportes compartidos en esta clase.</div></div>`;
-    return;
+  
+  let htmlToRender = '';
+  if (!notes.length) {
+    htmlToRender = `<div class="com-shared-empty"><div class="com-shared-empty-icon">📝</div><div class="com-shared-empty-text">Aún no hay aportes compartidos en esta clase.</div></div>`;
+  } else {
+    htmlToRender = notes.map(apunte => {
+      const isImage = apunte.tipo === 'imagen';
+      const canDelete = apunte.autor_uid === window._comCurrentUid || clase.creador_uid === window._comCurrentUid;
+      return `
+        <div class="com-shared-item">
+          <div class="com-shared-item-icon ${isImage?'drive':'link'}">${isImage?'🖼️':'🔗'}</div>
+          <div class="com-shared-item-info">
+            <div class="com-shared-item-name">${apunte.nombre}</div>
+            <div class="com-shared-item-meta">${new Date(apunte.fecha).toLocaleString()} · ${apunte.autor_email||'Anónimo'}</div>
+            ${isImage?`<img src="${apunte.url}" style="max-width:100%;border-radius:12px;margin-top:10px;">`:(apunte.url?`<div class="com-shared-item-url">${apunte.url}</div>`:'')}
+          </div>
+          <div class="com-shared-item-actions">
+            ${apunte.url?`<a href="${apunte.url}" target="_blank" class="com-open-btn">Abrir</a>`:''}
+            ${canDelete?`<button class="com-del-btn" onclick="deleteSharedApunte('${clase.id}','${apunte.id}')">×</button>`:''}
+          </div>
+        </div>`;
+    }).join('');
   }
+
+  // NUEVO: Renderiza la lista de archivos en las dos pestañas
+  if (listApuntes) listApuntes.innerHTML = htmlToRender;
+  if (listComunidad) listComunidad.innerHTML = htmlToRender;
+}
   list.innerHTML = notes.map(apunte=>{
     const isImage = apunte.tipo==='imagen';
     const canDelete = apunte.autor_uid===window._comCurrentUid || clase.creador_uid===window._comCurrentUid;
@@ -3402,7 +3452,36 @@ window.submitSharedResource=async(claseId)=>{
   if(btn){btn.disabled=false;btn.textContent='+ Publicar';}
 };
 
-window.renderCommunityPage=async()=>{
+window.renderCommunityPage = async () => {
+  const wrapper = document.getElementById('comClassesList');
+  if (!wrapper) return;
+  const clases = await cargarMisClases();
+  
+  // Asegurar que todo el menú principal esté visible al entrar a la pestaña
+  if (wrapper) wrapper.style.display = 'grid';
+  const sharedUpload = document.querySelector('.com-shared-upload[style*="grid"]');
+  if (sharedUpload) sharedUpload.style.display = 'grid';
+  const headerRow = document.querySelector('.com-header-row');
+  if (headerRow) headerRow.style.display = 'flex';
+  
+  if (!clases.length) {
+    wrapper.innerHTML = `<div class="com-shared-empty"><div class="com-shared-empty-icon">📭</div><div class="com-shared-empty-text">Todavía no estás en ninguna clase. Creá una o unite ingresando un código.</div></div>`;
+    document.getElementById('comSelectedClassDetails').style.display = 'none';
+    return;
+  }
+  wrapper.innerHTML = clases.map(clase => `
+    <div class="com-clase-card">
+      <span class="com-clase-badge ${clase.creador_uid===window._comCurrentUid?'creador':'miembro'}">${clase.creador_uid===window._comCurrentUid?'Creador':'Miembro'}</span>
+      <div class="com-clase-nombre">${clase.nombre||'Clase compartida'}</div>
+      <div class="com-clase-materia">${clase.materia||'Materia'}</div>
+      <div class="com-clase-desc">${clase.descripcion||'Accedé a apuntes compartidos y subí recursos para tu grupo.'}</div>
+      <div class="com-clase-meta">
+        <div class="com-clase-members">${(clase.miembros?.length||0)} miembro${(clase.miembros?.length===1?'':'s')}</div>
+        <button class="com-btn-sm accent" onclick="openSharedClass('${clase.id}')">Abrir</button>
+      </div>
+    </div>`).join('');
+  document.getElementById('comSelectedClassDetails').style.display = 'none';
+};
   const wrapper=document.getElementById('comClassesList');
   if(!wrapper) return;
   const clases=await cargarMisClases();
