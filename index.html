@@ -82,13 +82,30 @@ window.publicarApunte = async (claseId, apunte) => {
   let tipo = apunte.tipo || 'link';
   if (apunte.file) {
     try {
-      const fileRef = storageRef(storage, `clases/${claseId}/${Date.now()}_${apunte.file.name}`);
-      const snap = await uploadBytes(fileRef, apunte.file);
-      url = await getDownloadURL(snap.ref);
+      // Configuramos los datos para Cloudinary
+      const formData = new FormData();
+      formData.append('file', apunte.file);
+      formData.append('upload_preset', 'TU_PRESET_ACA'); // <-- PONE EL NOMBRE DE TU PRESET ACA
+
+      // Hacemos la petición a tu cuenta de Cloudinary (dlmisrlfo)
+      const res = await fetch('https://api.cloudinary.com/v1_1/dlmisrlfo/image/upload', {
+        method: 'POST',
+        body: formData
+      });
+      
+      const data = await res.json();
+      
+      if (data.error) {
+        throw new Error(data.error.message);
+      }
+
+      // Guardamos la URL que nos devuelve Cloudinary
+      url = data.secure_url;
       tipo = apunte.file.type.startsWith('image/') ? 'imagen' : 'archivo';
+
     } catch (e) {
       console.error('Error al subir el archivo:', e);
-      alert('No se pudo subir el archivo. Probá nuevamente.');
+      alert('No se pudo subir la imagen. Probá nuevamente.');
       return;
     }
   }
@@ -436,7 +453,8 @@ window.salirDeClase = async (claseId) => {
     }
     .logo-area .uni-name{font-size:.82rem;color:var(--text-muted);font-weight:500;white-space:nowrap;}
 
-    .tabs-container{display:flex;align-items:center;gap:2px;flex-wrap:wrap;}
+    .tabs-container{display:flex;align-items:center;gap:10px;flex-wrap:wrap;justify-content:space-between;}
+    .tabs-dropdown{position:relative;}
     .tab-btn{
       padding:8px 14px;border:none;border-radius:6px;
       font-size:.88rem;font-weight:500;cursor:pointer;
@@ -444,8 +462,26 @@ window.salirDeClase = async (claseId) => {
       color:rgba(157,150,255,.5);font-family:'DM Sans',sans-serif;
       letter-spacing:.2px; position:relative;
     }
+    .tab-dropdown-btn{min-width:110px;}
     .tab-btn:hover{background:rgba(157,150,255,.08);color:var(--violet);}
     .tab-btn.active{background:rgba(157,150,255,.12);color:var(--violet);font-weight:700;}
+    .header-menu-panel{
+      position:absolute;top:calc(100% + 8px);right:0;
+      min-width:220px;background:var(--bg-deep);
+      border:1px solid var(--border);border-radius:18px;
+      padding:10px;display:none;flex-direction:column;gap:6px;
+      box-shadow:0 18px 40px rgba(0,0,0,.25);z-index:150;
+    }
+    .header-menu-panel.open{display:flex;}
+    .header-menu-item{
+      width:100%;text-align:left;background:transparent;border:none;
+      color:var(--text-muted);padding:10px 14px;border-radius:12px;
+      cursor:pointer;transition:.2s;font-family:'DM Sans',sans-serif;
+      font-size:.95rem;font-weight:500;
+    }
+    .header-menu-item:hover,
+    .header-menu-item.active{background:rgba(157,150,255,.08);color:var(--violet);}
+    .header-actions{display:flex;align-items:center;gap:10px;}
     .btn-auth{border:1px solid rgba(157,150,255,.2);}
     .btn-logout{display:none;}
 
@@ -1758,21 +1794,28 @@ body.light-mode .com-shared-empty { background: rgba(240,237,255,.6); }
       </div>
     </div>
     <div class="tabs-container">
-      <button class="tab-btn active" onclick="switchTab('home',event)">Inicio</button>
-      <button class="tab-btn" onclick="switchTab('map',event)">Plan</button>
-      <button class="tab-btn" id="calTabBtn" onclick="switchTab('calendar',event)">Calendario</button>
-      <button class="tab-btn" onclick="switchTab('schedule',event)">Horario</button>
-      <button class="tab-btn" onclick="switchTab('stats',event)">Progreso</button>
-      <button class="tab-btn" onclick="switchTab('pomodoro',event)">Estudiar</button>
-      <button class="tab-btn" onclick="switchTab('notes',event)">Apuntes</button>
-      <button class="tab-btn" onclick="switchTab('comunidad',event)">Comunidad</button>
-      <button class="tab-btn" onclick="switchTab('profile',event)">Perfil</button>
-      <button class="dark-toggle-btn" id="darkToggleBtn" onclick="toggleDarkMode()">
-        <span id="darkToggleIcon">☀</span>
-        <span id="darkToggleLabel">Claro</span>
-      </button>
-      <button class="tab-btn btn-auth btn-logout" id="btnLogout" onclick="logout()">Salir</button>
-      <button class="tab-btn btn-auth" id="btnOpenLogin" style="display:none" onclick="switchTab('profile',event)">Cuenta</button>
+      <div class="tabs-dropdown">
+        <button class="tab-btn tab-dropdown-btn active" id="headerMenuBtn" onclick="toggleHeaderMenu()">Menú ▾</button>
+        <div class="header-menu-panel" id="headerMenuPanel">
+          <button class="header-menu-item active" data-tab="home" onclick="switchTab('home',event)">Inicio</button>
+          <button class="header-menu-item" data-tab="map" onclick="switchTab('map',event)">Plan</button>
+          <button class="header-menu-item" data-tab="calendar" onclick="switchTab('calendar',event)">Calendario</button>
+          <button class="header-menu-item" data-tab="schedule" onclick="switchTab('schedule',event)">Horario</button>
+          <button class="header-menu-item" data-tab="stats" onclick="switchTab('stats',event)">Progreso</button>
+          <button class="header-menu-item" data-tab="pomodoro" onclick="switchTab('pomodoro',event)">Estudiar</button>
+          <button class="header-menu-item" data-tab="notes" onclick="switchTab('notes',event)">Apuntes</button>
+          <button class="header-menu-item" data-tab="comunidad" onclick="switchTab('comunidad',event)">Comunidad</button>
+          <button class="header-menu-item" data-tab="profile" onclick="switchTab('profile',event)">Perfil</button>
+        </div>
+      </div>
+      <div class="header-actions">
+        <button class="dark-toggle-btn" id="darkToggleBtn" onclick="toggleDarkMode()">
+          <span id="darkToggleIcon">☀</span>
+          <span id="darkToggleLabel">Claro</span>
+        </button>
+        <button class="tab-btn btn-auth btn-logout" id="btnLogout" onclick="logout()">Salir</button>
+        <button class="tab-btn btn-auth" id="btnOpenLogin" style="display:none" onclick="switchTab('profile',event)">Cuenta</button>
+      </div>
     </div>
   </header>
 
@@ -2442,13 +2485,37 @@ function updateStates(){
 window.switchTab=(name,event)=>{
   document.querySelectorAll('.view-section').forEach(s=>s.classList.remove('active'));
   document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('.header-menu-item').forEach(b=>b.classList.remove('active'));
   const el=document.getElementById('view-'+name);if(el)el.classList.add('active');
   if(event&&event.currentTarget)event.currentTarget.classList.add('active');
+  else {
+    const selected=document.querySelector(`.header-menu-item[data-tab="${name}"]`);
+    if(selected) selected.classList.add('active');
+  }
+  closeHeaderMenu();
   if(name==='notes')setNotesMode(_notesMode||'private');
   if(name==='comunidad')renderCommunityPage();
   if(name==='pomodoro')renderPomSubjectSelect();
   if(name==='calendar'){renderCalendarView();renderSidebar();renderTodoList();}
 };
+
+window.toggleHeaderMenu=()=>{
+  const panel=document.getElementById('headerMenuPanel');
+  if(!panel) return;
+  panel.classList.toggle('open');
+};
+
+window.closeHeaderMenu=()=>{
+  const panel=document.getElementById('headerMenuPanel');
+  if(panel) panel.classList.remove('open');
+};
+
+document.addEventListener('click',(event)=>{
+  const panel=document.getElementById('headerMenuPanel');
+  const button=document.getElementById('headerMenuBtn');
+  if(!panel||!button) return;
+  if(!panel.contains(event.target) && !button.contains(event.target)) panel.classList.remove('open');
+});
 
 // ==================== MODAL DE NOTA ====================
 function openGradeModal(id,nombre){
