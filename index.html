@@ -3355,6 +3355,12 @@ window.openSharedClass = async (claseId) => {
   window.scrollTo({ top: 0, behavior: 'smooth' });
 };
 
+window.openCommunityClass = async (claseId) => {
+  await openSharedClass(claseId);
+  const comDetails = document.getElementById('comSelectedClassDetails');
+  if (comDetails) comDetails.style.display = 'block';
+};
+
 window.closeSharedClassDetails = () => {
   if (_currentClaseUnsubscribe) { _currentClaseUnsubscribe(); _currentClaseUnsubscribe = null; }
   _selectedSharedClassId = null;
@@ -3473,7 +3479,7 @@ window.renderCommunityPage = async () => {
       <div class="com-clase-desc">${clase.descripcion || 'Accedé a apuntes compartidos y subí recursos para tu grupo.'}</div>
       <div class="com-clase-meta">
         <div class="com-clase-members">${(clase.miembros?.length || 0)} miembro${(clase.miembros?.length === 1 ? '' : 's')}</div>
-        <button class="com-btn-sm accent" onclick="openSharedClass('${clase.id}')">Abrir</button>
+        <button class="com-btn-sm accent" onclick="openCommunityClass('${clase.id}')">Abrir</button>
       </div>
     </div>`).join('');
   document.getElementById('comSelectedClassDetails').style.display = 'none';
@@ -3488,7 +3494,7 @@ window.handleCreateClass=async()=>{
   if(!result) return;
   alert(`Clase creada. Código: ${result.codigo}`);
   renderCommunityPage();
-  openSharedClass(result.id);
+  openCommunityClass(result.id);
 };
 
 window.handleJoinClass=async()=>{
@@ -3498,7 +3504,7 @@ window.handleJoinClass=async()=>{
   if(result.error){alert(result.error);return;}
   alert(`Te uniste a ${result.nombre}`);
   renderCommunityPage();
-  openSharedClass(result.id);
+  openCommunityClass(result.id);
 };
 
 window.deleteSharedApunte=async(claseId,apunteId)=>{
