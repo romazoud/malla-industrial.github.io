@@ -101,34 +101,46 @@
   // ── Publicar un apunte compartido ────────────────────
   window.publicarApunte = async (claseId, apunte) => {
     const user = auth.currentUser;
-    if (!user) return;
+    if (!user) throw new Error('Debes iniciar sesión para publicar.');
+    if (!claseId) throw new Error('Falta seleccionar la clase.');
+    
     let url = apunte.url || '';
     let tipo = apunte.tipo || 'link';
+    
+    // Si hay archivo, subir primero
     if (apunte.file) {
       try {
-        // Subimos a Firebase Storage
         const filename = `apuntes/${claseId}/${Date.now()}_${apunte.file.name}`;
         const fileRef = storageRef(storage, filename);
         const res = await uploadBytes(fileRef, apunte.file);
         url = await getDownloadURL(res.ref);
         tipo = apunte.file.type.startsWith('image/') ? 'imagen' : 'archivo';
       } catch (e) {
-        console.error('Error al subir el archivo:', e);
-        alert('No se pudo subir la imagen. Probá nuevamente.');
-        return;
+        console.error('Error al subir archivo:', e);
+        throw new Error('No se pudo subir el archivo: ' + e.message);
       }
     }
-    await updateDoc(doc(db, 'clases', claseId), {
-      apuntes_compartidos: arrayUnion({
-        id: Date.now().toString(),
-        nombre: apunte.nombre,
-        url,
-        tipo,
-        autor_email: user.email,
-        autor_uid: user.uid,
-        fecha: new Date().toISOString()
-      })
-    });
+    
+    // Validar que tenemos al menos URL o archivo
+    if (!url) throw new Error('Debe haber URL o archivo.');
+    
+    // Guardar en Firestore
+    try {
+      await updateDoc(doc(db, 'clases', claseId), {
+        apuntes_compartidos: arrayUnion({
+          id: Date.now().toString(),
+          nombre: apunte.nombre || 'Sin título',
+          url,
+          tipo,
+          autor_email: user.email,
+          autor_uid: user.uid,
+          fecha: new Date().toISOString()
+        })
+      });
+    } catch (e) {
+      console.error('Error al guardar en Firestore:', e);
+      throw new Error('No se pudo guardar: ' + e.message);
+    }
   };
 
   // ── Borrar un apunte compartido (autor o creador) ────
@@ -3453,6 +3465,19 @@
   }
 
   window.submitSharedResource = async (claseId) => {
+    // Validar que hay una clase seleccionada
+    const selectedClaseId = window._selectedSharedClassId;
+    if (!selectedClaseId) { 
+      alert('Por favor selecciona una clase primero.'); 
+      return; 
+    }
+    
+    // Validar que hay usuario autenticado
+    if (!auth.currentUser) {
+      alert('Debes iniciar sesión para publicar.');
+      return;
+    }
+    
     // Buscar en ambos formularios (notas y comunidad)
     const titleInput1 = document.getElementById('comSharedTitle');
     const titleInput2 = document.getElementById('comSelectedTitle');
@@ -3473,7 +3498,7 @@
     if (btn) { btn.disabled = true; btn.textContent = 'Publicando...'; }
     
     try {
-      await publicarApunte(claseId, { nombre: name, url: url, file: file });
+      await window.publicarApunte(selectedClaseId, { nombre: name, url: url, file: file });
       if (titleInput1) titleInput1.value = '';
       if (titleInput2) titleInput2.value = '';
       if (urlInput1) urlInput1.value = '';
@@ -3482,8 +3507,8 @@
       if (fileInput2) fileInput2.value = '';
       alert('Recurso publicado con éxito.');
     } catch (e) { 
-      console.error('Error:', e);
-      alert('No se pudo publicar el recurso.'); 
+      console.error('Error al publicar:', e);
+      alert('Error: ' + (e.message || 'No se pudo publicar el recurso.')); 
     }
     
     if (btn) { btn.disabled = false; btn.textContent = '+ Publicar'; }
