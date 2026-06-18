@@ -3453,12 +3453,18 @@
   }
 
   window.submitSharedResource = async (claseId) => {
-    const titleInput = document.getElementById('comSharedTitle') || document.getElementById('comSelectedTitle');
-    const urlInput = document.getElementById('comSharedUrl') || document.getElementById('comSelectedUrl');
-    const fileInput = document.getElementById('comSharedFile') || document.getElementById('comSelectedFile');
-    const name = titleInput?.value.trim();
-    const url = urlInput?.value.trim();
-    const file = fileInput?.files?.[0];
+    // Buscar en ambos formularios (notas y comunidad)
+    const titleInput1 = document.getElementById('comSharedTitle');
+    const titleInput2 = document.getElementById('comSelectedTitle');
+    const urlInput1 = document.getElementById('comSharedUrl');
+    const urlInput2 = document.getElementById('comSelectedUrl');
+    const fileInput1 = document.getElementById('comSharedFile');
+    const fileInput2 = document.getElementById('comSelectedFile');
+    
+    // Usar el input que tenga contenido
+    const name = (titleInput1?.value?.trim() || titleInput2?.value?.trim()) || '';
+    const url = (urlInput1?.value?.trim() || urlInput2?.value?.trim()) || '';
+    const file = fileInput1?.files?.[0] || fileInput2?.files?.[0];
     
     if (!name) { alert('Agrega un título para tu recurso.'); return; }
     if (!url && !file) { alert('Agrega una URL o sube un archivo.'); return; }
@@ -3468,10 +3474,15 @@
     
     try {
       await publicarApunte(claseId, { nombre: name, url: url, file: file });
-      if (titleInput) titleInput.value = '';
-      if (urlInput) urlInput.value = '';
-      if (fileInput) fileInput.value = '';
+      if (titleInput1) titleInput1.value = '';
+      if (titleInput2) titleInput2.value = '';
+      if (urlInput1) urlInput1.value = '';
+      if (urlInput2) urlInput2.value = '';
+      if (fileInput1) fileInput1.value = '';
+      if (fileInput2) fileInput2.value = '';
+      alert('Recurso publicado con éxito.');
     } catch (e) { 
+      console.error('Error:', e);
       alert('No se pudo publicar el recurso.'); 
     }
     
