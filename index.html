@@ -1,4 +1,4 @@
- <!DOCTYPE html>
+  <!DOCTYPE html>
   <html lang="es">
   <head>
     <meta charset="UTF-8"/>
@@ -115,7 +115,7 @@
         formData.append('file', apunte.file);
         
         // Configura tus datos de Cloudinary acá abajo:
-        formData.append('upload_preset', 'TU_PRESET_UNSIGNED_ACA'); // <-- Reemplazá por tu preset de Cloudinary
+        formData.append('upload_preset', 'facu-app'); // Reemplazá el texto viejo por 'facu-app'
         const cloudName = 'dlmisrlfo'; // Tu cloud name actual
         
         const response = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, {
