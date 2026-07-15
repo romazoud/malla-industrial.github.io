@@ -1,4 +1,4 @@
-   <!DOCTYPE html>
+ <!DOCTYPE html>
   <html lang="es">
   <head>
     <meta charset="UTF-8"/>
@@ -501,14 +501,25 @@
       .tab-dropdown-btn{min-width:110px;}
       .tab-btn:hover{background:rgba(157,150,255,.08);color:var(--violet);}
       .tab-btn.active{background:rgba(157,150,255,.12);color:var(--violet);font-weight:700;}
+      
+      /* ESTILOS DEL NUEVO MENÚ LATERAL (SIDEBAR) */
       .header-menu-panel{
-        position:absolute;top:calc(100% + 8px);right:0;
-        min-width:220px;background:var(--bg-deep);
-        border:1px solid var(--border);border-radius:18px;
-        padding:10px;display:none;flex-direction:column;gap:6px;
-        box-shadow:0 18px 40px rgba(0,0,0,.25);z-index:150;
+        position:fixed;top:0;left:0;width:280px;height:100vh;
+        background:var(--bg-deep);border-right:1px solid var(--border);
+        padding:20px 14px;display:flex;flex-direction:column;gap:6px;
+        box-shadow:4px 0 30px rgba(0,0,0,.4);z-index:2000;
+        transform:translateX(-100%);transition:transform .3s ease;
+        overflow-y:auto;
       }
-      .header-menu-panel.open{display:flex;}
+      .header-menu-panel.open{transform:translateX(0);}
+      
+      /* FONDO OSCURO CUANDO EL MENÚ SE ABRE */
+      .menu-overlay{
+        position:fixed;inset:0;background:rgba(0,0,0,.6);
+        z-index:1999;opacity:0;pointer-events:none;transition:opacity .3s ease;
+        backdrop-filter:blur(3px);
+      }
+      .menu-overlay.open{opacity:1;pointer-events:auto;}
       .header-menu-item{
         width:100%;text-align:left;background:transparent;border:none;
         color:var(--text-muted);padding:10px 14px;border-radius:12px;
@@ -1821,52 +1832,52 @@
       APP CONTENT
       ========================================================= -->
   <div id="appContent">
-    <header>
-      <div class="logo-area">
-        <img src="logonombre.png" alt="Logo" onerror="this.style.display='none'">
-        <div>
-          <div class="career-name" id="headerCareer">Mi Carrera</div>
-          <div class="uni-name" id="headerUni">Mi Universidad</div>
-        </div>
-      </div>
-
-      <!-- 👇 ACÁ ARRANCA LO QUE TENÉS QUE PEGAR 👇 -->
-      <div class="tabs-container">
-        <!-- El botón del modo oscuro queda afuera, junto a la hamburguesa -->
-        <div class="header-actions">
-          <button class="dark-toggle-btn" id="darkToggleBtn" onclick="toggleDarkMode()">
-            <span id="darkToggleIcon">☀</span>
-            <span id="darkToggleLabel">Claro</span>
-          </button>
-        </div>
-
-        <div class="tabs-dropdown">
-          <!-- Botón de tres rayas (Hamburguesa) -->
-          <button class="tab-btn tab-dropdown-btn active" id="headerMenuBtn" onclick="toggleHeaderMenu()" style="font-size: 1.2rem; padding: 4px 10px; min-width: auto;">☰</button>
-          
-          <div class="header-menu-panel" id="headerMenuPanel">
-            <button class="header-menu-item active" data-tab="home" onclick="switchTab('home',event)">Inicio</button>
-            <button class="header-menu-item" data-tab="map" onclick="switchTab('map',event)">Plan</button>
-            <button class="header-menu-item" data-tab="calendar" onclick="switchTab('calendar',event)">Calendario</button>
-            <button class="header-menu-item" data-tab="schedule" onclick="switchTab('schedule',event)">Horario</button>
-            <button class="header-menu-item" data-tab="stats" onclick="switchTab('stats',event)">Progreso</button>
-            <button class="header-menu-item" data-tab="pomodoro" onclick="switchTab('pomodoro',event)">Estudiar</button>
-            <button class="header-menu-item" data-tab="notes" onclick="switchTab('notes',event)">Apuntes</button>
-            <button class="header-menu-item" data-tab="comunidad" onclick="switchTab('comunidad',event)">Comunidad</button>
-            <button class="header-menu-item" data-tab="profile" onclick="switchTab('profile',event)">Perfil</button>
-            
-            <!-- Separador visual -->
-            <div style="height: 1px; background: var(--border); margin: 6px 10px;"></div>
-            
-            <!-- Botones de Cuenta y Salir integrados al menú -->
-            <button class="header-menu-item" id="btnOpenLogin" style="display:none; color: var(--lime); font-weight: bold;" onclick="switchTab('profile',event)">Cuenta</button>
-            <button class="header-menu-item btn-logout" id="btnLogout" onclick="logout()" style="color: var(--magenta); font-weight: bold;">Salir</button>
+    <header style="display:flex; justify-content:space-between; width:100%; align-items:center;">
+      <div style="display:flex; align-items:center; gap:16px;">
+        <!-- Botón de las 3 rayitas ahora a la izquierda -->
+        <button id="headerMenuBtn" onclick="toggleHeaderMenu()" style="background:transparent; border:none; color:var(--violet); font-size:1.8rem; cursor:pointer; padding:0;">☰</button>
+        <div class="logo-area">
+          <img src="logonombre.png" alt="Logo" onerror="this.style.display='none'">
+          <div>
+            <div class="career-name" id="headerCareer">Mi Carrera</div>
+            <div class="uni-name" id="headerUni">Mi Universidad</div>
           </div>
         </div>
       </div>
-      <!-- 👆 ACÁ TERMINA LO QUE TENÉS QUE PEGAR 👆 -->
-
+      <div class="header-actions">
+        <!-- Botón de Modo Claro/Oscuro -->
+        <button class="dark-toggle-btn" id="darkToggleBtn" onclick="toggleDarkMode()">
+          <span id="darkToggleIcon">☀</span>
+          <span id="darkToggleLabel">Claro</span>
+        </button>
+      </div>
     </header>
+
+    <!-- Overlay oscuro para tapar el fondo -->
+    <div class="menu-overlay" id="menuOverlay" onclick="closeHeaderMenu()"></div>
+
+    <!-- Panel lateral desplegable (Sidebar) -->
+    <div class="header-menu-panel" id="headerMenuPanel">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; padding:0 8px;">
+        <span style="font-family:'Cormorant Garamond',serif;font-style:italic;color:var(--violet);font-size:1.6rem;font-weight:700;">Menú</span>
+        <!-- Botón X para cerrar -->
+        <button onclick="closeHeaderMenu()" style="background:transparent; border:none; color:var(--text-muted); font-size:2rem; cursor:pointer; line-height:1;">×</button>
+      </div>
+      <button class="header-menu-item active" data-tab="home" onclick="switchTab('home',event)">Inicio</button>
+      <button class="header-menu-item" data-tab="map" onclick="switchTab('map',event)">Plan</button>
+      <button class="header-menu-item" data-tab="calendar" onclick="switchTab('calendar',event)">Calendario</button>
+      <button class="header-menu-item" data-tab="schedule" onclick="switchTab('schedule',event)">Horario</button>
+      <button class="header-menu-item" data-tab="stats" onclick="switchTab('stats',event)">Progreso</button>
+      <button class="header-menu-item" data-tab="pomodoro" onclick="switchTab('pomodoro',event)">Estudiar</button>
+      <button class="header-menu-item" data-tab="notes" onclick="switchTab('notes',event)">Apuntes</button>
+      <button class="header-menu-item" data-tab="comunidad" onclick="switchTab('comunidad',event)">Comunidad</button>
+      <button class="header-menu-item" data-tab="profile" onclick="switchTab('profile',event)">Perfil</button>
+      
+      <div style="height: 1px; background: var(--border); margin: 10px;"></div>
+      
+      <button class="header-menu-item" id="btnOpenLogin" style="display:none; color: var(--lime); font-weight: bold;" onclick="switchTab('profile',event)">Cuenta</button>
+      <button class="header-menu-item btn-logout" id="btnLogout" onclick="logout()" style="color: var(--magenta); font-weight: bold;">Salir</button>
+    </div>
 
     <main class="main-content">
      <div class="tabs-container">
@@ -2572,13 +2583,17 @@
 
   window.toggleHeaderMenu=()=>{
     const panel=document.getElementById('headerMenuPanel');
+    const overlay=document.getElementById('menuOverlay');
     if(!panel) return;
     panel.classList.toggle('open');
+    if(overlay) overlay.classList.toggle('open');
   };
 
   window.closeHeaderMenu=()=>{
     const panel=document.getElementById('headerMenuPanel');
+    const overlay=document.getElementById('menuOverlay');
     if(panel) panel.classList.remove('open');
+    if(overlay) overlay.classList.remove('open');
   };
 
   document.addEventListener('click',(event)=>{
