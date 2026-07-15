@@ -1,4 +1,4 @@
-  <!DOCTYPE html>
+   <!DOCTYPE html>
   <html lang="es">
   <head>
     <meta charset="UTF-8"/>
@@ -700,15 +700,15 @@
       .cal-week-event-del{position:absolute;top:3px;right:4px;cursor:pointer;opacity:.7;font-size:.65rem;}
       .cal-month-view{flex:1;overflow:auto;}
       .cal-month-weekdays{display:grid;grid-template-columns:repeat(7,1fr);border-bottom:1px solid var(--border);position:sticky;top:0;background:rgba(7,6,20,.7);backdrop-filter:blur(8px);z-index:10;}
-      .cal-month-weekday{padding:8px;text-align:center;font-size:.66rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.5px;}
+      .cal-month-weekday{padding:10px 8px;text-align:center;font-size:.75rem;font-weight:700;color:var(--text-soft);text-transform:uppercase;letter-spacing:.5px;}
       .cal-month-grid{display:grid;grid-template-columns:repeat(7,1fr);}
-      .cal-month-cell{min-height:80px;border-bottom:1px solid var(--border-2);border-right:1px solid var(--border-2);padding:5px;cursor:pointer;transition:background .12s;}
+      .cal-month-cell{min-height:100px;border-bottom:1px solid var(--border-2);border-right:1px solid var(--border-2);padding:8px;cursor:pointer;transition:background .12s;}
       .cal-month-cell:hover{background:rgba(157,150,255,.04);}
       .cal-month-cell.empty{background:rgba(7,6,20,.2);cursor:default;}
       .cal-month-cell.today{background:rgba(157,150,255,.05);}
-      .cal-month-date{font-size:.72rem;font-weight:600;color:var(--text-muted);margin-bottom:2px;text-align:right;}
-      .cal-month-cell.today .cal-month-date{color:var(--violet);font-weight:700;}
-      .cal-month-event{font-size:.63rem;font-weight:600;color:var(--bg);padding:2px 5px;border-radius:4px;margin-bottom:2px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;cursor:pointer;}
+      .cal-month-date{font-size:.95rem;font-weight:700;color:var(--text-main);margin-bottom:4px;text-align:right;}
+      .cal-month-cell.today .cal-month-date{color:var(--violet);font-weight:800;font-size:1.1rem;}
+      .cal-month-event{font-size:.7rem;font-weight:600;color:var(--bg);padding:3px 6px;border-radius:4px;margin-bottom:3px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;cursor:pointer;}
 
       /* Rango de horario */
       .cal-time-range-row{display:flex;align-items:center;gap:8px;background:var(--surface-2);border:1px solid var(--border);border-radius:8px;padding:9px 11px;margin-bottom:12px;flex-wrap:wrap;}
@@ -768,15 +768,15 @@
       .todo-stat-val{font-family:'Cormorant Garamond',serif;font-size:1.3rem;font-weight:700;color:var(--violet);display:block;}
       .todo-stat-lbl{font-size:.62rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:.5px;}
 
-      /* ============================================================
+     /* ============================================================
         HORARIO
         ============================================================ */
-      #view-schedule{max-width:1100px;margin:0 auto;padding-bottom:50px;}
-      .schedule-grid{display:flex;gap:10px;overflow-x:auto;padding-bottom:10px;}
-      .day-column{flex:1;min-width:132px;display:flex;flex-direction:column;border-radius:10px;border:1px solid var(--border);overflow:hidden;background:var(--surface);backdrop-filter:var(--blur);}
-      .day-header{background:rgba(7,6,20,.6);color:var(--violet);text-align:center;padding:10px;font-family:'Cormorant Garamond',serif;font-style:italic;font-weight:700;font-size:.9rem;border-bottom:1px solid var(--border);}
-      .hour-cell{display:flex;border-top:1px solid var(--border-2);min-height:46px;position:relative;}
-      .hour-label{background:rgba(7,6,20,.4);color:var(--text-muted);font-weight:700;font-size:.64rem;width:44px;display:flex;align-items:center;justify-content:center;border-right:1px solid var(--border-2);flex-shrink:0;}
+      #view-schedule{max-width:1400px;margin:0 auto;padding-bottom:50px;}
+      .schedule-grid{display:flex;gap:12px;overflow-x:auto;padding-bottom:12px;}
+      .day-column{flex:1;min-width:200px;display:flex;flex-direction:column;border-radius:10px;border:1px solid var(--border);overflow:hidden;background:var(--surface);backdrop-filter:var(--blur);}
+      .day-header{background:rgba(7,6,20,.6);color:var(--violet);text-align:center;padding:12px;font-family:'Cormorant Garamond',serif;font-style:italic;font-weight:700;font-size:1.05rem;border-bottom:1px solid var(--border);}
+      .hour-cell{display:flex;border-top:1px solid var(--border-2);min-height:56px;position:relative;}
+      .hour-label{background:rgba(7,6,20,.4);color:var(--text-muted);font-weight:700;font-size:.75rem;width:54px;display:flex;align-items:center;justify-content:center;border-right:1px solid var(--border-2);flex-shrink:0;}
       .hour-cell textarea{flex:1;border:none;outline:none;background:transparent;padding:5px;text-align:center;color:var(--text-soft);resize:none;font-size:.72rem;font-weight:600;font-family:'DM Sans',sans-serif;box-sizing:border-box;}
       .hour-cell textarea:focus{background:rgba(157,150,255,.05);}
       .schedule-cell-occupied{background:rgba(157,150,255,.08) !important;color:var(--violet) !important;}
@@ -1829,7 +1829,47 @@
           <div class="uni-name" id="headerUni">Mi Universidad</div>
         </div>
       </div>
+
+      <!-- 👇 ACÁ ARRANCA LO QUE TENÉS QUE PEGAR 👇 -->
       <div class="tabs-container">
+        <!-- El botón del modo oscuro queda afuera, junto a la hamburguesa -->
+        <div class="header-actions">
+          <button class="dark-toggle-btn" id="darkToggleBtn" onclick="toggleDarkMode()">
+            <span id="darkToggleIcon">☀</span>
+            <span id="darkToggleLabel">Claro</span>
+          </button>
+        </div>
+
+        <div class="tabs-dropdown">
+          <!-- Botón de tres rayas (Hamburguesa) -->
+          <button class="tab-btn tab-dropdown-btn active" id="headerMenuBtn" onclick="toggleHeaderMenu()" style="font-size: 1.2rem; padding: 4px 10px; min-width: auto;">☰</button>
+          
+          <div class="header-menu-panel" id="headerMenuPanel">
+            <button class="header-menu-item active" data-tab="home" onclick="switchTab('home',event)">Inicio</button>
+            <button class="header-menu-item" data-tab="map" onclick="switchTab('map',event)">Plan</button>
+            <button class="header-menu-item" data-tab="calendar" onclick="switchTab('calendar',event)">Calendario</button>
+            <button class="header-menu-item" data-tab="schedule" onclick="switchTab('schedule',event)">Horario</button>
+            <button class="header-menu-item" data-tab="stats" onclick="switchTab('stats',event)">Progreso</button>
+            <button class="header-menu-item" data-tab="pomodoro" onclick="switchTab('pomodoro',event)">Estudiar</button>
+            <button class="header-menu-item" data-tab="notes" onclick="switchTab('notes',event)">Apuntes</button>
+            <button class="header-menu-item" data-tab="comunidad" onclick="switchTab('comunidad',event)">Comunidad</button>
+            <button class="header-menu-item" data-tab="profile" onclick="switchTab('profile',event)">Perfil</button>
+            
+            <!-- Separador visual -->
+            <div style="height: 1px; background: var(--border); margin: 6px 10px;"></div>
+            
+            <!-- Botones de Cuenta y Salir integrados al menú -->
+            <button class="header-menu-item" id="btnOpenLogin" style="display:none; color: var(--lime); font-weight: bold;" onclick="switchTab('profile',event)">Cuenta</button>
+            <button class="header-menu-item btn-logout" id="btnLogout" onclick="logout()" style="color: var(--magenta); font-weight: bold;">Salir</button>
+          </div>
+        </div>
+      </div>
+      <!-- 👆 ACÁ TERMINA LO QUE TENÉS QUE PEGAR 👆 -->
+
+    </header>
+
+    <main class="main-content">
+     <div class="tabs-container">
         <div class="tabs-dropdown">
           <button class="tab-btn tab-dropdown-btn active" id="headerMenuBtn" onclick="toggleHeaderMenu()">Menú ▾</button>
           <div class="header-menu-panel" id="headerMenuPanel">
@@ -1853,7 +1893,6 @@
           <button class="tab-btn btn-auth" id="btnOpenLogin" style="display:none" onclick="switchTab('profile',event)">Cuenta</button>
         </div>
       </div>
-    </header>
 
     <main class="main-content">
 
@@ -2092,8 +2131,8 @@
         </div>
         <div id="notesPrivateView">
           <div class="notes-search-top">
-            <button class="notes-filter-btn active" id="filterAll" onclick="setNotesFilter('all',this)">Todas</button>
-            <button class="notes-filter-btn" id="filterCursando" onclick="setNotesFilter('cursando',this)">En curso</button>
+            <button class="notes-filter-btn" id="filterAll" onclick="setNotesFilter('all',this)">Todas</button>
+            <button class="notes-filter-btn active" id="filterCursando" onclick="setNotesFilter('cursando',this)">En curso</button>
             <button class="notes-filter-btn" id="filterAprobadas" onclick="setNotesFilter('aprobadas',this)">Aprobadas</button>
             <input type="text" id="notesSearchInput" class="notes-search-bar" placeholder="Buscar materia…" oninput="filterNotes()">
           </div>
@@ -3302,26 +3341,33 @@
   };
 
   function renderNotesTab(){
-    const grid=document.getElementById('notesGrid'),detail=document.getElementById('notesDetail');if(!grid)return;
-    grid.style.display='grid';detail.style.display='none';_notesActiveSubject=null;
-    const searchInput=document.getElementById('notesSearchInput');if(searchInput)searchInput.value='';
-    notesCurrentFilter='all';
-    document.querySelectorAll('.notes-search-top .notes-filter-btn').forEach((b,i)=>b.classList.toggle('active',i===0));
-    const enabled=Array.from(getCourses()).filter(c=>c.classList.contains('enabled')||c.classList.contains('completed'));
-    if(!enabled.length){grid.innerHTML='<span style="color:var(--text-muted);font-size:.84rem;grid-column:1/-1">Habilitá materias en el Plan de estudios para ver sus apuntes.</span>';return;}
-    grid.innerHTML=enabled.map((c)=>{
-      const id=c.dataset.id,name=c.querySelector('.course-name')?.textContent||'';
-      const isCompleted=c.classList.contains('completed'),nota=gradesData[id];
-      const count=countResources(id),hasNotes=count>0,icon=getSubjectIcon(id);
-      const statusBadge=isCompleted?`<span class="notes-card-status aprobada">${nota?nota+' ✦':'✦ Aprobada'}</span>`:`<span class="notes-card-status cursando">En curso</span>`;
-      const countLabel=count===0?'Sin recursos aún':`${count} recurso${count!==1?'s':''}`;
-      return`<div class="notes-canvas-card${hasNotes?' has-notes':''}" data-id="${id}" data-name="${name.replace(/"/g,'&quot;')}" data-has="${hasNotes?'1':'0'}" data-completed="${isCompleted?'1':'0'}" onclick="openNotesDetail('${id}','${name.replace(/'/g,"\\'").replace(/"/g,'&quot;')}')">
-        ${statusBadge}<div class="notes-card-icon">${icon}</div>
-        <div class="notes-card-title">${name}</div>
-        <div class="notes-card-count">${countLabel}</div>
-        <div class="notes-card-arrow">→</div></div>`;
-    }).join('');
-  }
+        const grid=document.getElementById('notesGrid'),detail=document.getElementById('notesDetail');if(!grid)return;
+        grid.style.display='grid';detail.style.display='none';_notesActiveSubject=null;
+        const searchInput=document.getElementById('notesSearchInput');if(searchInput)searchInput.value='';
+        
+        // Cambiamos el estado inicial a 'cursando' y marcamos el botón
+        notesCurrentFilter='cursando';
+        document.querySelectorAll('.notes-search-top .notes-filter-btn').forEach(b=>b.classList.remove('active'));
+        const btnCursando=document.getElementById('filterCursando');if(btnCursando)btnCursando.classList.add('active');
+        
+        const enabled=Array.from(getCourses()).filter(c=>c.classList.contains('enabled')||c.classList.contains('completed'));
+        if(!enabled.length){grid.innerHTML='<span style="color:var(--text-muted);font-size:.84rem;grid-column:1/-1">Habilitá materias en el Plan de estudios para ver sus apuntes.</span>';return;}
+        grid.innerHTML=enabled.map((c)=>{
+          const id=c.dataset.id,name=c.querySelector('.course-name')?.textContent||'';
+          const isCompleted=c.classList.contains('completed'),nota=gradesData[id];
+          const count=countResources(id),hasNotes=count>0,icon=getSubjectIcon(id);
+          const statusBadge=isCompleted?`<span class="notes-card-status aprobada">${nota?nota+' ✦':'✦ Aprobada'}</span>`:`<span class="notes-card-status cursando">En curso</span>`;
+          const countLabel=count===0?'Sin recursos aún':`${count} recurso${count!==1?'s':''}`;
+          return`<div class="notes-canvas-card${hasNotes?' has-notes':''}" data-id="${id}" data-name="${name.replace(/"/g,'&quot;')}" data-has="${hasNotes?'1':'0'}" data-completed="${isCompleted?'1':'0'}" onclick="openNotesDetail('${id}','${name.replace(/'/g,"\\'").replace(/"/g,'&quot;')}')">
+            ${statusBadge}<div class="notes-card-icon">${icon}</div>
+            <div class="notes-card-title">${name}</div>
+            <div class="notes-card-count">${countLabel}</div>
+            <div class="notes-card-arrow">→</div></div>`;
+        }).join('');
+        
+        // Llamamos al filtro inmediatamente para ocultar las aprobadas
+        filterNotes();
+      }
 
   window.setNotesMode=function(mode,btn){
     window._notesMode=mode;
