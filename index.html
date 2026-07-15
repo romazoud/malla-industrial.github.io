@@ -1,4 +1,4 @@
-  <!DOCTYPE html>
+<!DOCTYPE html>
   <html lang="es">
   <head>
     <meta charset="UTF-8"/>
@@ -1828,10 +1828,7 @@
     </div>
   </div>
 
-  <!-- =========================================================
-      APP CONTENT
-      ========================================================= -->
- <!-- =========================================================
+<!-- =========================================================
       APP CONTENT
       ========================================================= -->
   <div id="appContent">
@@ -1847,11 +1844,13 @@
       </div>
 
       <!-- Lado derecho: Botón oscuro y menú -->
-      <div class="header-actions" style="display:flex; align-items:center; gap:12px;">
+      <div class="header-actions" style="display:flex; align-items:center; gap:16px;">
+        <!-- Botón de Modo Claro/Oscuro -->
         <button class="dark-toggle-btn" id="darkToggleBtn" onclick="toggleDarkMode()">
           <span id="darkToggleIcon">☀</span>
           <span id="darkToggleLabel">Claro</span>
         </button>
+        <!-- Botón de Menú Hamburguesa a la derecha -->
         <button id="headerMenuBtn" onclick="toggleHeaderMenu()" style="background:transparent; border:none; color:var(--violet); font-size:1.8rem; cursor:pointer; padding:0;">☰</button>
       </div>
     </header>
