@@ -1,4 +1,4 @@
- <!DOCTYPE html>
+  <!DOCTYPE html>
   <html lang="es">
   <head>
     <meta charset="UTF-8"/>
@@ -504,11 +504,11 @@
       
       /* ESTILOS DEL NUEVO MENÚ LATERAL (SIDEBAR) */
       .header-menu-panel{
-        position:fixed;top:0;left:0;width:280px;height:100vh;
-        background:var(--bg-deep);border-right:1px solid var(--border);
+        position:fixed;top:0;right:0;width:280px;height:100vh;
+        background:var(--bg-deep);border-left:1px solid var(--border);
         padding:20px 14px;display:flex;flex-direction:column;gap:6px;
-        box-shadow:4px 0 30px rgba(0,0,0,.4);z-index:2000;
-        transform:translateX(-100%);transition:transform .3s ease;
+        box-shadow:-4px 0 30px rgba(0,0,0,.4);z-index:2000;
+        transform:translateX(100%);transition:transform .3s ease;
         overflow-y:auto;
       }
       .header-menu-panel.open{transform:translateX(0);}
@@ -1831,25 +1831,28 @@
   <!-- =========================================================
       APP CONTENT
       ========================================================= -->
+ <!-- =========================================================
+      APP CONTENT
+      ========================================================= -->
   <div id="appContent">
+    
     <header style="display:flex; justify-content:space-between; width:100%; align-items:center;">
-      <div style="display:flex; align-items:center; gap:16px;">
-        <!-- Botón de las 3 rayitas ahora a la izquierda -->
-        <button id="headerMenuBtn" onclick="toggleHeaderMenu()" style="background:transparent; border:none; color:var(--violet); font-size:1.8rem; cursor:pointer; padding:0;">☰</button>
-        <div class="logo-area">
-          <img src="logonombre.png" alt="Logo" onerror="this.style.display='none'">
-          <div>
-            <div class="career-name" id="headerCareer">Mi Carrera</div>
-            <div class="uni-name" id="headerUni">Mi Universidad</div>
-          </div>
+      <!-- Lado izquierdo: Logo y textos -->
+      <div class="logo-area">
+        <img src="logonombre.png" alt="Logo" onerror="this.style.display='none'">
+        <div>
+          <div class="career-name" id="headerCareer">Mi Carrera</div>
+          <div class="uni-name" id="headerUni">Mi Universidad</div>
         </div>
       </div>
-      <div class="header-actions">
-        <!-- Botón de Modo Claro/Oscuro -->
+
+      <!-- Lado derecho: Botón oscuro y menú -->
+      <div class="header-actions" style="display:flex; align-items:center; gap:12px;">
         <button class="dark-toggle-btn" id="darkToggleBtn" onclick="toggleDarkMode()">
           <span id="darkToggleIcon">☀</span>
           <span id="darkToggleLabel">Claro</span>
         </button>
+        <button id="headerMenuBtn" onclick="toggleHeaderMenu()" style="background:transparent; border:none; color:var(--violet); font-size:1.8rem; cursor:pointer; padding:0;">☰</button>
       </div>
     </header>
 
