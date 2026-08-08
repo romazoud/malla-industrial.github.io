@@ -334,17 +334,17 @@ html{font-size:20px;}
 
       /* fondo degradado global fijo */
       body::before{
-        content:'';
-        position:fixed; inset:0; z-index:0; pointer-events:none;
-        background:
-          radial-gradient(ellipse 80% 60% at 10% 10%, rgba(157,150,255,.18) 0%, transparent 60%),
-          radial-gradient(ellipse 70% 50% at 90% 5%,  rgba(190,218,98,.12)  0%, transparent 55%),
-          radial-gradient(ellipse 60% 70% at 80% 50%, rgba(201,54,174,.10)  0%, transparent 55%),
-          radial-gradient(ellipse 80% 60% at 5%  70%, rgba(190,218,98,.10)  0%, transparent 60%),
-          radial-gradient(ellipse 70% 50% at 50% 90%, rgba(157,150,255,.12) 0%, transparent 55%),
-          radial-gradient(ellipse 50% 40% at 30% 50%, rgba(250,199,90,.07)  0%, transparent 50%),
-          var(--bg);
-      }
+  content:'';
+  position:fixed; inset:0; z-index:0; pointer-events:none;
+  background:
+    radial-gradient(ellipse 80% 60% at 10% 10%, color-mix(in srgb, var(--accent) 22%, transparent) 0%, transparent 60%),
+    radial-gradient(ellipse 70% 50% at 90% 5%,  color-mix(in srgb, var(--accent-light) 16%, transparent) 0%, transparent 55%),
+    radial-gradient(ellipse 60% 70% at 80% 50%, color-mix(in srgb, var(--accent-dark) 14%, transparent) 0%, transparent 55%),
+    radial-gradient(ellipse 80% 60% at 5%  70%, color-mix(in srgb, var(--accent-light) 14%, transparent) 0%, transparent 60%),
+    radial-gradient(ellipse 70% 50% at 50% 90%, color-mix(in srgb, var(--accent) 16%, transparent) 0%, transparent 55%),
+    radial-gradient(ellipse 50% 40% at 30% 50%, color-mix(in srgb, var(--accent-dark) 10%, transparent) 0%, transparent 50%),
+    var(--bg);
+}
 
       /* ruido sutil */
       body::after{
@@ -713,7 +713,7 @@ html{font-size:20px;}
       .cal-month-weekdays{display:grid;grid-template-columns:repeat(7,1fr);border-bottom:1px solid var(--border);position:sticky;top:0;background:rgba(7,6,20,.7);backdrop-filter:blur(8px);z-index:10;}
       .cal-month-weekday{padding:10px 8px;text-align:center;font-size:.75rem;font-weight:700;color:var(--text-soft);text-transform:uppercase;letter-spacing:.5px;}
       .cal-month-grid{display:grid;grid-template-columns:repeat(7,1fr);}
-      .cal-month-cell{min-height:100px;border-bottom:1px solid var(--border-2);border-right:1px solid var(--border-2);padding:8px;cursor:pointer;transition:background .12s;}
+      .cal-month-cell{height:120px;overflow-y:auto;border-bottom:1px solid var(--border-2);border-right:1px solid var(--border-2);padding:8px;cursor:pointer;transition:background .12s;}
       .cal-month-cell:hover{background:rgba(157,150,255,.04);}
       .cal-month-cell.empty{background:rgba(7,6,20,.2);cursor:default;}
       .cal-month-cell.today{background:rgba(157,150,255,.05);}
@@ -1107,15 +1107,14 @@ html{font-size:20px;}
 
       /* fondo claro */
       body.light-mode::before {
-        background:
-          radial-gradient(ellipse 80% 60% at 10% 10%, rgba(157,150,255,.13) 0%, transparent 60%),
-          radial-gradient(ellipse 70% 50% at 90% 5%,  rgba(190,218,98,.09)  0%, transparent 55%),
-          radial-gradient(ellipse 60% 70% at 80% 50%, rgba(201,54,174,.06)  0%, transparent 55%),
-          radial-gradient(ellipse 80% 60% at 5%  70%, rgba(190,218,98,.07)  0%, transparent 60%),
-          radial-gradient(ellipse 70% 50% at 50% 90%, rgba(157,150,255,.08) 0%, transparent 55%),
-          #f4f2ff;
-      }
-
+  background:
+    radial-gradient(ellipse 80% 60% at 10% 10%, color-mix(in srgb, var(--accent) 16%, transparent) 0%, transparent 60%),
+    radial-gradient(ellipse 70% 50% at 90% 5%,  color-mix(in srgb, var(--accent-light) 12%, transparent) 0%, transparent 55%),
+    radial-gradient(ellipse 60% 70% at 80% 50%, color-mix(in srgb, var(--accent-dark) 8%, transparent) 0%, transparent 55%),
+    radial-gradient(ellipse 80% 60% at 5%  70%, color-mix(in srgb, var(--accent-light) 9%, transparent) 0%, transparent 60%),
+    radial-gradient(ellipse 70% 50% at 50% 90%, color-mix(in srgb, var(--accent) 10%, transparent) 0%, transparent 55%),
+    #f4f2ff;
+}
       /* header claro */
       body.light-mode header {
         background: rgba(255,255,255,.88);
@@ -2993,7 +2992,7 @@ html{font-size:20px;}
   function calNavPrev(){
     if(calView==='month'){currentMonth--;if(currentMonth<0){currentMonth=11;currentYear--;}}
     else if(calView==='week'){currentWeekStart.setDate(currentWeekStart.getDate()-7);}
-    else{currentWeekStart.setDate(currentWeekStart.getDate()-1);}
+    else{currentDayView.setDate(currentDayView.getDate()-1);}
     renderCalendarView();
   }
   function calNavNext(){
