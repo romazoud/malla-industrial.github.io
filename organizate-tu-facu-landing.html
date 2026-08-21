@@ -1,0 +1,648 @@
+<!DOCTYPE html>
+<html lang="es-AR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Organizá tu Facu — Toda tu carrera, en un solo mapa</title>
+<meta name="description" content="Tu plan de estudios, calendario, horario, apuntes y comunidad, en un solo lugar.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+
+  :root{
+    --bg:#FAFAFC;
+    --surface:#FFFFFF;
+    --border:#ECEAF4;
+    --ink:#18162B;
+    --ink-soft:#635F7A;
+    --ink-faint:#9793AC;
+
+    --purpura:#8B5CF6;
+    --azul:#3B82F6;
+    --violeta:#6366F1;
+    --lima:#5B9A1B;
+    --magenta:#EC4899;
+    --dorado:#D97706;
+
+    --radius-s:12px;
+    --radius-m:18px;
+    --radius-l:28px;
+    --maxw:1180px;
+    --shadow-card: 0 1px 2px rgba(24,22,43,.04), 0 16px 36px -18px rgba(24,22,43,.22);
+  }
+
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  @media (prefers-reduced-motion: reduce){
+    html{scroll-behavior:auto;}
+    *{animation-duration:.001ms !important; animation-iteration-count:1 !important; transition-duration:.001ms !important;}
+  }
+
+  body{
+    margin:0;
+    font-family:'Inter',sans-serif;
+    color:var(--ink);
+    background:var(--bg);
+    -webkit-font-smoothing:antialiased;
+  }
+
+  h1,h2,h3,.font-display{
+    font-family:'Plus Jakarta Sans',sans-serif;
+    font-weight:800;
+    line-height:1.08;
+    margin:0;
+    letter-spacing:-0.015em;
+  }
+
+  p{margin:0;}
+  a{color:inherit;text-decoration:none;}
+  img,svg{display:block;max-width:100%;}
+  button{font:inherit;}
+
+  a:focus-visible, button:focus-visible{
+    outline:2px solid var(--violeta);
+    outline-offset:3px;
+    border-radius:4px;
+  }
+
+  .wrap{max-width:var(--maxw); margin:0 auto; padding:0 28px;}
+
+  .spark{ color:var(--magenta); }
+
+  .section-eyebrow{
+    font-family:'Plus Jakarta Sans',sans-serif;
+    font-size:13.5px;
+    font-weight:700;
+    letter-spacing:.02em;
+    color:var(--violeta);
+    margin-bottom:10px;
+    display:flex; align-items:center; gap:6px;
+  }
+
+  /* ---------- buttons ---------- */
+  .btn{
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    font-family:'Plus Jakarta Sans',sans-serif;
+    font-weight:700;
+    font-size:15.5px;
+    padding:13px 24px;
+    border-radius:999px;
+    border:1.5px solid transparent;
+    transition:transform .15s ease, box-shadow .15s ease, background-color .15s ease, border-color .15s ease;
+  }
+  .btn-primary{
+    background:linear-gradient(100deg,var(--purpura),var(--violeta) 55%,var(--azul));
+    color:#fff;
+    box-shadow:0 10px 24px -10px rgba(99,102,241,.55);
+  }
+  .btn-primary:hover{ transform:translateY(-2px); box-shadow:0 14px 30px -10px rgba(99,102,241,.6); }
+  .btn-ghost{
+    background:var(--surface);
+    color:var(--ink);
+    border-color:var(--border);
+  }
+  .btn-ghost:hover{ border-color:var(--violeta); color:var(--violeta); }
+  .btn-small{ padding:9px 18px; font-size:14px; }
+  .btn-large{ padding:16px 30px; font-size:17px; }
+
+  /* ---------- header ---------- */
+  .site-header{
+    position:sticky; top:0; z-index:50;
+    background:rgba(250,250,252,.82);
+    backdrop-filter:blur(10px);
+    border-bottom:1px solid var(--border);
+  }
+  .header-inner{
+    max-width:var(--maxw); margin:0 auto; padding:16px 28px;
+    display:flex; align-items:center; justify-content:space-between; gap:20px;
+  }
+  .logo{
+    display:flex; align-items:center; gap:10px;
+    font-family:'Plus Jakarta Sans',sans-serif; font-weight:800; font-size:17px;
+  }
+  .logo-mark{
+    display:grid; place-items:center;
+    width:34px; height:34px;
+    background:linear-gradient(135deg,var(--purpura),var(--magenta) 50%, var(--dorado));
+    color:#fff; border-radius:11px;
+    font-size:15px;
+  }
+  .nav{ display:flex; gap:28px; }
+  .nav a{ font-size:15px; color:var(--ink-soft); font-weight:600; }
+  .nav a:hover{ color:var(--ink); }
+  .header-cta{ display:flex; align-items:center; gap:14px; }
+  .nav-toggle{
+    display:none; background:none; border:1.5px solid var(--border); border-radius:9px;
+    width:38px; height:38px; padding:0; cursor:pointer;
+  }
+  .nav-toggle span{ display:block; width:16px; height:2px; background:var(--ink); margin:3px auto; }
+
+  @media (max-width:860px){
+    .nav{
+      position:absolute; top:100%; left:0; right:0;
+      background:var(--surface); border-bottom:1px solid var(--border);
+      flex-direction:column; padding:18px 28px; gap:16px;
+      display:none;
+    }
+    .nav.open{ display:flex; }
+    .nav-toggle{ display:block; }
+  }
+
+  /* ---------- hero ---------- */
+  .hero{ padding:64px 0 40px; position:relative; overflow:hidden; }
+  .hero-blob{ position:absolute; border-radius:50%; filter:blur(70px); opacity:.35; z-index:0; }
+  .blob-1{ width:340px; height:340px; background:var(--purpura); top:-120px; left:-80px; }
+  .blob-2{ width:300px; height:300px; background:var(--dorado); bottom:-140px; right:6%; opacity:.25; }
+  .hero-inner{
+    position:relative; z-index:1;
+    display:grid; grid-template-columns:1fr 1fr; gap:56px; align-items:center;
+  }
+  .eyebrow{
+    font-family:'Plus Jakarta Sans',sans-serif; font-size:13.5px; font-weight:700;
+    color:var(--violeta); margin-bottom:18px; letter-spacing:.01em;
+    display:flex; align-items:center; gap:6px;
+  }
+  .hero-copy h1{ font-size:clamp(36px,5vw,54px); margin-bottom:20px; }
+  .hero-sub{
+    font-size:17px; line-height:1.55; color:var(--ink-soft);
+    max-width:46ch; margin-bottom:30px;
+  }
+  .hero-actions{ display:flex; gap:14px; flex-wrap:wrap; }
+
+  /* ---------- map card (signature element) ---------- */
+  .map-card{
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:var(--radius-m);
+    box-shadow:var(--shadow-card);
+    padding:20px 20px 18px;
+    position:relative;
+  }
+  .map-card-header{
+    display:flex; align-items:center; justify-content:space-between;
+    padding-bottom:14px; margin-bottom:6px; border-bottom:1px solid var(--border);
+  }
+  .map-card-title{ font-family:'Plus Jakarta Sans',sans-serif; font-weight:700; font-size:14px; display:flex; align-items:center; gap:6px; }
+  .map-card-tag{
+    font-family:'Plus Jakarta Sans',sans-serif; font-size:11.5px; font-weight:700;
+    background:#F1EFFC; color:var(--violeta); padding:5px 10px; border-radius:999px;
+  }
+  .map-svg{ width:100%; height:auto; }
+  .map-node{ cursor:default; }
+  .map-node rect{ transition:fill .2s ease, stroke .2s ease, opacity .2s ease; }
+  .map-node text{ font-family:'Inter',sans-serif; font-size:12px; transition:fill .2s ease; }
+  .map-node .node-dot{ transition:fill .2s ease, stroke .2s ease; }
+
+  .map-node.state-locked rect{ fill:#F5F4FA; stroke:#E3E1EE; }
+  .map-node.state-locked text{ fill:#B4B0C6; }
+  .map-node.state-locked .node-dot{ fill:#E3E1EE; stroke:#E3E1EE; }
+
+  .map-node.state-available{ cursor:pointer; }
+  .map-node.state-available rect{ fill:#fff; stroke:var(--c); stroke-width:1.6; }
+  .map-node.state-available text{ fill:var(--ink); font-weight:600; }
+  .map-node.state-available .node-dot{ fill:#fff; stroke:var(--c); stroke-width:1.6; }
+  .map-node.state-available:hover rect{ fill:var(--c); opacity:.08; }
+
+  .map-node.state-approved{ cursor:pointer; }
+  .map-node.state-approved rect{ fill:var(--c); stroke:var(--c); }
+  .map-node.state-approved text{ fill:#fff; font-weight:700; }
+  .map-node.state-approved .node-dot{ fill:#fff; stroke:#fff; }
+
+  .map-edge{ fill:none; stroke:#E3E1EE; stroke-width:1.6; transition:stroke .25s ease, opacity .25s ease; }
+  .map-edge.edge-active{ opacity:.9; }
+
+  .map-caption{ font-size:13px; color:var(--ink-soft); margin-top:12px; }
+  .map-caption button{
+    background:none; border:none; color:var(--violeta); font-weight:700; cursor:pointer; padding:0;
+    text-decoration:underline; text-underline-offset:2px;
+  }
+
+  .map-legend{ display:flex; gap:18px; flex-wrap:wrap; padding-top:12px; margin-top:10px; border-top:1px solid var(--border); }
+  .legend-item{ display:flex; align-items:center; gap:7px; font-size:12px; color:var(--ink-soft); font-weight:600; }
+  .swatch{ width:16px; height:16px; border-radius:5px; display:inline-block; }
+  .swatch-locked{ background:#F5F4FA; border:1.5px solid #E3E1EE; }
+  .swatch-available{ background:#fff; border:1.5px solid var(--violeta); }
+  .swatch-approved{ background:var(--violeta); border:1.5px solid var(--violeta); }
+
+  @media (max-width:860px){
+    .hero-inner{ grid-template-columns:1fr; gap:40px; }
+  }
+
+  /* ---------- pains ---------- */
+  .pains{ padding:60px 0; }
+  .pains-grid{
+    display:grid; grid-template-columns:repeat(4,1fr); gap:16px;
+  }
+  .pain-card{
+    background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-s);
+    padding:20px; font-weight:600; font-size:14.5px; line-height:1.4;
+    border-top:3px solid var(--c);
+  }
+  .pains-resolve{
+    text-align:center; font-size:18px; color:var(--ink-soft); margin-top:28px; font-weight:600;
+  }
+  .pains-resolve strong{ color:var(--ink); }
+  @media (max-width:900px){ .pains-grid{ grid-template-columns:1fr 1fr; } }
+  @media (max-width:560px){ .pains-grid{ grid-template-columns:1fr; } }
+
+  /* ---------- features ---------- */
+  .features{ padding:60px 0; }
+  .features .wrap > h2{ font-size:clamp(28px,3.4vw,38px); margin-bottom:36px; max-width:22ch; }
+  .features-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:20px; }
+  .feature-card{
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:var(--radius-m);
+    padding:24px 22px;
+    transition:border-color .15s ease, transform .15s ease, box-shadow .15s ease;
+  }
+  .feature-card:hover{ border-color:transparent; transform:translateY(-3px); box-shadow:var(--shadow-card); }
+  .feature-icon{
+    width:42px; height:42px; margin-bottom:16px;
+    display:grid; place-items:center;
+    border-radius:12px;
+    background:var(--c-soft); color:var(--c);
+  }
+  .feature-card h3{ font-size:17.5px; margin-bottom:8px; }
+  .feature-card p{ font-size:14.5px; color:var(--ink-soft); line-height:1.5; }
+
+  @media (max-width:900px){ .features-grid{ grid-template-columns:1fr 1fr; } }
+  @media (max-width:600px){ .features-grid{ grid-template-columns:1fr; } }
+
+  /* ---------- steps ---------- */
+  .steps{ padding:60px 0; }
+  .steps .wrap > h2{ font-size:clamp(28px,3.4vw,38px); margin-bottom:12px; max-width:24ch; }
+  .steps .wrap > p.steps-sub{ color:var(--ink-soft); font-size:15.5px; margin-bottom:40px; max-width:60ch; }
+  .steps-row{ display:grid; grid-template-columns:repeat(3,1fr); gap:24px; }
+  .step{ background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-m); padding:26px; }
+  .step-num{
+    width:34px; height:34px; border-radius:10px;
+    display:grid; place-items:center;
+    font-family:'Plus Jakarta Sans',sans-serif; font-weight:800; font-size:14px;
+    background:var(--c-soft); color:var(--c); margin-bottom:16px;
+  }
+  .step h3{ font-size:17px; margin-bottom:8px; }
+  .step p{ font-size:14.5px; color:var(--ink-soft); line-height:1.5; }
+  @media (max-width:860px){ .steps-row{ grid-template-columns:1fr; } }
+
+  /* ---------- community ---------- */
+  .community{ padding:60px 0; }
+  .community-inner{ display:grid; grid-template-columns:1fr 1fr; gap:56px; align-items:center; }
+  .community-copy h2{ font-size:clamp(26px,3.2vw,34px); margin:10px 0 16px; }
+  .community-copy p{ font-size:16px; color:var(--ink-soft); line-height:1.55; max-width:44ch; margin-bottom:24px; }
+
+  .code-card{
+    background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-m);
+    padding:22px; box-shadow:var(--shadow-card);
+  }
+  .code-card-label{ font-size:12.5px; color:var(--ink-faint); font-weight:600; margin-bottom:8px; }
+  .code-pill{
+    display:inline-flex; align-items:center; gap:8px;
+    background:#F1EFFC; color:var(--violeta); font-weight:800;
+    font-size:20px; letter-spacing:.08em; padding:10px 18px; border-radius:12px; margin-bottom:18px;
+  }
+  .avatar-row{ display:flex; }
+  .avatar{
+    width:34px; height:34px; border-radius:50%; border:2px solid var(--surface);
+    margin-left:-8px; display:grid; place-items:center; color:#fff; font-size:12px; font-weight:700;
+  }
+  .avatar:first-child{ margin-left:0; }
+  .note-list{ margin-top:18px; display:flex; flex-direction:column; gap:10px; }
+  .note-row{ display:flex; align-items:center; gap:10px; font-size:13.5px; color:var(--ink-soft); }
+  .note-dot{ width:8px; height:8px; border-radius:50%; flex:none; }
+
+  @media (max-width:860px){
+    .community-inner{ grid-template-columns:1fr; gap:44px; }
+    .code-card{ order:-1; }
+  }
+
+  /* ---------- final cta ---------- */
+  .final-cta{ padding:30px 0 90px; }
+  .final-cta-card{
+    max-width:var(--maxw); margin:0 auto; padding:60px 40px;
+    background:linear-gradient(120deg,#1D1B33,#2A2350 60%, #3A2A55);
+    color:#fff;
+    border-radius:var(--radius-l);
+    text-align:center;
+    position:relative; overflow:hidden;
+  }
+  .final-cta-card h2{ color:#fff; font-size:clamp(28px,4vw,42px); margin-bottom:14px; }
+  .final-cta-card p{ color:#C7C2E0; font-size:16px; margin-bottom:30px; }
+  .final-cta-card .btn-ghost{ background:rgba(255,255,255,.08); border-color:rgba(255,255,255,.25); color:#fff; }
+  .final-cta-card .btn-ghost:hover{ border-color:#fff; }
+
+  /* ---------- footer ---------- */
+  footer{ border-top:1px solid var(--border); padding:26px 0; }
+  .footer-inner{
+    max-width:var(--maxw); margin:0 auto; padding:0 28px;
+    display:flex; flex-wrap:wrap; gap:12px; align-items:center; justify-content:space-between;
+    font-size:13.5px; color:var(--ink-soft);
+  }
+
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="header-inner">
+    <a class="logo" href="#top">
+      <span class="logo-mark">✦</span>
+      Organizá tu Facu
+    </a>
+    <nav class="nav" id="mainNav">
+      <a href="#funciones">Funciones</a>
+      <a href="#como-funciona">Cómo funciona</a>
+      <a href="#comunidad">Comunidad</a>
+    </nav>
+    <div class="header-cta">
+      <a href="/app/" class="btn btn-primary btn-small">Crear mi cuenta</a>
+      <button class="nav-toggle" id="navToggle" aria-label="Abrir menú" aria-expanded="false">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </div>
+</header>
+
+<section class="hero" id="top">
+  <div class="hero-blob blob-1"></div>
+  <div class="hero-blob blob-2"></div>
+  <div class="wrap hero-inner">
+    <div class="hero-copy">
+      <p class="eyebrow"><span class="spark">✦</span> tu carrera, ordenada</p>
+      <h1>Toda tu carrera,<br>en un solo mapa.</h1>
+      <p class="hero-sub">Subís tu plan de estudios y la IA arma tu malla con las correlativas. Sumale calendario, horario, apuntes y comunidad — todo en un solo lugar, pensado para cómo cursamos de verdad.</p>
+      <div class="hero-actions">
+        <a href="/app/" class="btn btn-primary">Crear mi cuenta</a>
+        <a href="#funciones" class="btn btn-ghost">Ver funciones</a>
+      </div>
+    </div>
+
+    <div class="hero-visual">
+      <div class="map-card">
+        <div class="map-card-header">
+          <span class="map-card-title">✦ Plan de estudios</span>
+          <span class="map-card-tag">Ing. Industrial</span>
+        </div>
+
+        <svg class="map-svg" id="mapSvg" viewBox="0 0 630 300" role="img" aria-label="Mapa curricular interactivo: tocá una materia disponible para marcarla como aprobada y ver qué se desbloquea"></svg>
+
+        <p class="map-caption">Tocá una materia disponible para marcarla como aprobada. <button id="resetMap" type="button">Reiniciar mapa</button></p>
+
+        <div class="map-legend">
+          <span class="legend-item"><i class="swatch swatch-locked"></i>Bloqueada</span>
+          <span class="legend-item"><i class="swatch swatch-available"></i>Disponible</span>
+          <span class="legend-item"><i class="swatch swatch-approved"></i>Aprobada</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="pains">
+  <div class="wrap">
+    <div class="pains-grid">
+      <div class="pain-card" style="--c:var(--violeta)">¿Te anotaste una materia sin tener la correlativa?</div>
+      <div class="pain-card" style="--c:var(--magenta)">¿Se te pisan dos parciales el mismo día?</div>
+      <div class="pain-card" style="--c:var(--azul)">¿Los apuntes del compañero están repartidos en cinco chats?</div>
+      <div class="pain-card" style="--c:var(--dorado)">¿Perdiste la cuenta de qué te falta para recibirte?</div>
+    </div>
+    <p class="pains-resolve"><strong>Organizá tu Facu</strong> junta todo eso en un solo lugar.</p>
+  </div>
+</section>
+
+<section class="features" id="funciones">
+  <div class="wrap">
+    <p class="section-eyebrow"><span class="spark">✦</span> funciones</p>
+    <h2>Todo lo de tu cursada, en un solo lugar</h2>
+
+    <div class="features-grid">
+      <div class="feature-card" style="--c:var(--violeta); --c-soft:#EEEDFD;">
+        <div class="feature-icon">
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><circle cx="4" cy="4" r="2.5" stroke="currentColor" stroke-width="1.5"/><circle cx="16" cy="6" r="2.5" stroke="currentColor" stroke-width="1.5"/><circle cx="8" cy="16" r="2.5" stroke="currentColor" stroke-width="1.5"/><path d="M6.3 5.3L13.5 6M6 6.5L7.2 13.6" stroke="currentColor" stroke-width="1.5"/></svg>
+        </div>
+        <h3>Plan de estudios</h3>
+        <p>Tu malla curricular con las correlativas marcadas: qué aprobaste y qué podés cursar ahora.</p>
+      </div>
+
+      <div class="feature-card" style="--c:var(--azul); --c-soft:#E9F1FE;">
+        <div class="feature-icon">
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><rect x="2.5" y="4" width="15" height="13" rx="2" stroke="currentColor" stroke-width="1.5"/><path d="M2.5 8h15M6.5 2.5v3M13.5 2.5v3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        </div>
+        <h3>Calendario y horario</h3>
+        <p>Parciales, finales y entregas en el calendario. Tus clases semanales, en su propio horario.</p>
+      </div>
+
+      <div class="feature-card" style="--c:var(--lima); --c-soft:#EFF6E6;">
+        <div class="feature-icon">
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><rect x="3" y="3" width="14" height="14" rx="3" stroke="currentColor" stroke-width="1.5"/><path d="M6.5 10.2l2.2 2.2 4.8-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+        <h3>Progreso</h3>
+        <p>Tu avance, tus notas y tu promedio, actualizados a medida que vas cargando materias.</p>
+      </div>
+
+      <div class="feature-card" style="--c:var(--magenta); --c-soft:#FCE9F2;">
+        <div class="feature-icon">
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="6.5" stroke="currentColor" stroke-width="1.5"/><path d="M10 6.5V10l2.3 1.4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        </div>
+        <h3>Modo estudio</h3>
+        <p>Un temporizador de estudio y descanso configurable, con registro de tus sesiones del día.</p>
+      </div>
+
+      <div class="feature-card" style="--c:var(--dorado); --c-soft:#FBEEDD;">
+        <div class="feature-icon">
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M5 3h6.5L16 7.5V17a1 1 0 01-1 1H5a1 1 0 01-1-1V4a1 1 0 011-1z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><path d="M6.5 10.5h7M6.5 13.5h5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        </div>
+        <h3>Apuntes</h3>
+        <p>Tus notas por materia y cuatrimestre, privadas o compartidas con tu clase, siempre a mano.</p>
+      </div>
+
+      <div class="feature-card" style="--c:var(--purpura); --c-soft:#F1EDFD;">
+        <div class="feature-icon">
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><circle cx="7" cy="7" r="3" stroke="currentColor" stroke-width="1.5"/><circle cx="14.5" cy="8.5" r="2.3" stroke="currentColor" stroke-width="1.5"/><path d="M2.5 16c.6-2.8 2.4-4.3 4.5-4.3s3.9 1.5 4.5 4.3M12.7 15.6c.4-1.9 1.6-2.9 3-2.9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        </div>
+        <h3>Comunidad</h3>
+        <p>Creá o unite a una clase con un código, y accedé al instante a los apuntes que comparte tu curso.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="steps" id="como-funciona">
+  <div class="wrap">
+    <p class="section-eyebrow"><span class="spark">✦</span> cómo funciona</p>
+    <h2>Tu malla, armada en tres pasos</h2>
+    <p class="steps-sub">Sin cargar materia por materia a mano: la IA lee tu plan de estudios y arma el mapa por vos.</p>
+
+    <div class="steps-row">
+      <div class="step">
+        <span class="step-num" style="--c:var(--violeta); --c-soft:#EEEDFD;">1</span>
+        <h3>Contanos tu carrera</h3>
+        <p>Nombre de la carrera, universidad y duración. Elegís también tu color de tema.</p>
+      </div>
+      <div class="step">
+        <span class="step-num" style="--c:var(--azul); --c-soft:#E9F1FE;">2</span>
+        <h3>Subí tu plan de estudios</h3>
+        <p>Un PDF o una foto alcanza: la IA lo lee y arma tu malla con todas las correlativas cargadas.</p>
+      </div>
+      <div class="step">
+        <span class="step-num" style="--c:var(--magenta); --c-soft:#FCE9F2;">3</span>
+        <h3>Marcá lo que ya aprobaste</h3>
+        <p>El mapa se actualiza solo y te muestra, de un vistazo, qué podés cursar ahora.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="community" id="comunidad">
+  <div class="wrap community-inner">
+    <div class="community-copy">
+      <p class="section-eyebrow"><span class="spark">✦</span> comunidad</p>
+      <h2>Los apuntes de tu curso, en un solo lugar</h2>
+      <p>Creá una clase compartida y sumá a tus compañeros con un código. Todos ven los apuntes al instante, materia por materia, sin buscar entre chats.</p>
+      <a href="/app/" class="btn btn-ghost">Crear una clase</a>
+    </div>
+    <div class="code-card">
+      <p class="code-card-label">Código de invitación</p>
+      <span class="code-pill">IND-2C26</span>
+      <div class="avatar-row">
+        <span class="avatar" style="background:var(--violeta)">RM</span>
+        <span class="avatar" style="background:var(--magenta)">CT</span>
+        <span class="avatar" style="background:var(--dorado)">JL</span>
+        <span class="avatar" style="background:var(--azul)">+8</span>
+      </div>
+      <div class="note-list">
+        <div class="note-row"><span class="note-dot" style="background:var(--violeta)"></span>Física II · resumen de resonancia</div>
+        <div class="note-row"><span class="note-dot" style="background:var(--dorado)"></span>Organización Ind. · guía de EOQ y ROP</div>
+        <div class="note-row"><span class="note-dot" style="background:var(--magenta)"></span>Electrotecnia · circuitos RC resueltos</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="final-cta" id="empezar">
+  <div class="final-cta-card">
+    <h2>Dejá de armar tu cuatrimestre a los ponchazos.</h2>
+    <p>Tu plan, tu calendario y tus apuntes, en un solo lugar.</p>
+    <a href="/app/" class="btn btn-primary btn-large">Crear mi cuenta</a>
+  </div>
+</section>
+
+<footer>
+  <div class="footer-inner">
+    <span class="font-display" style="font-weight:700;">✦ Organizá tu Facu</span>
+    <span>Hecho por estudiantes, para estudiantes.</span>
+    <span>© 2026</span>
+  </div>
+</footer>
+
+<script>
+(function(){
+  const palette = {
+    violeta: '#6366F1',
+    dorado:  '#D97706',
+    magenta: '#EC4899',
+    lima:    '#5B9A1B',
+    azul:    '#3B82F6',
+    purpura: '#8B5CF6'
+  };
+
+  const W = 150, H = 40;
+  const nodes = [
+    { id:'am1',      name:'Análisis Mat. I',   x:10,  y:20,  color:'violeta', prereqs:[] },
+    { id:'algebra',  name:'Álgebra',           x:10,  y:90,  color:'dorado',  prereqs:[] },
+    { id:'fisica1',  name:'Física I',          x:10,  y:160, color:'magenta', prereqs:[] },
+    { id:'sistrepr', name:'Sist. de Repr.',    x:10,  y:230, color:'lima',    prereqs:[] },
+
+    { id:'am2',      name:'Análisis Mat. II',  x:250, y:35,  color:'azul',    prereqs:['am1'] },
+    { id:'fisica2',  name:'Física II',         x:250, y:110, color:'purpura', prereqs:['fisica1','am1'] },
+    { id:'orgind1',  name:'Organiz. Ind. I',   x:250, y:200, color:'violeta', prereqs:['sistrepr'] },
+
+    { id:'electro',  name:'Electrotecnia',     x:460, y:60,  color:'dorado',  prereqs:['am2','fisica2'] },
+    { id:'invop',    name:'Inv. Operativa',    x:460, y:170, color:'magenta', prereqs:['orgind1','am2'] }
+  ];
+
+  const edges = [
+    ['am1','am2'], ['fisica1','fisica2'], ['sistrepr','orgind1'],
+    ['am2','electro'], ['fisica2','electro'],
+    ['orgind1','invop'], ['am2','invop']
+  ];
+
+  const initialApproved = ['am1','algebra','fisica1','sistrepr'];
+  let approved = new Set(initialApproved);
+
+  const byId = Object.fromEntries(nodes.map(n => [n.id, n]));
+
+  function stateOf(node){
+    if (approved.has(node.id)) return 'approved';
+    if (node.prereqs.every(p => approved.has(p))) return 'available';
+    return 'locked';
+  }
+
+  function edgePath(from, to){
+    const x1 = from.x + W, y1 = from.y + H/2;
+    const x2 = to.x, y2 = to.y + H/2;
+    const mx = (x1 + x2) / 2;
+    return `M${x1},${y1} C${mx},${y1} ${mx},${y2} ${x2},${y2}`;
+  }
+
+  const svg = document.getElementById('mapSvg');
+
+  function render(){
+    let html = '';
+    edges.forEach(([fromId, toId]) => {
+      const from = byId[fromId], to = byId[toId];
+      const active = approved.has(fromId);
+      const stroke = active ? palette[from.color] : '#E3E1EE';
+      html += `<path class="map-edge${active ? ' edge-active' : ''}" d="${edgePath(from,to)}" style="stroke:${stroke}"></path>`;
+    });
+    nodes.forEach(n => {
+      const st = stateOf(n);
+      html += `
+        <g class="map-node state-${st}" data-id="${n.id}" style="--c:${palette[n.color]}" transform="translate(${n.x},${n.y})">
+          <rect width="${W}" height="${H}" rx="9"></rect>
+          <circle class="node-dot" cx="16" cy="${H/2}" r="4"></circle>
+          <text x="30" y="${H/2 + 4}">${n.name}</text>
+        </g>`;
+    });
+    svg.innerHTML = html;
+  }
+
+  svg.addEventListener('click', (e) => {
+    const g = e.target.closest('.map-node');
+    if (!g) return;
+    const id = g.getAttribute('data-id');
+    const node = byId[id];
+    const st = stateOf(node);
+    if (st === 'available') approved.add(id);
+    else if (st === 'approved') approved.delete(id);
+    else return;
+    render();
+  });
+
+  document.getElementById('resetMap').addEventListener('click', () => {
+    approved = new Set(initialApproved);
+    render();
+  });
+
+  render();
+
+  const toggle = document.getElementById('navToggle');
+  const nav = document.getElementById('mainNav');
+  toggle.addEventListener('click', () => {
+    const isOpen = nav.classList.toggle('open');
+    toggle.setAttribute('aria-expanded', isOpen);
+  });
+  nav.querySelectorAll('a').forEach(link => {
+    link.addEventListener('click', () => {
+      nav.classList.remove('open');
+      toggle.setAttribute('aria-expanded', 'false');
+    });
+  });
+})();
+</script>
+
+</body>
+</html>
