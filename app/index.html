@@ -5,7 +5,7 @@
   <title>Mi Malla Curricular</title>
   <link rel="icon" href="logo.png?v=2" type="image/png">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 
   <script type="module">
@@ -278,13 +278,15 @@ window.salirDeClase = async (claseId) => {
   </script>
 
   <style>
-        :root{
+    :root{
       --bg:       #0a0a0a;
       --bg-deep:  #000000;
       --violet:   #C4D6B0;
       --lime:     #a98aae;
       --magenta:  #C8154B;
       --gold:     #FFCA4B;
+      --tema-a:   #58355E;
+      --tema-b:   #C4D6B0;
       --surface:  rgba(255,255,255,.04);
       --surface-2: rgba(255,255,255,.06);
       --surface-3: rgba(255,255,255,.03);
@@ -315,18 +317,18 @@ window.salirDeClase = async (claseId) => {
       min-height:100vh;
     }
 
-   body::before{
+    body::before{
       content:'';
       position:fixed; inset:0; z-index:0; pointer-events:none;
       background:
-        radial-gradient(ellipse 80% 60% at 10% 10%, color-mix(in srgb, var(--accent) 22%, transparent) 0%, transparent 60%),
-        radial-gradient(ellipse 70% 50% at 90% 5%,  color-mix(in srgb, var(--accent-light) 16%, transparent) 0%, transparent 55%),
-        radial-gradient(ellipse 60% 70% at 80% 50%, color-mix(in srgb, var(--accent-dark) 14%, transparent) 0%, transparent 55%),
-        radial-gradient(ellipse 80% 60% at 5%  70%, color-mix(in srgb, var(--accent-light) 14%, transparent) 0%, transparent 60%),
-        radial-gradient(ellipse 70% 50% at 50% 90%, color-mix(in srgb, var(--accent) 16%, transparent) 0%, transparent 55%),
-        radial-gradient(ellipse 50% 40% at 30% 50%, color-mix(in srgb, var(--accent-dark) 10%, transparent) 0%, transparent 50%),
+        radial-gradient(ellipse 80% 60% at 10% 10%, color-mix(in srgb, var(--tema-a) 55%, transparent) 0%, transparent 60%),
+        radial-gradient(ellipse 70% 50% at 90% 5%,  color-mix(in srgb, var(--tema-b) 28%, transparent) 0%, transparent 55%),
+        radial-gradient(ellipse 60% 70% at 80% 50%, color-mix(in srgb, var(--tema-a) 45%, transparent) 0%, transparent 55%),
+        radial-gradient(ellipse 80% 60% at 5%  70%, color-mix(in srgb, var(--tema-b) 22%, transparent) 0%, transparent 60%),
+        radial-gradient(ellipse 70% 50% at 50% 90%, color-mix(in srgb, var(--tema-a) 50%, transparent) 0%, transparent 55%),
+        radial-gradient(ellipse 50% 40% at 30% 50%, color-mix(in srgb, var(--tema-b) 16%, transparent) 0%, transparent 50%),
         var(--bg);
-    } 
+    }
 
     body::after{
       content:'';
@@ -1005,16 +1007,16 @@ window.salirDeClase = async (claseId) => {
     ::-webkit-scrollbar-thumb{background:rgba(128,128,128,.2);border-radius:3px;}
     ::-webkit-scrollbar-thumb:hover{background:rgba(128,128,128,.35);}
 
-    option{background:#0e0b1f;color:#f0ecff;}
+    option{background:#111;color:#f5f5f5;}
 
     input[type=checkbox]{accent-color:var(--violet);}
 
-        body.light-mode {
+    body.light-mode {
       --bg:        #ffffff;
       --bg-deep:   #f5f5f5;
-      --surface:   #ffffff;
-      --surface-2: #f6f6f6;
-      --surface-3: #fafafa;
+      --surface:   rgba(255,255,255,.78);
+      --surface-2: rgba(246,246,246,.9);
+      --surface-3: rgba(250,250,250,.7);
       --border:    rgba(0,0,0,.12);
       --border-2:  rgba(0,0,0,.06);
       --text-main: #111111;
@@ -1027,8 +1029,21 @@ window.salirDeClase = async (claseId) => {
     }
 
     body.light-mode::before {
-      background: var(--bg);
+      background:
+        radial-gradient(ellipse 80% 60% at 10% 10%, color-mix(in srgb, var(--tema-a) 30%, transparent) 0%, transparent 60%),
+        radial-gradient(ellipse 70% 50% at 90% 5%,  color-mix(in srgb, var(--tema-b) 60%, transparent) 0%, transparent 55%),
+        radial-gradient(ellipse 60% 70% at 80% 50%, color-mix(in srgb, var(--tema-a) 22%, transparent) 0%, transparent 55%),
+        radial-gradient(ellipse 80% 60% at 5%  70%, color-mix(in srgb, var(--tema-b) 55%, transparent) 0%, transparent 60%),
+        radial-gradient(ellipse 70% 50% at 50% 90%, color-mix(in srgb, var(--tema-a) 26%, transparent) 0%, transparent 55%),
+        radial-gradient(ellipse 50% 40% at 30% 50%, color-mix(in srgb, var(--tema-b) 40%, transparent) 0%, transparent 50%),
+        #ffffff;
     }
+
+    body.light-mode .ob-card {
+      background: rgba(255,255,255,.82);
+      box-shadow: 0 30px 80px rgba(0,0,0,.08), 0 0 0 1px rgba(0,0,0,.04);
+    }
+
     body.light-mode header {
       background: rgba(255,255,255,.88);
       border-bottom: 1px solid rgba(130,120,220,.15);
@@ -1566,7 +1581,7 @@ h1,h2,h3{font-weight:700;letter-spacing:-.01em;}
         <span style="font-size:11px;color:var(--text-muted);white-space:nowrap">o continua con</span>
         <div style="flex:1;height:1px;background:var(--border)"></div>
       </div>
-      <button onclick="loginConGoogle()" style="width:100%;padding:10px 14px;border-radius:8px;border:1px solid var(--border);background:rgba(0,0,0,.5);color:var(--text-soft);font-family:'DM Sans',sans-serif;font-weight:600;font-size:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:all .2s;backdrop-filter:blur(8px);" onmouseover="this.style.borderColor='rgba(128,128,128,.4)'" onmouseout="this.style.borderColor='var(--border)'">
+      <button onclick="loginConGoogle()" style="width:100%;padding:10px 14px;border-radius:8px;border:1px solid var(--border);background:var(--surface-2);color:var(--text-soft);font-family:'DM Sans',sans-serif;font-weight:600;font-size:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:all .2s;backdrop-filter:blur(8px);" onmouseover="this.style.borderColor='rgba(128,128,128,.4)'" onmouseout="this.style.borderColor='var(--border)'">
         <svg width="16" height="16" viewBox="0 0 18 18" xmlns="http://www.w3.org/2000/svg"><path d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908c1.702-1.567 2.684-3.874 2.684-6.615z" fill="#4285F4"/><path d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 0 0 9 18z" fill="#34A853"/><path d="M3.964 10.71A5.41 5.41 0 0 1 3.682 9c0-.593.102-1.17.282-1.71V4.958H.957A8.996 8.996 0 0 0 0 9c0 1.452.348 2.827.957 4.042l3.007-2.332z" fill="#FBBC05"/><path d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 0 0 .957 4.958L3.964 7.29C4.672 5.163 6.656 3.58 9 3.58z" fill="#EA4335"/></svg>
         Continuar con Google
       </button>
@@ -1593,7 +1608,7 @@ h1,h2,h3{font-weight:700;letter-spacing:-.01em;}
       <div class="ob-step-title">Elegí tu tema</div>
       <div class="ob-step-sub">El color principal de toda tu malla. Podés cambiarlo después desde Perfil.</div>
       <div class="theme-grid">
-               <div class="theme-card" data-accent="#C8154B" data-second="#FFF8B6" data-dark="#C8154B" data-light="#FFF8B6" data-bg="rgba(200,21,75,.12)" data-label="Frambuesa" onclick="obSelectTheme(this)"><div class="theme-swatch" style="background:linear-gradient(135deg,#C8154B 50%,#FFF8B6 50%)"></div><div class="theme-name">Frambuesa</div></div>
+        <div class="theme-card" data-accent="#C8154B" data-second="#FFF8B6" data-dark="#C8154B" data-light="#FFF8B6" data-bg="rgba(200,21,75,.12)" data-label="Frambuesa" onclick="obSelectTheme(this)"><div class="theme-swatch" style="background:linear-gradient(135deg,#C8154B 50%,#FFF8B6 50%)"></div><div class="theme-name">Frambuesa</div></div>
         <div class="theme-card selected" data-accent="#58355E" data-second="#C4D6B0" data-dark="#58355E" data-light="#C4D6B0" data-bg="rgba(88,53,94,.12)" data-label="Violeta" onclick="obSelectTheme(this)"><div class="theme-swatch" style="background:linear-gradient(135deg,#58355E 50%,#C4D6B0 50%)"></div><div class="theme-name">Violeta</div></div>
         <div class="theme-card" data-accent="#7F1633" data-second="#F89847" data-dark="#7F1633" data-light="#F89847" data-bg="rgba(127,22,51,.12)" data-label="Ciruela" onclick="obSelectTheme(this)"><div class="theme-swatch" style="background:linear-gradient(135deg,#7F1633 50%,#F89847 50%)"></div><div class="theme-name">Ciruela</div></div>
         <div class="theme-card" data-accent="#00555A" data-second="#FFCA4B" data-dark="#00555A" data-light="#FFCA4B" data-bg="rgba(0,85,90,.12)" data-label="Petroleo" onclick="obSelectTheme(this)"><div class="theme-swatch" style="background:linear-gradient(135deg,#00555A 50%,#FFCA4B 50%)"></div><div class="theme-name">Azul petróleo</div></div>
@@ -2044,7 +2059,7 @@ h1,h2,h3{font-weight:700;letter-spacing:-.01em;}
         <div class="profile-section">
           <h3>Cambiar tema principal</h3>
           <div class="profile-grid" id="profileThemeGrid">
-                        <div class="profile-theme-card" data-accent="#C8154B" data-second="#FFF8B6" data-dark="#C8154B" data-light="#FFF8B6" data-bg="rgba(200,21,75,.12)" data-label="Frambuesa" onclick="profileSelectTheme(this)"><div class="theme-swatch" style="background:linear-gradient(135deg,#C8154B 50%,#FFF8B6 50%)"></div><div class="theme-name">Frambuesa</div></div>
+            <div class="profile-theme-card" data-accent="#C8154B" data-second="#FFF8B6" data-dark="#C8154B" data-light="#FFF8B6" data-bg="rgba(200,21,75,.12)" data-label="Frambuesa" onclick="profileSelectTheme(this)"><div class="theme-swatch" style="background:linear-gradient(135deg,#C8154B 50%,#FFF8B6 50%)"></div><div class="theme-name">Frambuesa</div></div>
             <div class="profile-theme-card" data-accent="#58355E" data-second="#C4D6B0" data-dark="#58355E" data-light="#C4D6B0" data-bg="rgba(88,53,94,.12)" data-label="Violeta" onclick="profileSelectTheme(this)"><div class="theme-swatch" style="background:linear-gradient(135deg,#58355E 50%,#C4D6B0 50%)"></div><div class="theme-name">Violeta</div></div>
             <div class="profile-theme-card" data-accent="#7F1633" data-second="#F89847" data-dark="#7F1633" data-light="#F89847" data-bg="rgba(127,22,51,.12)" data-label="Ciruela" onclick="profileSelectTheme(this)"><div class="theme-swatch" style="background:linear-gradient(135deg,#7F1633 50%,#F89847 50%)"></div><div class="theme-name">Ciruela</div></div>
             <div class="profile-theme-card" data-accent="#00555A" data-second="#FFCA4B" data-dark="#00555A" data-light="#FFCA4B" data-bg="rgba(0,85,90,.12)" data-label="Petroleo" onclick="profileSelectTheme(this)"><div class="theme-swatch" style="background:linear-gradient(135deg,#00555A 50%,#FFCA4B 50%)"></div><div class="theme-name">Azul petróleo</div></div>
@@ -2119,7 +2134,7 @@ h1,h2,h3{font-weight:700;letter-spacing:-.01em;}
   function toggleDarkMode(){
     _isDark = !_isDark;
     document.body.classList.toggle('light-mode', !_isDark);
-     if(window._temaActual) aplicarTema(window._temaActual);
+    if(window._temaActual) aplicarTema(window._temaActual);
     const icon = document.getElementById('darkToggleIcon');
     const label = document.getElementById('darkToggleLabel');
     if(icon) icon.textContent = _isDark ? '☀' : '☽';
@@ -2130,7 +2145,7 @@ h1,h2,h3{font-weight:700;letter-spacing:-.01em;}
     const saved = localStorage.getItem('darkMode');
     _isDark = saved === null ? true : saved === '1';
     document.body.classList.toggle('light-mode', !_isDark);
-     if(window._temaActual) aplicarTema(window._temaActual);
+    if(window._temaActual) aplicarTema(window._temaActual);
     const icon = document.getElementById('darkToggleIcon');
     const label = document.getElementById('darkToggleLabel');
     if(icon) icon.textContent = _isDark ? '☀' : '☽';
@@ -2275,7 +2290,7 @@ h1,h2,h3{font-weight:700;letter-spacing:-.01em;}
 
   function obFinish(){
     const config={career:obState.career,uni:obState.uni,years:obState.years,
-        theme:{accent:obState.accent,second:obState.second,dark:obState.dark,light:obState.light,bg:obState.bg,label:obState.theme},
+      theme:{accent:obState.accent,second:obState.second,dark:obState.dark,light:obState.light,bg:obState.bg,label:obState.theme},
       materias:obState.materias,setup:true};
     localStorage.setItem('userConfig',JSON.stringify(config));
     if(window.syncCloud)window.syncCloud();
@@ -2292,12 +2307,15 @@ h1,h2,h3{font-weight:700;letter-spacing:-.01em;}
     confetti({particleCount:120,spread:70,origin:{y:.5},colors:[obState.accent,'#BEDA62','#ffffff']});
   }
 
-    function aplicarTema(t){
+  function aplicarTema(t){
     if(!t||!t.accent)return;
     window._temaActual=t;
     const r=document.documentElement.style;
     const oscuro=!document.body.classList.contains('light-mode');
     const sec=t.second||t.light||t.accent;
+    // Los dos colores del par, siempre disponibles para el fondo
+    r.setProperty('--tema-a',t.accent);
+    r.setProperty('--tema-b',sec);
     // Modo oscuro: el color claro del par es el principal. Modo claro: el color oscuro.
     const principal=oscuro?sec:t.accent;
     const secundario=oscuro
@@ -2318,7 +2336,7 @@ h1,h2,h3{font-weight:700;letter-spacing:-.01em;}
   function profileSelectTheme(el){
     document.querySelectorAll('.profile-theme-card').forEach(c=>c.classList.remove('selected'));
     el.classList.add('selected');
-      profileSelectedTheme={accent:el.dataset.accent,second:el.dataset.second,dark:el.dataset.dark,light:el.dataset.light,bg:el.dataset.bg,label:el.dataset.label};
+    profileSelectedTheme={accent:el.dataset.accent,second:el.dataset.second,dark:el.dataset.dark,light:el.dataset.light,bg:el.dataset.bg,label:el.dataset.label};
     aplicarTema(profileSelectedTheme);
   }
   function saveProfileTheme(){
